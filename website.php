@@ -84,9 +84,7 @@ $sanitized_css = sanitize_css($website['css_personalizado']);
 </head>
 
 <body>
-    <div class="website-container">
-        <?php echo htmlspecialchars_decode($website['conteudo']); ?>
-    </div>
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
