@@ -3,17 +3,19 @@ require_once '../config.php';
 
 header('Content-Type: application/json');
 
+// Verificar se está logado
 if (!isLogado()) {
-    echo json_encode(['error' => 'Não autorizado']);
+    echo json_encode(['success' => false, 'error' => 'Não autorizado']);
     exit;
 }
 
+// Receber dados
 $data = json_decode(file_get_contents('php://input'), true);
 $website_id = intval($data['website_id'] ?? 0);
 $element_id = $data['element_id'] ?? '';
 
 if (!$website_id || !$element_id) {
-    echo json_encode(['error' => 'Dados incompletos']);
+    echo json_encode(['success' => false, 'error' => 'Dados incompletos']);
     exit;
 }
 
@@ -22,7 +24,7 @@ $usuario = getUsuarioAtual($pdo);
 $stmt = $pdo->prepare("SELECT id FROM websites WHERE id = ? AND usuario_id = ?");
 $stmt->execute([$website_id, $usuario['id']]);
 if (!$stmt->fetch()) {
-    echo json_encode(['error' => 'Website não encontrado']);
+    echo json_encode(['success' => false, 'error' => 'Website não encontrado']);
     exit;
 }
 
@@ -36,6 +38,8 @@ if ($stmt->fetch()) {
 
 // Criar nova área com conteúdo vazio
 $stmt = $pdo->prepare("INSERT INTO dynamic_areas (website_id, element_id, content_data) VALUES (?, ?, '[]')");
-$stmt->execute([$website_id, $element_id]);
-
-echo json_encode(['success' => true, 'element_id' => $element_id]);
+if ($stmt->execute([$website_id, $element_id])) {
+    echo json_encode(['success' => true, 'element_id' => $element_id]);
+} else {
+    echo json_encode(['success' => false, 'error' => 'Erro ao criar área no banco']);
+}
