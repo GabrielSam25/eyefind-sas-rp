@@ -415,7 +415,104 @@ function minifyCss($css)
                 }
             });
 
+            // Definir blocos dinâmicos
+            const dynamicBlocks = [
+                {
+                    id: 'dynamic-posts',
+                    label: 'Lista de Posts',
+                    media: '<i class="fas fa-list"></i>',
+                    content: {
+                        type: 'dynamic',
+                        dynamicType: 'posts_list',
+                        content: '<div data-block-type="dynamic" data-dynamic-type="posts_list" class="dynamic-block">Carregando posts...</div>',
+                        style: { padding: '20px', border: '1px dashed #ccc' }
+                    }
+                },
+                {
+                    id: 'dynamic-products',
+                    label: 'Grade de Produtos',
+                    media: '<i class="fas fa-shopping-cart"></i>',
+                    content: {
+                        type: 'dynamic',
+                        dynamicType: 'products_grid',
+                        content: '<div data-block-type="dynamic" data-dynamic-type="products_grid" class="dynamic-block">Carregando produtos...</div>',
+                        style: { padding: '20px', border: '1px dashed #ccc' }
+                    }
+                },
+                {
+                    id: 'dynamic-single-post',
+                    label: 'Post Específico',
+                    media: '<i class="fas fa-file-alt"></i>',
+                    content: {
+                        type: 'dynamic',
+                        dynamicType: 'single_post',
+                        content: '<div data-block-type="dynamic" data-dynamic-type="single_post" data-post-id="" class="dynamic-block">Selecione um post...</div>',
+                        style: { padding: '20px', border: '1px dashed #ccc' }
+                    }
+                }
+            ];
 
+            // Adicionar ao Block Manager
+            editor.BlockManager.add('dynamic-posts', dynamicBlocks[0]);
+            editor.BlockManager.add('dynamic-products', dynamicBlocks[1]);
+            editor.BlockManager.add('dynamic-single-post', dynamicBlocks[2]);
+
+            // Tratar clique duplo no bloco para configurar
+            editor.on('component:dblclick', function(component) {
+                if (component.get('type') === 'dynamic') {
+                    const dynamicType = component.getAttributes()['data-dynamic-type'];
+                    if (dynamicType === 'posts_list') {
+                        // Abrir modal para configurar quantidade, ordem, etc.
+                        openPostsConfig(component);
+                    } else if (dynamicType === 'products_grid') {
+                        openProductsConfig(component);
+                    } else if (dynamicType === 'single_post') {
+                        openSinglePostConfig(component);
+                    }
+                }
+            });
+
+            // Funções para abrir modais (simplificadas)
+            function openPostsConfig(component) {
+                const config = component.get('config') || { limit: 5, order: 'desc' };
+                const modal = editor.Modal;
+                modal.setTitle('Configurar Lista de Posts');
+                modal.setContent(`
+                    <form id="posts-config">
+                        <div>
+                            <label>Quantidade máxima:</label>
+                            <input type="number" name="limit" value="${config.limit || 5}" min="1" max="50">
+                        </div>
+                        <div>
+                            <label>Ordenar:</label>
+                            <select name="order">
+                                <option value="desc" ${config.order==='desc'?'selected':''}>Mais recentes primeiro</option>
+                                <option value="asc" ${config.order==='asc'?'selected':''}>Mais antigos primeiro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Mostrar imagem?</label>
+                            <input type="checkbox" name="show_image" ${config.show_image ? 'checked' : ''}>
+                        </div>
+                        <button type="submit">Salvar</button>
+                    </form>
+                `);
+                modal.open();
+                document.getElementById('posts-config').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const newConfig = {
+                        limit: formData.get('limit'),
+                        order: formData.get('order'),
+                        show_image: formData.get('show_image') === 'on'
+                    };
+                    component.set('config', newConfig);
+                    component.addAttributes({ 'data-config': JSON.stringify(newConfig) });
+                    // Atualizar texto do bloco
+                    component.set('content', `<div data-block-type="dynamic" data-dynamic-type="posts_list" data-config='${JSON.stringify(newConfig)}'>Lista de Posts (configurado)</div>`);
+                    modal.close();
+                });
+            }
 
             // Manipulador do formulário
             const form = document.querySelector('form[action="new_blog.php"]');
