@@ -13,26 +13,25 @@ try {
     die("Erro de conexão: " . $e->getMessage());
 }
 
-// ========== FUNÇÕES DE AUTENTICAÇÃO ==========
 function isLogado()
 {
     return isset($_SESSION['usuario_id']);
 }
 
-function getUsuarioAtual($pdo)
-{
-    if (!isLogado()) return null;
-    $stmt = $pdo->prepare("SELECT id, nome, email, is_admin FROM usuarios WHERE id = ?");
-    $stmt->execute([$_SESSION['usuario_id']]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
-// ========== FUNÇÕES DE BLOG ==========
 function usuarioTemBlog($pdo, $usuario_id)
 {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM websites WHERE usuario_id = ?");
     $stmt->execute([$usuario_id]);
     return $stmt->fetchColumn() > 0;
+}
+
+function getUsuarioAtual($pdo)
+{
+    if (!isLogado()) return null;
+
+    $stmt = $pdo->prepare("SELECT id, nome, email, is_admin FROM usuarios WHERE id = ?");
+    $stmt->execute([$_SESSION['usuario_id']]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
 function getBlogDoUsuario($pdo, $usuario_id)
@@ -103,7 +102,6 @@ function getWebsitesByCategoria($pdo, $categoria_id)
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// ========== FUNÇÕES DE MINIFICAÇÃO ==========
 function minifyHtml($html)
 {
     $html = preg_replace('/<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->/s', '', $html);
@@ -121,193 +119,204 @@ function minifyCss($css)
     return trim($css);
 }
 
-// ========== FUNÇÕES PARA BLOCOS DINÂMICOS ==========
+// ========== FUNÇÕES PARA CONTEÚDO DINÂMICO SIMPLES ==========
 
 /**
- * Renderiza um bloco dinâmico baseado no tipo e atributos
+ * Substitui marcadores {{tipo}} no HTML por conteúdo dinâmico
  */
-function renderDynamicBlock($pdo, $type, $attributes = [])
+function processDynamicContent($pdo, $html)
 {
-    $limit = isset($attributes['data-limit']) ? intval($attributes['data-limit']) : 5;
-    $class = isset($attributes['data-class']) ? $attributes['data-class'] : '';
-    $classAttr = $class ? ' class="' . htmlspecialchars($class) . '"' : '';
-
-    switch ($type) {
-        case 'latest-news':
-            // Buscar últimas notícias do banco
-            $stmt = $pdo->prepare("SELECT titulo, conteudo, autor, fonte, imagem, created_at 
-                                   FROM noticias ORDER BY created_at DESC LIMIT ?");
-            $stmt->execute([$limit]);
-            $noticias = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            if (empty($noticias)) {
-                return '<div class="dynamic-block empty">Nenhuma notícia encontrada.</div>';
-            }
-            
-            $html = '<div class="dynamic-news"' . $classAttr . '>';
-            foreach ($noticias as $n) {
-                $data = date('d/m/Y', strtotime($n['created_at']));
-                $imagem = $n['imagem'] ? '<img src="' . htmlspecialchars($n['imagem']) . '" alt="' . htmlspecialchars($n['titulo']) . '" class="news-image">' : '';
+    // Padrão: encontra {{tipo:parametro}} ou {{tipo}}
+    $pattern = '/{{(.*?)}}/';
+    
+    return preg_replace_callback($pattern, function($matches) use ($pdo) {
+        $tag = trim($matches[1]);
+        
+        // Verificar se tem parâmetro (ex: noticias:5)
+        $parts = explode(':', $tag);
+        $type = strtolower(trim($parts[0]));
+        $param = isset($parts[1]) ? trim($parts[1]) : null;
+        
+        switch ($type) {
+            case 'noticias':
+            case 'noticia':
+                return renderNoticias($pdo, $param);
                 
-                $html .= '<div class="news-item">';
-                $html .= $imagem;
-                $html .= '<h3 class="news-title">' . htmlspecialchars($n['titulo']) . '</h3>';
-                $html .= '<p class="news-meta">Por ' . htmlspecialchars($n['autor'] ?: 'Desconhecido') . ' - ' . $data . '</p>';
-                $html .= '<p class="news-excerpt">' . htmlspecialchars(substr($n['conteudo'], 0, 150)) . '...</p>';
-                $html .= '</div>';
-            }
+            case 'bleets':
+            case 'bleet':
+                return renderBleets($pdo, $param);
+                
+            case 'citacao':
+            case 'quote':
+                return renderCitacao();
+                
+            case 'produtos':
+            case 'produto':
+                return renderProdutos($pdo, $param);
+                
+            case 'contador':
+            case 'counter':
+                return renderContador($param);
+                
+            case 'data':
+            case 'date':
+                return date('d/m/Y');
+                
+            case 'hora':
+            case 'time':
+                return date('H:i:s');
+                
+            case 'usuario':
+                return renderUsuarioAtual($pdo);
+                
+            default:
+                // Se não reconhece, mantém o marcador
+                return $matches[0];
+        }
+    }, $html);
+}
+
+function renderNoticias($pdo, $limite = 3)
+{
+    $limite = intval($limite) ?: 3;
+    
+    try {
+        $stmt = $pdo->prepare("SELECT titulo, conteudo, autor, imagem, created_at FROM noticias ORDER BY created_at DESC LIMIT ?");
+        $stmt->execute([$limite]);
+        $noticias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (empty($noticias)) {
+            return '<p>Nenhuma notícia encontrada.</p>';
+        }
+        
+        $html = '<div class="dynamic-noticias">';
+        foreach ($noticias as $n) {
+            $data = date('d/m/Y', strtotime($n['created_at']));
+            $imagem = $n['imagem'] ? '<img src="' . htmlspecialchars($n['imagem']) . '" alt="' . htmlspecialchars($n['titulo']) . '" class="noticia-imagem">' : '';
+            
+            $html .= '<div class="noticia-item">';
+            $html .= $imagem;
+            $html .= '<h3 class="noticia-titulo">' . htmlspecialchars($n['titulo']) . '</h3>';
+            $html .= '<p class="noticia-meta">Por ' . htmlspecialchars($n['autor'] ?: 'Desconhecido') . ' em ' . $data . '</p>';
+            $html .= '<p class="noticia-resumo">' . htmlspecialchars(substr($n['conteudo'], 0, 200)) . '...</p>';
             $html .= '</div>';
-            return $html;
-            
-        case 'recent-bleets':
-            // Buscar bleets recentes
-            $stmt = $pdo->prepare("SELECT conteudo, autor, created_at FROM bleets ORDER BY created_at DESC LIMIT ?");
-            $stmt->execute([$limit]);
-            $bleets = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            if (empty($bleets)) {
-                return '<div class="dynamic-block empty">Nenhum bleet encontrado.</div>';
-            }
-            
-            $html = '<div class="dynamic-bleets"' . $classAttr . '>';
-            foreach ($bleets as $b) {
-                $data = date('d/m/Y H:i', strtotime($b['created_at']));
-                $html .= '<div class="bleet-item">';
-                $html .= '<p class="bleet-content">' . htmlspecialchars($b['conteudo']) . '</p>';
-                $html .= '<p class="bleet-meta">— ' . htmlspecialchars($b['autor']) . ' em ' . $data . '</p>';
-                $html .= '</div>';
-            }
-            $html .= '</div>';
-            return $html;
-            
-        case 'random-quote':
-            // Citações aleatórias
-            $quotes = [
-                ['texto' => 'A criatividade é a inteligência se divertindo.', 'autor' => 'Albert Einstein'],
-                ['texto' => 'Simplicidade é o último grau de sofisticação.', 'autor' => 'Leonardo da Vinci'],
-                ['texto' => 'A imaginação é mais importante que o conhecimento.', 'autor' => 'Albert Einstein'],
-                ['texto' => 'Não espere por oportunidades, crie-as.', 'autor' => 'George Bernard Shaw'],
-                ['texto' => 'O sucesso é a soma de pequenos esforços repetidos dia após dia.', 'autor' => 'Robert Collier'],
-                ['texto' => 'A única forma de fazer um ótimo trabalho é amar o que você faz.', 'autor' => 'Steve Jobs'],
-            ];
-            
-            $quote = $quotes[array_rand($quotes)];
-            return '<div class="dynamic-quote"' . $classAttr . '>
-                    <p class="quote-text">"' . htmlspecialchars($quote['texto']) . '"</p>
-                    <p class="quote-author">— ' . htmlspecialchars($quote['autor']) . '</p>
-                    </div>';
-            
-        case 'featured-products':
-            // Produtos em destaque (mockado, mas poderia vir do banco)
-            $products = [
-                ['nome' => 'Produto Premium', 'preco' => 'R$ 99,90', 'imagem' => 'https://via.placeholder.com/200x200?text=Produto+1'],
-                ['nome' => 'Pacote Completo', 'preco' => 'R$ 149,90', 'imagem' => 'https://via.placeholder.com/200x200?text=Produto+2'],
-                ['nome' => 'Edição Limitada', 'preco' => 'R$ 199,90', 'imagem' => 'https://via.placeholder.com/200x200?text=Produto+3'],
-                ['nome' => 'Acessórios', 'preco' => 'R$ 49,90', 'imagem' => 'https://via.placeholder.com/200x200?text=Produto+4'],
-            ];
-            
-            // Limitar conforme solicitado
-            $products = array_slice($products, 0, $limit);
-            
-            $html = '<div class="dynamic-products product-grid"' . $classAttr . '>';
-            foreach ($products as $p) {
-                $html .= '<div class="product-item">';
-                $html .= '<img src="' . htmlspecialchars($p['imagem']) . '" alt="' . htmlspecialchars($p['nome']) . '" class="product-image">';
-                $html .= '<h4 class="product-name">' . htmlspecialchars($p['nome']) . '</h4>';
-                $html .= '<p class="product-price">' . htmlspecialchars($p['preco']) . '</p>';
-                $html .= '<button class="product-buy">Comprar</button>';
-                $html .= '</div>';
-            }
-            $html .= '</div>';
-            return $html;
-            
-        case 'user-stats':
-            // Estatísticas do usuário (exemplo)
-            $usuario = getUsuarioAtual($pdo);
-            if (!$usuario) {
-                return '<div class="dynamic-block">Faça login para ver estatísticas.</div>';
-            }
-            
-            // Contar blogs do usuário
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM websites WHERE usuario_id = ?");
-            $stmt->execute([$usuario['id']]);
-            $totalBlogs = $stmt->fetchColumn();
-            
-            $html = '<div class="dynamic-stats"' . $classAttr . '>';
-            $html .= '<h4>Olá, ' . htmlspecialchars($usuario['nome']) . '!</h4>';
-            $html .= '<ul class="stats-list">';
-            $html .= '<li><strong>Total de blogs:</strong> ' . $totalBlogs . '</li>';
-            $html .= '<li><strong>Email:</strong> ' . htmlspecialchars($usuario['email']) . '</li>';
-            $html .= '</ul>';
-            $html .= '</div>';
-            return $html;
-            
-        case 'counter':
-            // Contador simples
-            $initial = isset($attributes['data-initial']) ? intval($attributes['data-initial']) : 0;
-            $id = 'counter-' . uniqid();
-            return '<div class="dynamic-counter"' . $classAttr . '>
-                    <span id="' . $id . '">' . $initial . '</span>
-                    <button onclick="document.getElementById(\'' . $id . '\').innerText = parseInt(document.getElementById(\'' . $id . '\').innerText) + 1">+</button>
-                    <button onclick="document.getElementById(\'' . $id . '\').innerText = parseInt(document.getElementById(\'' . $id . '\').innerText) - 1">-</button>
-                    </div>';
-            
-        default:
-            return '<!-- Bloco dinâmico não reconhecido: ' . htmlspecialchars($type) . ' -->';
+        }
+        $html .= '</div>';
+        
+        return $html;
+        
+    } catch (PDOException $e) {
+        return '<p>Erro ao carregar notícias.</p>';
     }
 }
 
-/**
- * Processa o HTML do website, substituindo blocos dinâmicos
- */
-function processDynamicBlocks($pdo, $html)
+function renderBleets($pdo, $limite = 5)
 {
-    // Usar DOMDocument para processar com segurança
-    $dom = new DOMDocument();
-    libxml_use_internal_errors(true); // Ignorar warnings de HTML malformado
+    $limite = intval($limite) ?: 5;
     
-    // Adicionar wrapper para evitar problemas de codificação
-    $htmlWithMeta = '<?xml encoding="UTF-8">' . $html;
-    $dom->loadHTML($htmlWithMeta, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-    libxml_clear_errors();
-    
-    $xpath = new DOMXPath($dom);
-    $dynamicNodes = $xpath->query("//*[@data-dynamic-type]");
-    
-    foreach ($dynamicNodes as $node) {
-        $type = $node->getAttribute('data-dynamic-type');
+    try {
+        $stmt = $pdo->prepare("SELECT conteudo, autor, created_at FROM bleets ORDER BY created_at DESC LIMIT ?");
+        $stmt->execute([$limite]);
+        $bleets = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Coletar todos os atributos data-*
-        $attributes = [];
-        foreach ($node->attributes as $attr) {
-            if ($attr->nodeName !== 'data-dynamic-type' && strpos($attr->nodeName, 'data-') === 0) {
-                $attributes[$attr->nodeName] = $attr->nodeValue;
-            }
+        if (empty($bleets)) {
+            return '<p>Nenhum bleet encontrado.</p>';
         }
         
-        // Gerar novo conteúdo
-        $newContent = renderDynamicBlock($pdo, $type, $attributes);
-        
-        // Criar fragmento com o novo HTML
-        $fragment = $dom->createDocumentFragment();
-        $fragment->appendXML($newContent);
-        
-        // Substituir o nó original
-        $node->parentNode->replaceChild($fragment, $node);
-    }
-    
-    // Extrair apenas o conteúdo do body ou o HTML completo
-    $body = $dom->getElementsByTagName('body')->item(0);
-    if ($body) {
-        $result = '';
-        foreach ($body->childNodes as $child) {
-            $result .= $dom->saveHTML($child);
+        $html = '<div class="dynamic-bleets">';
+        foreach ($bleets as $b) {
+            $data = date('d/m/Y H:i', strtotime($b['created_at']));
+            $html .= '<div class="bleet-item">';
+            $html .= '<p class="bleet-conteudo">' . htmlspecialchars($b['conteudo']) . '</p>';
+            $html .= '<p class="bleet-meta">— ' . htmlspecialchars($b['autor']) . ' · ' . $data . '</p>';
+            $html .= '</div>';
         }
-        return $result;
+        $html .= '</div>';
+        
+        return $html;
+        
+    } catch (PDOException $e) {
+        return '<p>Erro ao carregar bleets.</p>';
+    }
+}
+
+function renderCitacao()
+{
+    $citacoes = [
+        ['texto' => 'A vida é o que acontece enquanto você está ocupado fazendo outros planos.', 'autor' => 'John Lennon'],
+        ['texto' => 'Seja a mudança que você quer ver no mundo.', 'autor' => 'Mahatma Gandhi'],
+        ['texto' => 'O sucesso não é final, o fracasso não é fatal: é a coragem de continuar que conta.', 'autor' => 'Winston Churchill'],
+        ['texto' => 'A imaginação é mais importante que o conhecimento.', 'autor' => 'Albert Einstein'],
+        ['texto' => 'A simplicidade é o último grau da sofisticação.', 'autor' => 'Leonardo da Vinci'],
+        ['texto' => 'O único modo de fazer um excelente trabalho é amar o que você faz.', 'autor' => 'Steve Jobs'],
+        ['texto' => 'Não espere por oportunidades, crie-as.', 'autor' => 'George Bernard Shaw'],
+    ];
+    
+    $c = $citacoes[array_rand($citacoes)];
+    
+    return '<div class="dynamic-citacao">
+            <p class="citacao-texto">"' . htmlspecialchars($c['texto']) . '"</p>
+            <p class="citacao-autor">— ' . htmlspecialchars($c['autor']) . '</p>
+            </div>';
+}
+
+function renderProdutos($pdo, $limite = 4)
+{
+    $limite = intval($limite) ?: 4;
+    
+    // Por enquanto, produtos mockados. Depois pode ter tabela própria
+    $produtos = [
+        ['nome' => 'Produto Premium', 'preco' => 'R$ 99,90', 'imagem' => 'https://via.placeholder.com/200x150?text=Premium'],
+        ['nome' => 'Pacote Completo', 'preco' => 'R$ 149,90', 'imagem' => 'https://via.placeholder.com/200x150?text=Pacote'],
+        ['nome' => 'Edição Limitada', 'preco' => 'R$ 199,90', 'imagem' => 'https://via.placeholder.com/200x150?text=Limited'],
+        ['nome' => 'Acessórios', 'preco' => 'R$ 49,90', 'imagem' => 'https://via.placeholder.com/200x150?text=Acessorios'],
+        ['nome' => 'Curso Online', 'preco' => 'R$ 297,00', 'imagem' => 'https://via.placeholder.com/200x150?text=Curso'],
+        ['nome' => 'E-book', 'preco' => 'R$ 29,90', 'imagem' => 'https://via.placeholder.com/200x150?text=Ebook'],
+    ];
+    
+    $produtos = array_slice($produtos, 0, $limite);
+    
+    $html = '<div class="dynamic-produtos grade-produtos">';
+    foreach ($produtos as $p) {
+        $html .= '<div class="produto-item">';
+        $html .= '<img src="' . $p['imagem'] . '" alt="' . $p['nome'] . '" class="produto-imagem">';
+        $html .= '<h4 class="produto-nome">' . $p['nome'] . '</h4>';
+        $html .= '<p class="produto-preco">' . $p['preco'] . '</p>';
+        $html .= '<button class="produto-botao">Comprar</button>';
+        $html .= '</div>';
+    }
+    $html .= '</div>';
+    
+    return $html;
+}
+
+function renderContador($inicial = 0)
+{
+    $inicial = intval($inicial) ?: 0;
+    $id = 'counter-' . uniqid();
+    
+    return '<div class="dynamic-contador">
+            <span id="' . $id . '" class="contador-valor">' . $inicial . '</span>
+            <div class="contador-botoes">
+                <button onclick="document.getElementById(\'' . $id . '\').innerText = parseInt(document.getElementById(\'' . $id . '\').innerText) + 1">+</button>
+                <button onclick="document.getElementById(\'' . $id . '\').innerText = parseInt(document.getElementById(\'' . $id . '\').innerText) - 1">-</button>
+                <button onclick="document.getElementById(\'' . $id . '\').innerText = ' . $inicial . '">Reset</button>
+            </div>
+            </div>';
+}
+
+function renderUsuarioAtual($pdo)
+{
+    if (!isLogado()) {
+        return '<p>Você não está logado.</p>';
     }
     
-    // Se não encontrou body, retorna o HTML do documento
-    return $dom->saveHTML();
+    $usuario = getUsuarioAtual($pdo);
+    
+    return '<div class="dynamic-usuario">
+            <p>Olá, <strong>' . htmlspecialchars($usuario['nome']) . '</strong>!</p>
+            <p>Email: ' . htmlspecialchars($usuario['email']) . '</p>
+            </div>';
 }
 
 /**
@@ -328,6 +337,9 @@ function getSiteStats($pdo)
     
     $stmt = $pdo->query("SELECT COUNT(*) FROM noticias");
     $stats['total_noticias'] = $stmt->fetchColumn();
+    
+    $stmt = $pdo->query("SELECT COUNT(*) FROM bleets");
+    $stats['total_bleets'] = $stmt->fetchColumn();
     
     return $stats;
 }
