@@ -8,7 +8,6 @@ if (!isLogado()) {
 
 $categorias = getCategorias($pdo);
 
-// No trecho de inserção, modifique para:
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = $_POST['nome'];
     $descricao = $_POST['descricao'];
@@ -18,19 +17,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $css = minifyCss($_POST['css']);
     $usuario_id = $_SESSION['usuario_id'];
     $is_dynamic = isset($_POST['is_dynamic']) ? 1 : 0;
-    $dynamic_config = isset($_POST['dynamic_config']) ? json_encode($_POST['dynamic_config']) : null;
+    $dynamic_blocks_data = $_POST['dynamic_blocks_data'] ?? '[]';
 
-    // Verificar se está usando blocos dinâmicos
-    $usingDynamicBlocks = strpos($conteudo, 'data-block-type="dynamic"') !== false;
-
+    // Verificar se há blocos dinâmicos no conteúdo
+    $usingDynamicBlocks = strpos($conteudo, 'data-dynamic-type') !== false;
     if ($usingDynamicBlocks) {
         $is_dynamic = 1;
     }
 
+    // Inserir o website
     $stmt = $pdo->prepare("INSERT INTO websites (nome, url, imagem, descricao, categoria_id, destaque, ordem, usuario_id, conteudo, css, is_dynamic, dynamic_config) VALUES (:nome, :url, :imagem, :descricao, :categoria_id, 0, 0, :usuario_id, :conteudo, :css, :is_dynamic, :dynamic_config)");
+    
+    $url = strtolower(trim(preg_replace('/[^a-zA-Z0-9-]+/', '-', $nome), '-'));
+    
     $stmt->execute([
         ':nome' => $nome,
-        ':url' => strtolower(str_replace(' ', '-', $nome)),
+        ':url' => $url,
         ':imagem' => $imagem_url,
         ':descricao' => $descricao,
         ':categoria_id' => $categoria_id,
@@ -38,86 +40,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':conteudo' => $conteudo,
         ':css' => $css,
         ':is_dynamic' => $is_dynamic,
-        ':dynamic_config' => $dynamic_config
+        ':dynamic_config' => $dynamic_blocks_data
     ]);
 
-    // Se estiver usando blocos dinâmicos, processá-los
+    $websiteId = $pdo->lastInsertId();
+
+    // Se estiver usando blocos dinâmicos, processar para a tabela dynamic_blocks
     if ($usingDynamicBlocks) {
-        $websiteId = $pdo->lastInsertId();
-        $dom = new DOMDocument();
-        @$dom->loadHTML($conteudo);
-
-        $dynamicBlocks = $dom->getElementsByTagName('div');
-        foreach ($dynamicBlocks as $block) {
-            if ($block->getAttribute('data-block-type') === 'dynamic') {
-                $blockType = $block->getAttribute('data-original-type') ?? 'custom';
-                $content = '';
-
-                foreach ($block->childNodes as $child) {
-                    $content .= $dom->saveHTML($child);
-                }
-
-                $stmt = $pdo->prepare("INSERT INTO dynamic_blocks (website_id, block_type, content) VALUES (?, ?, ?)");
-                $stmt->execute([$websiteId, $blockType, $content]);
-
-                $blockId = $pdo->lastInsertId();
-                $block->setAttribute('data-block-id', $blockId);
+        $dynamicBlocks = json_decode($dynamic_blocks_data, true);
+        if (is_array($dynamicBlocks)) {
+            foreach ($dynamicBlocks as $index => $block) {
+                $type = $block['type'] ?? 'unknown';
+                $attrs = json_encode($block['attributes'] ?? []);
+                
+                $stmt = $pdo->prepare("INSERT INTO dynamic_blocks (website_id, block_type, content, block_order) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$websiteId, $type, $attrs, $index]);
             }
         }
-
-        // Atualizar o conteúdo com os IDs dos blocos
-        $updatedContent = $dom->saveHTML();
-        $stmt = $pdo->prepare("UPDATE websites SET conteudo = ? WHERE id = ?");
-        $stmt->execute([$updatedContent, $websiteId]);
     }
 
-    header('Location: index.php');
+    header('Location: manage_blogs.php?success=1');
     exit;
-}
-
-function minifyHtml($html)
-{
-    $html = preg_replace('/<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->/s', '', $html);
-
-    $html = preg_replace('/\s+/', ' ', $html);
-
-    $html = preg_replace('/>\s+</', '><', $html);
-
-    return trim($html);
-}
-function minifyCss($css)
-{
-    $css = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $css);
-
-    $css = str_replace(["\r\n", "\r", "\n", "\t", '  ', '    ', '    '], '', $css);
-
-    $css = preg_replace('/\s*([{}:;,+>~])\s*/', '$1', $css);
-
-    $css = preg_replace('/;}/', '}', $css);
-
-    return trim($css);
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Novo Blog - Eyefind.info</title>
     <link rel="icon" type="image/png" sizes="192x192" href="icon/android-chrome-192x192.png">
-
     <link rel="icon" type="image/png" sizes="512x512" href="icon/android-chrome-512x512.png">
-
     <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-touch-icon.png">
-
     <link rel="icon" type="image/png" sizes="16x16" href="icon/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32x32.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- GRAPESJS Core -->
@@ -138,9 +98,7 @@ function minifyCss($css)
     <script src="https://unpkg.com/grapesjs-blocks-bootstrap5@1.0.0"></script>
     <script src="https://unpkg.com/grapesjs-style-filter@1.0.0"></script>
 
-
     <script>
-        // Configuração do Tailwind
         tailwind.config = {
             theme: {
                 extend: {
@@ -153,25 +111,24 @@ function minifyCss($css)
             }
         }
 
-        // Função de preview de imagem
         function previewImage() {
             const url = document.getElementById('imagem_url').value;
             const preview = document.getElementById('image-preview');
-
+            
             if (url) {
                 preview.innerHTML = `
-            <div class="relative w-full rounded border-2 border-eyefind-blue overflow-hidden">
-                <img src="${url}" alt="Pré-visualização da imagem" 
-                     class="w-full h-auto max-h-[400px] object-cover"
-                     onerror="this.onerror=null;preview.innerHTML='<div class=\'relative w-full bg-red-50 rounded border-2 border-red-300 flex items-center justify-center min-h-[200px] text-red-500\'>Imagem não encontrada</div>'">
-            </div>
-        `;
+                    <div class="relative w-full rounded border-2 border-eyefind-blue overflow-hidden">
+                        <img src="${url}" alt="Pré-visualização" 
+                             class="w-full h-auto max-h-[400px] object-cover"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'bg-red-50 p-4 text-red-500\'>Imagem não encontrada</div>'">
+                    </div>
+                `;
             } else {
                 preview.innerHTML = `
-            <div class="relative w-full bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center min-h-[200px]">
-                <span class="text-gray-500">Pré-visualização aparecerá aqui</span>
-            </div>
-        `;
+                    <div class="relative w-full bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center min-h-[200px]">
+                        <span class="text-gray-500">Pré-visualização aparecerá aqui</span>
+                    </div>
+                `;
             }
         }
 
@@ -220,301 +177,102 @@ function minifyCss($css)
                     'grapesjs-symbols': {},
                     'grapesjs-style-filter': {}
                 },
+                blockManager: {
+                    blocks: [
+                        // Blocos básicos
+                        {
+                            id: 'text',
+                            label: 'Texto',
+                            category: 'Básicos',
+                            content: '<div style="padding: 10px;">Insira seu texto aqui...</div>',
+                        },
+                        {
+                            id: 'heading',
+                            label: 'Título',
+                            category: 'Básicos',
+                            content: '<h1 style="padding: 10px;">Título</h1>',
+                        },
+                        {
+                            id: 'image',
+                            label: 'Imagem',
+                            category: 'Básicos',
+                            content: '<img src="https://via.placeholder.com/400x200" style="max-width:100%; padding: 10px;">',
+                        },
+                        {
+                            id: 'button',
+                            label: 'Botão',
+                            category: 'Básicos',
+                            content: '<button style="background: #067191; color: white; padding: 10px 20px; border-radius: 5px;">Clique aqui</button>',
+                        },
+                        
+                        // BLOCOS DINÂMICOS - NOVOS!
+                        {
+                            id: 'dynamic-news',
+                            label: '📰 Últimas Notícias',
+                            category: 'Blocos Dinâmicos',
+                            content: '<div data-dynamic-type="latest-news" data-limit="5" data-class="dynamic-news-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">🔴 Bloco Dinâmico: Últimas Notícias (será carregado automaticamente)</div>',
+                        },
+                        {
+                            id: 'dynamic-bleets',
+                            label: '💬 Bleets Recentes',
+                            category: 'Blocos Dinâmicos',
+                            content: '<div data-dynamic-type="recent-bleets" data-limit="3" data-class="dynamic-bleets-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">🟢 Bloco Dinâmico: Bleets Recentes</div>',
+                        },
+                        {
+                            id: 'dynamic-quote',
+                            label: '✨ Citação Aleatória',
+                            category: 'Blocos Dinâmicos',
+                            content: '<div data-dynamic-type="random-quote" data-class="dynamic-quote-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">💭 Bloco Dinâmico: Citação Aleatória</div>',
+                        },
+                        {
+                            id: 'dynamic-products',
+                            label: '🛍️ Produtos em Destaque',
+                            category: 'Blocos Dinâmicos',
+                            content: '<div data-dynamic-type="featured-products" data-limit="4" data-class="dynamic-products-grid" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">🛒 Bloco Dinâmico: Produtos</div>',
+                        },
+                        {
+                            id: 'dynamic-stats',
+                            label: '📊 Estatísticas do Usuário',
+                            category: 'Blocos Dinâmicos',
+                            content: '<div data-dynamic-type="user-stats" data-class="dynamic-stats" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">👤 Bloco Dinâmico: Estatísticas do Usuário</div>',
+                        },
+                        {
+                            id: 'dynamic-counter',
+                            label: '🔢 Contador Interativo',
+                            category: 'Blocos Dinâmicos',
+                            content: '<div data-dynamic-type="counter" data-initial="0" data-class="dynamic-counter" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">🧮 Bloco Dinâmico: Contador</div>',
+                        }
+                    ]
+                },
                 styleManager: {
-                    sectors: [{
+                    sectors: [
+                        {
                             name: 'Geral',
-                            properties: [{
-                                    type: 'color',
-                                    property: 'color',
-                                    label: 'Cor do Texto',
-                                },
-                                {
-                                    type: 'color',
-                                    property: 'background-color',
-                                    label: 'Cor de Fundo',
-                                },
-                                {
-                                    type: 'select',
-                                    property: 'text-align',
-                                    label: 'Alinhamento',
-                                    options: [{
-                                            value: 'left',
-                                            label: 'Esquerda'
-                                        },
-                                        {
-                                            value: 'center',
-                                            label: 'Centro'
-                                        },
-                                        {
-                                            value: 'right',
-                                            label: 'Direita'
-                                        },
-                                    ]
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'font-size',
-                                    label: 'Tamanho da Fonte',
-                                    defaults: '16px',
-                                    step: 1,
-                                    max: 100,
-                                    min: 10,
-                                }
+                            properties: [
+                                { type: 'color', property: 'color', label: 'Cor do Texto' },
+                                { type: 'color', property: 'background-color', label: 'Cor de Fundo' },
+                                { type: 'select', property: 'text-align', label: 'Alinhamento', options: [
+                                    { value: 'left', label: 'Esquerda' },
+                                    { value: 'center', label: 'Centro' },
+                                    { value: 'right', label: 'Direita' },
+                                ]},
+                                { type: 'slider', property: 'font-size', label: 'Tamanho da Fonte', defaults: '16px', step: 1, max: 100, min: 10 },
                             ]
                         },
                         {
                             name: 'Dimensões',
-                            properties: [{
-                                    type: 'slider',
-                                    property: 'width',
-                                    label: 'Largura',
-                                    units: ['px', '%', 'vw'],
-                                    defaults: 'auto',
-                                    min: 0,
-                                    max: 1000,
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'height',
-                                    label: 'Altura',
-                                    units: ['px', '%', 'vh'],
-                                    defaults: 'auto',
-                                    min: 0,
-                                    max: 1000,
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'margin',
-                                    label: 'Margem',
-                                    units: ['px', 'em', '%'],
-                                    defaults: '0',
-                                    min: 0,
-                                    max: 100,
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'padding',
-                                    label: 'Preenchimento',
-                                    units: ['px', 'em', '%'],
-                                    defaults: '0',
-                                    min: 0,
-                                    max: 100,
-                                }
-                            ]
-                        },
-                        {
-                            name: 'Decorações',
-                            properties: [{
-                                    type: 'slider',
-                                    property: 'border-radius',
-                                    label: 'Borda Arredondada',
-                                    units: ['px', '%'],
-                                    defaults: '0',
-                                    min: 0,
-                                    max: 100,
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'border-width',
-                                    label: 'Espessura da Borda',
-                                    units: ['px'],
-                                    defaults: '0',
-                                    min: 0,
-                                    max: 20,
-                                },
-                                {
-                                    type: 'color',
-                                    property: 'border-color',
-                                    label: 'Cor da Borda',
-                                },
-                                {
-                                    type: 'select',
-                                    property: 'border-style',
-                                    label: 'Estilo da Borda',
-                                    options: [{
-                                            value: 'none',
-                                            label: 'Nenhum'
-                                        },
-                                        {
-                                            value: 'solid',
-                                            label: 'Sólido'
-                                        },
-                                        {
-                                            value: 'dashed',
-                                            label: 'Tracejado'
-                                        },
-                                        {
-                                            value: 'dotted',
-                                            label: 'Pontilhado'
-                                        },
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            name: 'Sombras e Efeitos',
-                            properties: [{
-                                    type: 'stack',
-                                    property: 'box-shadow',
-                                    label: 'Sombra',
-                                    properties: [{
-                                            type: 'slider',
-                                            units: ['px'],
-                                            property: 'offsetX',
-                                            defaults: 0,
-                                            min: -50,
-                                            max: 50,
-                                            label: 'X'
-                                        },
-                                        {
-                                            type: 'slider',
-                                            units: ['px'],
-                                            property: 'offsetY',
-                                            defaults: 0,
-                                            min: -50,
-                                            max: 50,
-                                            label: 'Y'
-                                        },
-                                        {
-                                            type: 'slider',
-                                            units: ['px'],
-                                            property: 'blur',
-                                            defaults: 0,
-                                            min: 0,
-                                            max: 50,
-                                            label: 'Desfoque'
-                                        },
-                                        {
-                                            type: 'slider',
-                                            units: ['px'],
-                                            property: 'spread',
-                                            defaults: 0,
-                                            min: 0,
-                                            max: 50,
-                                            label: 'Expansão'
-                                        },
-                                        {
-                                            type: 'color',
-                                            property: 'color',
-                                            label: 'Cor'
-                                        },
-                                    ]
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'opacity',
-                                    label: 'Opacidade',
-                                    defaults: 1,
-                                    step: 0.1,
-                                    max: 1,
-                                    min: 0,
-                                }
+                            properties: [
+                                { type: 'slider', property: 'width', label: 'Largura', units: ['px', '%', 'vw'], defaults: 'auto', min: 0, max: 1000 },
+                                { type: 'slider', property: 'height', label: 'Altura', units: ['px', '%', 'vh'], defaults: 'auto', min: 0, max: 1000 },
+                                { type: 'slider', property: 'margin', label: 'Margem', units: ['px', 'em', '%'], defaults: '0', min: 0, max: 100 },
+                                { type: 'slider', property: 'padding', label: 'Preenchimento', units: ['px', 'em', '%'], defaults: '0', min: 0, max: 100 },
                             ]
                         }
                     ]
                 }
             });
 
-            // Definir blocos dinâmicos
-            const dynamicBlocks = [
-                {
-                    id: 'dynamic-posts',
-                    label: 'Lista de Posts',
-                    media: '<i class="fas fa-list"></i>',
-                    content: {
-                        type: 'dynamic',
-                        dynamicType: 'posts_list',
-                        content: '<div data-block-type="dynamic" data-dynamic-type="posts_list" class="dynamic-block">Carregando posts...</div>',
-                        style: { padding: '20px', border: '1px dashed #ccc' }
-                    }
-                },
-                {
-                    id: 'dynamic-products',
-                    label: 'Grade de Produtos',
-                    media: '<i class="fas fa-shopping-cart"></i>',
-                    content: {
-                        type: 'dynamic',
-                        dynamicType: 'products_grid',
-                        content: '<div data-block-type="dynamic" data-dynamic-type="products_grid" class="dynamic-block">Carregando produtos...</div>',
-                        style: { padding: '20px', border: '1px dashed #ccc' }
-                    }
-                },
-                {
-                    id: 'dynamic-single-post',
-                    label: 'Post Específico',
-                    media: '<i class="fas fa-file-alt"></i>',
-                    content: {
-                        type: 'dynamic',
-                        dynamicType: 'single_post',
-                        content: '<div data-block-type="dynamic" data-dynamic-type="single_post" data-post-id="" class="dynamic-block">Selecione um post...</div>',
-                        style: { padding: '20px', border: '1px dashed #ccc' }
-                    }
-                }
-            ];
-
-            // Adicionar ao Block Manager
-            editor.BlockManager.add('dynamic-posts', dynamicBlocks[0]);
-            editor.BlockManager.add('dynamic-products', dynamicBlocks[1]);
-            editor.BlockManager.add('dynamic-single-post', dynamicBlocks[2]);
-
-            // Tratar clique duplo no bloco para configurar
-            editor.on('component:dblclick', function(component) {
-                if (component.get('type') === 'dynamic') {
-                    const dynamicType = component.getAttributes()['data-dynamic-type'];
-                    if (dynamicType === 'posts_list') {
-                        // Abrir modal para configurar quantidade, ordem, etc.
-                        openPostsConfig(component);
-                    } else if (dynamicType === 'products_grid') {
-                        openProductsConfig(component);
-                    } else if (dynamicType === 'single_post') {
-                        openSinglePostConfig(component);
-                    }
-                }
-            });
-
-            // Funções para abrir modais (simplificadas)
-            function openPostsConfig(component) {
-                const config = component.get('config') || { limit: 5, order: 'desc' };
-                const modal = editor.Modal;
-                modal.setTitle('Configurar Lista de Posts');
-                modal.setContent(`
-                    <form id="posts-config">
-                        <div>
-                            <label>Quantidade máxima:</label>
-                            <input type="number" name="limit" value="${config.limit || 5}" min="1" max="50">
-                        </div>
-                        <div>
-                            <label>Ordenar:</label>
-                            <select name="order">
-                                <option value="desc" ${config.order==='desc'?'selected':''}>Mais recentes primeiro</option>
-                                <option value="asc" ${config.order==='asc'?'selected':''}>Mais antigos primeiro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Mostrar imagem?</label>
-                            <input type="checkbox" name="show_image" ${config.show_image ? 'checked' : ''}>
-                        </div>
-                        <button type="submit">Salvar</button>
-                    </form>
-                `);
-                modal.open();
-                document.getElementById('posts-config').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const formData = new FormData(e.target);
-                    const newConfig = {
-                        limit: formData.get('limit'),
-                        order: formData.get('order'),
-                        show_image: formData.get('show_image') === 'on'
-                    };
-                    component.set('config', newConfig);
-                    component.addAttributes({ 'data-config': JSON.stringify(newConfig) });
-                    // Atualizar texto do bloco
-                    component.set('content', `<div data-block-type="dynamic" data-dynamic-type="posts_list" data-config='${JSON.stringify(newConfig)}'>Lista de Posts (configurado)</div>`);
-                    modal.close();
-                });
-            }
-
-            // Manipulador do formulário
+            // Manipulador do formulário - INCLUINDO COLETA DOS BLOCOS DINÂMICOS
             const form = document.querySelector('form[action="new_blog.php"]');
             if (form) {
                 form.addEventListener('submit', function(e) {
@@ -524,54 +282,51 @@ function minifyCss($css)
                         const html = editor.getHtml();
                         const css = editor.getCss();
 
+                        // COLETAR BLOCOS DINÂMICOS
+                        const dynamicBlocks = [];
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = html;
+                        
+                        tempDiv.querySelectorAll('[data-dynamic-type]').forEach(el => {
+                            const block = {
+                                type: el.dataset.dynamicType,
+                                attributes: {}
+                            };
+                            
+                            // Copiar todos os atributos data-* exceto dynamic-type
+                            for (let attr of el.attributes) {
+                                if (attr.name.startsWith('data-') && attr.name !== 'data-dynamic-type') {
+                                    block.attributes[attr.name] = attr.value;
+                                }
+                            }
+                            
+                            dynamicBlocks.push(block);
+                        });
+
+                        // Preencher campos hidden
                         document.getElementById('conteudo').value = html || '';
                         document.getElementById('css').value = css || '';
+                        document.getElementById('dynamic_blocks_data').value = JSON.stringify(dynamicBlocks);
 
                         form.removeEventListener('submit', arguments.callee);
                         form.submit();
                     } catch (error) {
                         console.error('Erro ao salvar conteúdo:', error);
+                        alert('Erro ao salvar. Verifique o console.');
                     }
                 });
             }
         });
-
-        editor.on('component:drag:start', (component) => {
-            if (component.get('type') === 'header' || component.get('customNoDrag')) {
-                editor.get('DomComponents').getWrapper().trigger('component:drag:stop');
-            }
-        });
-
-        editor.on('component:drag', (component) => {
-            const wrapper = editor.getWrapper();
-            const wrapperEl = wrapper.getEl();
-
-            // pega posição do componente e limita dentro do wrapper
-            const compEl = component.view.el;
-            const rect = compEl.getBoundingClientRect();
-            const wrapRect = wrapperEl.getBoundingClientRect();
-
-            if (rect.left < wrapRect.left) {
-                compEl.style.left = '0px';
-            }
-        });
     </script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
-
-        body {
-            font-family: 'Roboto Condensed', sans-serif;
-        }
-
-        #grapesjs-editor {
-            height: 500px;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-        }
+        body { font-family: 'Roboto Condensed', sans-serif; }
+        #grapesjs-editor { height: 500px; border: 1px solid #e2e8f0; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .gjs-block { width: auto !important; height: auto !important; margin: 5px !important; }
+        .gjs-block-label { font-size: 12px; }
     </style>
 </head>
-
 <body class="bg-eyefind-light">
     <section class="bg-[#488BC2] shadow-md">
         <div class="p-4 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
@@ -606,19 +361,26 @@ function minifyCss($css)
 
     <div class="w-full h-2 bg-yellow-400"></div>
 
-
     <div class="max-w-7xl mx-auto mt-1">
         <section class="bg-white p-6 shadow-md">
             <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Criar Novo Blog</h2>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <p class="text-blue-700 font-bold">✨ NOVIDADE: Blocos Dinâmicos!</p>
+                <p class="text-blue-600">Arraste blocos da categoria "Blocos Dinâmicos" para adicionar conteúdo que se atualiza automaticamente: notícias, bleets, citações, produtos e mais!</p>
+            </div>
+            
             <form action="new_blog.php" method="POST">
                 <div class="mb-4">
                     <label for="nome" class="block text-eyefind-dark font-bold mb-2">Nome do Blog</label>
                     <input type="text" name="nome" id="nome" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" required>
                 </div>
+                
                 <div class="mb-4">
                     <label for="descricao" class="block text-eyefind-dark font-bold mb-2">Descrição</label>
-                    <textarea name="descricao" id="descricao" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" required></textarea>
+                    <textarea name="descricao" id="descricao" rows="3" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" required></textarea>
                 </div>
+                
                 <div class="mb-4">
                     <label for="imagem_url" class="block text-eyefind-dark font-bold mb-2">URL da Imagem do Blog</label>
                     <input type="url" name="imagem_url" id="imagem_url"
@@ -632,6 +394,7 @@ function minifyCss($css)
                         </div>
                     </div>
                 </div>
+                
                 <div class="mb-4">
                     <label for="categoria_id" class="block text-eyefind-dark font-bold mb-2">Categoria</label>
                     <select name="categoria_id" id="categoria_id" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" required>
@@ -640,14 +403,20 @@ function minifyCss($css)
                         <?php endforeach; ?>
                     </select>
                 </div>
+                
                 <div class="mb-4">
                     <label for="conteudo" class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog</label>
                     <div id="grapesjs-editor"></div>
                     <input type="hidden" name="conteudo" id="conteudo" value="">
                     <input type="hidden" name="css" id="css" value="">
+                    <input type="hidden" name="dynamic_blocks_data" id="dynamic_blocks_data" value="[]">
                 </div>
-                <div class="flex justify-end">
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
+                
+                <div class="flex justify-end gap-2">
+                    <a href="manage_blogs.php" class="bg-gray-500 text-white px-6 py-2 rounded font-bold hover:bg-gray-600 transition">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition">
                         Criar Blog
                     </button>
                 </div>
@@ -655,4 +424,4 @@ function minifyCss($css)
         </section>
     </div>
 </body>
-<html>
+</html>
