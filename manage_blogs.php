@@ -12,23 +12,27 @@ if (!isLogado()) {
 $usuario = getUsuarioAtual($pdo);
 $usuario_id = $usuario['id'];
 
+// Obter mensagem da URL
+$mensagem = isset($_GET['msg']) ? htmlspecialchars($_GET['msg']) : '';
+
 // Obter todos os blogs do usuário
-$stmt = $pdo->prepare("SELECT * FROM websites WHERE usuario_id = ?");
+$stmt = $pdo->prepare("SELECT * FROM websites WHERE usuario_id = ? ORDER BY id DESC");
 $stmt->execute([$usuario_id]);
 $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Redirecionar para a página de criação de blog se o usuário não tiver blogs
-if (empty($blogs)) {
-    header('Location: new_blog.php');
-    exit;
-}
 
 // Processar a exclusão de um blog
 if (isset($_GET['excluir'])) {
     $blog_id = intval($_GET['excluir']);
+    
+    // Primeiro excluir áreas dinâmicas
+    $stmt = $pdo->prepare("DELETE FROM dynamic_areas WHERE website_id = ?");
+    $stmt->execute([$blog_id]);
+    
+    // Depois excluir o blog
     $stmt = $pdo->prepare("DELETE FROM websites WHERE id = ? AND usuario_id = ?");
     $stmt->execute([$blog_id, $usuario_id]);
-    header('Location: manage_blogs.php');
+    
+    header('Location: manage_blogs.php?msg=' . urlencode('Blog excluído com sucesso!'));
     exit;
 }
 ?>
@@ -42,11 +46,8 @@ if (isset($_GET['excluir'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Blogs - Eyefind.info</title>
     <link rel="icon" type="image/png" sizes="192x192" href="icon/android-chrome-192x192.png">
-
     <link rel="icon" type="image/png" sizes="512x512" href="icon/android-chrome-512x512.png">
-
     <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-touch-icon.png">
-
     <link rel="icon" type="image/png" sizes="16x16" href="icon/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32x32.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -77,10 +78,10 @@ if (isset($_GET['excluir'])) {
 
             <div class="flex items-center gap-4 mt-4 md:mt-0">
                 <a href="index.php" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 transition">
-                    Voltar
+                    <i class="fas fa-arrow-left mr-2"></i>Voltar
                 </a>
                 <a href="logout.php" class="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition">
-                    Logout
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
                 </a>
             </div>
         </div>
@@ -88,40 +89,81 @@ if (isset($_GET['excluir'])) {
 
     <div class="w-full h-2 bg-yellow-400"></div>
 
-
     <div class="max-w-7xl mx-auto mt-1">
-        <section class="bg-white p-6 shadow-md">
-            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Meus Blogs</h2>
-            <div class="space-y-4">
-                <?php foreach ($blogs as $blog): ?>
-                    <div class="flex items-center justify-between p-4 border border-eyefind-blue rounded-lg">
-                        <div class="flex items-center gap-4">
-                            <?php if ($blog['imagem']): ?>
-                                <img src="<?php echo htmlspecialchars($blog['imagem']); ?>" alt="Imagem do Blog" class="w-64 h-auto object-cover rounded">
-                            <?php endif; ?>
-                            <div>
-                                <h3 class="text-lg font-bold text-eyefind-dark"><?php echo htmlspecialchars($blog['nome']); ?></h3>
-                                <p class="text-sm text-gray-600"><?php echo htmlspecialchars($blog['descricao']); ?></p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <a href="edit_blog.php?id=<?php echo $blog['id']; ?>" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                            <a href="manage_blogs.php?excluir=<?php echo $blog['id']; ?>" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition" onclick="return confirm('Tem certeza que deseja excluir este blog?');">
-                                <i class="fas fa-trash"></i> Excluir
-                            </a>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+        <?php if ($mensagem): ?>
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4">
+                <i class="fas fa-info-circle mr-2"></i>
+                <?php echo $mensagem; ?>
             </div>
-            <div class="mt-6">
+        <?php endif; ?>
+
+        <section class="bg-white p-6 shadow-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-eyefind-blue">
+                    <i class="fas fa-blog mr-2"></i>
+                    Meus Blogs
+                </h2>
                 <a href="new_blog.php" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
-                    <i class="fas fa-plus"></i> Criar Novo Blog
+                    <i class="fas fa-plus mr-2"></i> Criar Novo Blog
                 </a>
             </div>
+            
+            <?php if (empty($blogs)): ?>
+                <div class="text-center py-12 bg-gray-50 rounded-lg">
+                    <i class="fas fa-blog text-6xl text-gray-400 mb-4"></i>
+                    <p class="text-xl text-gray-600 mb-4">Você ainda não tem nenhum blog.</p>
+                    <a href="new_blog.php" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition inline-block">
+                        <i class="fas fa-plus mr-2"></i> Criar seu primeiro blog
+                    </a>
+                </div>
+            <?php else: ?>
+                <div class="grid grid-cols-1 gap-6">
+                    <?php foreach ($blogs as $blog): ?>
+                        <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                            <div class="p-6">
+                                <div class="flex flex-col md:flex-row gap-6">
+                                    <?php if ($blog['imagem']): ?>
+                                        <div class="md:w-48 flex-shrink-0">
+                                            <img src="<?php echo htmlspecialchars($blog['imagem']); ?>" 
+                                                 alt="Imagem do Blog" 
+                                                 class="w-full h-32 object-cover rounded-lg">
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <div class="flex-1">
+                                        <h3 class="text-xl font-bold text-eyefind-dark mb-2">
+                                            <?php echo htmlspecialchars($blog['nome']); ?>
+                                        </h3>
+                                        <p class="text-gray-600 mb-4">
+                                            <?php echo htmlspecialchars($blog['descricao']); ?>
+                                        </p>
+                                        
+                                        <div class="flex flex-wrap gap-2">
+                                            <a href="website.php?id=<?php echo $blog['id']; ?>" 
+                                               target="_blank"
+                                               class="bg-green-500 text-white px-3 py-1.5 rounded hover:bg-green-600 transition text-sm">
+                                                <i class="fas fa-eye mr-1"></i> Visualizar
+                                            </a>
+                                            
+                                            <a href="edit_blog.php?id=<?php echo $blog['id']; ?>" 
+                                               class="bg-blue-500 text-white px-3 py-1.5 rounded hover:bg-blue-600 transition text-sm">
+                                                <i class="fas fa-edit mr-1"></i> Editar
+                                            </a>
+                                            
+                                            <a href="manage_blogs.php?excluir=<?php echo $blog['id']; ?>" 
+                                               class="bg-red-500 text-white px-3 py-1.5 rounded hover:bg-red-600 transition text-sm"
+                                               onclick="return confirm('Tem certeza que deseja excluir este blog? Todas as áreas dinâmicas também serão excluídas.');">
+                                                <i class="fas fa-trash mr-1"></i> Excluir
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </section>
     </div>
 </body>
-
 </html>
