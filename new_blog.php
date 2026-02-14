@@ -138,6 +138,63 @@ function minifyCss($css)
     <script src="https://unpkg.com/grapesjs-blocks-bootstrap5@1.0.0"></script>
     <script src="https://unpkg.com/grapesjs-style-filter@1.0.0"></script>
 
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+
+        #grapesjs-editor {
+            height: 500px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Estilo para destacar áreas dinâmicas */
+        .dynamic-area-highlight {
+            outline: 2px dashed #3b82f6 !important;
+            outline-offset: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dynamic-area-highlight::after {
+            content: '🔧 Área Dinâmica';
+            position: absolute;
+            top: -25px;
+            left: 0;
+            background: #3b82f6;
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        /* Estilo para placeholders de áreas dinâmicas */
+        .dynamic-area-placeholder {
+            background-color: #f3f4f6;
+            border: 2px dashed #9ca3af;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            color: #6b7280;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dynamic-area-placeholder i {
+            font-size: 32px;
+            color: #9ca3af;
+        }
+    </style>
 
     <script>
         // Configuração do Tailwind
@@ -415,66 +472,106 @@ function minifyCss($css)
                 }
             });
 
-
-            // Adiciona um botão na barra de ferramentas para tornar o componente dinâmico
-        editor.Panels.addButton('options', {
-            id: 'make-dynamic',
-            className: 'fa fa-cog',
-            command: 'open-dynamic-modal',
-            attributes: { title: 'Gerenciar área dinâmica' }
-        });
-
-        // Comando para abrir o modal
-        editor.Commands.add('open-dynamic-modal', {
-            run(editor, sender) {
-                const selected = editor.getSelected();
-                if (!selected) {
-                    alert('Selecione um elemento primeiro.');
-                    return;
+            // === BOTÃO PARA TORNAR ÁREA DINÂMICA ===
+            
+            // Adiciona um botão na barra de ferramentas
+            editor.Panels.addButton('options', {
+                id: 'make-dynamic',
+                className: 'fa fa-cog',
+                command: 'open-dynamic-modal',
+                attributes: { 
+                    title: 'Tornar área dinâmica (selecione um elemento primeiro)',
+                    style: 'color: #3b82f6; font-size: 16px;'
                 }
+            });
 
-                // Verifica se o elemento já tem um data-dynamic-area
-                let dynamicId = selected.get('attributes')?.['data-dynamic-area'];
-                const websiteId = <?php echo isset($blog) ? $blog['id'] : 'null'; ?>; // ID do site (se for edição) ou null se for novo
-
-                // Se não tiver, criar uma nova área dinâmica via AJAX
-                if (!dynamicId) {
-                    if (!websiteId) {
-                        alert('Salve o site primeiro antes de criar áreas dinâmicas.');
+            // Comando para abrir o modal
+            editor.Commands.add('open-dynamic-modal', {
+                run(editor, sender) {
+                    const selected = editor.getSelected();
+                    if (!selected) {
+                        alert('Por favor, selecione um elemento (div, section, etc.) primeiro.');
                         return;
                     }
-                    // Gerar um ID único temporário (ex: 'new_' + Date.now())
-                    dynamicId = 'new_' + Date.now();
-                    // Enviar requisição para criar a área no banco
-                    fetch('ajax/create_dynamic_area.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ website_id: websiteId, element_id: dynamicId })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Atualizar o componente com o atributo
-                            selected.addAttributes({ 'data-dynamic-area': data.element_id });
-                            // Abrir o modal de edição
-                            openDynamicContentModal(editor, selected, data.element_id);
-                        } else {
-                            alert('Erro ao criar área dinâmica.');
-                        }
-                    });
-                } else {
-                    // Se já existe, abrir o modal de edição
-                    openDynamicContentModal(editor, selected, dynamicId);
-                }
-            }
-        });
 
-        // Função para abrir o modal de edição de conteúdo
-        function openDynamicContentModal(editor, component, dynamicId) {
-            // Aqui você pode criar um modal personalizado ou redirecionar para uma página separada
-            // Por simplicidade, vamos redirecionar para uma página de edição da área
-            window.location.href = `edit_dynamic_area.php?website_id=<?php echo isset($blog) ? $blog['id'] : 0; ?>&element_id=${dynamicId}`;
-        }
+                    // Verifica se o elemento já tem um data-dynamic-area
+                    let dynamicId = selected.get('attributes')?.['data-dynamic-area'];
+                    const websiteId = <?php echo isset($blog) ? $blog['id'] : 'null'; ?>;
+
+                    // Se não tiver, criar uma nova área dinâmica via AJAX
+                    if (!dynamicId) {
+                        if (!websiteId) {
+                            alert('Salve o site primeiro antes de criar áreas dinâmicas.');
+                            return;
+                        }
+                        
+                        // Gerar um ID único
+                        dynamicId = 'area_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                        
+                        // Mostrar indicador de loading
+                        sender.set('active', false);
+                        
+                        // Enviar requisição para criar a área no banco
+                        fetch('ajax/create_dynamic_area.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                website_id: websiteId, 
+                                element_id: dynamicId 
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Atualizar o componente com o atributo
+                                selected.addAttributes({ 'data-dynamic-area': data.element_id });
+                                
+                                // Adicionar uma classe visual para identificar a área
+                                const currentClasses = selected.get('classes') || [];
+                                selected.set('classes', [...currentClasses, 'dynamic-area-highlight']);
+                                
+                                // Redirecionar para editar a área
+                                window.location.href = `edit_dynamic_area.php?website_id=${websiteId}&element_id=${data.element_id}`;
+                            } else {
+                                alert('Erro ao criar área dinâmica: ' + (data.error || 'Erro desconhecido'));
+                            }
+                        })
+                        .catch(error => {
+                            alert('Erro na requisição: ' + error);
+                        });
+                    } else {
+                        // Se já existe, abrir a página de edição da área
+                        window.location.href = `edit_dynamic_area.php?website_id=${websiteId}&element_id=${dynamicId}`;
+                    }
+                }
+            });
+
+            // Adiciona um botão no menu de contexto (clique direito)
+            editor.Commands.add('show-dynamic-context', {
+                run(editor, sender, opts) {
+                    const selected = editor.getSelected();
+                    if (!selected) return;
+                    
+                    const dynamicId = selected.get('attributes')?.['data-dynamic-area'];
+                    const websiteId = <?php echo isset($blog) ? $blog['id'] : 'null'; ?>;
+                    
+                    if (dynamicId && websiteId) {
+                        if (confirm('Editar esta área dinâmica?')) {
+                            window.location.href = `edit_dynamic_area.php?website_id=${websiteId}&element_id=${dynamicId}`;
+                        }
+                    }
+                }
+            });
+
+            // Atalho de teclado (Ctrl+Shift+D) para tornar dinâmico
+            editor.on('keydown', (event) => {
+                if (event.ctrlKey && event.shiftKey && event.key === 'D') {
+                    event.preventDefault();
+                    editor.runCommand('open-dynamic-modal');
+                }
+            });
+
+            // === FIM DO CÓDIGO DO BOTÃO ===
 
             // Manipulador do formulário
             const form = document.querySelector('form[action="new_blog.php"]');
@@ -496,42 +593,34 @@ function minifyCss($css)
                     }
                 });
             }
-        });
 
-        editor.on('component:drag:start', (component) => {
-            if (component.get('type') === 'header' || component.get('customNoDrag')) {
-                editor.get('DomComponents').getWrapper().trigger('component:drag:stop');
-            }
-        });
+            // Eventos de drag
+            editor.on('component:drag:start', (component) => {
+                if (component.get('type') === 'header' || component.get('customNoDrag')) {
+                    editor.get('DomComponents').getWrapper().trigger('component:drag:stop');
+                }
+            });
 
-        editor.on('component:drag', (component) => {
-            const wrapper = editor.getWrapper();
-            const wrapperEl = wrapper.getEl();
+            editor.on('component:drag', (component) => {
+                const wrapper = editor.getWrapper();
+                const wrapperEl = wrapper.getEl();
 
-            // pega posição do componente e limita dentro do wrapper
-            const compEl = component.view.el;
-            const rect = compEl.getBoundingClientRect();
-            const wrapRect = wrapperEl.getBoundingClientRect();
+                // pega posição do componente e limita dentro do wrapper
+                const compEl = component.view.el;
+                const rect = compEl.getBoundingClientRect();
+                const wrapRect = wrapperEl.getBoundingClientRect();
 
-            if (rect.left < wrapRect.left) {
-                compEl.style.left = '0px';
-            }
+                if (rect.left < wrapRect.left) {
+                    compEl.style.left = '0px';
+                }
+            });
+
+            // Mostrar dica de como usar áreas dinâmicas
+            setTimeout(() => {
+                console.log('💡 Dica: Selecione um elemento e clique no ícone de engrenagem (⚙️) para torná-lo uma área dinâmica!');
+            }, 3000);
         });
     </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
-
-        body {
-            font-family: 'Roboto Condensed', sans-serif;
-        }
-
-        #grapesjs-editor {
-            height: 500px;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-        }
-    </style>
 </head>
 
 <body class="bg-eyefind-light">
@@ -568,10 +657,16 @@ function minifyCss($css)
 
     <div class="w-full h-2 bg-yellow-400"></div>
 
-
     <div class="max-w-7xl mx-auto mt-1">
         <section class="bg-white p-6 shadow-md">
-            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Criar Novo Blog</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-eyefind-blue">Criar Novo Blog</h2>
+                <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Dica: Selecione um elemento e clique no ícone ⚙️ para criar áreas dinâmicas
+                </div>
+            </div>
+            
             <form action="new_blog.php" method="POST">
                 <div class="mb-4">
                     <label for="nome" class="block text-eyefind-dark font-bold mb-2">Nome do Blog</label>
@@ -616,5 +711,19 @@ function minifyCss($css)
             </form>
         </section>
     </div>
+
+    <!-- Pequeno tutorial flutuante (opcional) -->
+    <div class="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-xs border-l-4 border-blue-500 hidden md:block">
+        <h4 class="font-bold text-blue-600 mb-2"><i class="fas fa-magic mr-2"></i>Áreas Dinâmicas</h4>
+        <p class="text-sm text-gray-600 mb-2">
+            1. Arraste um elemento (div, section) para a tela<br>
+            2. Selecione o elemento<br>
+            3. Clique no ícone ⚙️ na barra de ferramentas<br>
+            4. Adicione itens (notícias, produtos, etc.)
+        </p>
+        <button onclick="this.parentElement.remove()" class="text-xs text-gray-500 hover:text-gray-700">
+            Fechar dica
+        </button>
+    </div>
 </body>
-<html>
+</html>
