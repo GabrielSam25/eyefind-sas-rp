@@ -14,12 +14,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $descricao = $_POST['descricao'];
     $imagem_url = $_POST['imagem_url'];
     $categoria_id = $_POST['categoria_id'];
-    $conteudo = minifyHtml($_POST['conteudo']);
-    $css = minifyCss($_POST['css']);
+    
+    // Pegar o conteúdo do campo hidden
+    $conteudo = isset($_POST['conteudo']) ? $_POST['conteudo'] : '';
+    $css = isset($_POST['css']) ? $_POST['css'] : '';
+    
+    // Se estiver vazio, colocar um HTML padrão
+    if (empty($conteudo)) {
+        $conteudo = '<div class="p-8 text-center text-gray-500">Comece a editar seu blog usando o editor acima.</div>';
+    }
+    
     $usuario_id = $_SESSION['usuario_id'];
 
     $stmt = $pdo->prepare("INSERT INTO websites (nome, url, imagem, descricao, categoria_id, usuario_id, conteudo, css) VALUES (:nome, :url, :imagem, :descricao, :categoria_id, :usuario_id, :conteudo, :css)");
-    $stmt->execute([
+    
+    $result = $stmt->execute([
         ':nome' => $nome,
         ':url' => strtolower(str_replace(' ', '-', $nome)),
         ':imagem' => $imagem_url,
@@ -30,10 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':css' => $css
     ]);
 
-    $websiteId = $pdo->lastInsertId();
-    
-    header("Location: edit_blog.php?id=$websiteId");
-    exit;
+    if ($result) {
+        $websiteId = $pdo->lastInsertId();
+        header("Location: edit_blog.php?id=$websiteId");
+        exit;
+    } else {
+        $erro = "Erro ao salvar o blog.";
+    }
 }
 
 function minifyHtml($html)
@@ -96,27 +108,6 @@ function minifyCss($css)
             border-radius: 0.5rem;
             margin-bottom: 1rem;
         }
-        
-        .dynamic-area-highlight {
-            outline: 2px dashed #3b82f6 !important;
-            outline-offset: 2px;
-            position: relative;
-            cursor: pointer;
-        }
-        
-        .dynamic-area-highlight::after {
-            content: '🔧 Área Dinâmica';
-            position: absolute;
-            top: -25px;
-            left: 0;
-            background: #3b82f6;
-            color: white;
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            z-index: 1000;
-            white-space: nowrap;
-        }
     </style>
 
     <script>
@@ -144,9 +135,28 @@ function minifyCss($css)
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Criar um conteúdo inicial para o editor
+            const initialContent = `
+                <div class="p-8 max-w-4xl mx-auto">
+                    <h1 class="text-3xl font-bold text-blue-600 mb-4">Meu Novo Blog</h1>
+                    <p class="text-gray-600 mb-4">Comece a editar este conteúdo arrastando elementos da barra lateral.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-100 p-4 rounded">
+                            <h2 class="text-xl font-bold mb-2">Seção 1</h2>
+                            <p>Conteúdo da primeira seção...</p>
+                        </div>
+                        <div class="bg-gray-100 p-4 rounded">
+                            <h2 class="text-xl font-bold mb-2">Seção 2</h2>
+                            <p>Conteúdo da segunda seção...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
             const editor = grapesjs.init({
                 container: '#grapesjs-editor',
                 fromElement: true,
+                components: initialContent,
                 storageManager: false,
                 allowScripts: true,
                 plugins: [
@@ -179,58 +189,49 @@ function minifyCss($css)
                 }
             });
 
-            // ===== BOTÃO PARA ÁREAS DINÂMICAS =====
-            editor.Panels.addButton('options', {
-                id: 'make-dynamic',
-                className: 'fa fa-cog',
-                command: 'open-dynamic-modal',
-                attributes: { 
-                    title: 'Tornar área dinâmica (selecione um elemento)',
-                    style: 'color: #3b82f6; font-size: 16px;'
-                }
-            });
-
-            editor.Commands.add('open-dynamic-modal', {
-                run(editor, sender) {
-                    const selected = editor.getSelected();
-                    if (!selected) {
-                        alert('Por favor, selecione um elemento (div, section, etc.) primeiro.');
-                        return;
-                    }
-
-                    // Verifica se o elemento já tem um data-dynamic-area
-                    let dynamicId = selected.get('attributes')?.['data-dynamic-area'];
-                    
-                    // IMPORTANTE: Em new_blog.php, ainda não temos ID
-                    // O usuário precisa salvar primeiro
-                    alert('Primeiro, crie o blog com as informações básicas e salve. Depois você poderá adicionar áreas dinâmicas na página de edição.');
-                    
-                    // Redirecionar para a listagem de blogs
-                    window.location.href = 'manage_blogs.php';
-                }
-            });
-
-            // ===== FIM DO BOTÃO =====
-
-            // Manipulador do formulário
+            // ===== IMPORTANTE: Capturar o conteúdo antes de enviar =====
             const form = document.querySelector('form');
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    e.preventDefault();
+                    e.preventDefault(); // Prevenir envio normal
                     
                     try {
+                        // Pegar o HTML e CSS do editor
                         const html = editor.getHtml();
                         const css = editor.getCss();
                         
+                        console.log('HTML capturado:', html); // Debug
+                        
+                        // Colocar nos campos hidden
                         document.getElementById('conteudo').value = html || '';
                         document.getElementById('css').value = css || '';
                         
+                        // Agora enviar o formulário
                         form.submit();
                     } catch (error) {
                         console.error('Erro ao salvar:', error);
+                        alert('Erro ao salvar o conteúdo. Tente novamente.');
                     }
                 });
             }
+
+            // Botão de área dinâmica (será usado apenas no edit_blog.php)
+            // No new_blog.php, mostramos apenas uma mensagem
+            editor.Panels.addButton('options', {
+                id: 'make-dynamic-info',
+                className: 'fa fa-info-circle',
+                command: 'show-dynamic-info',
+                attributes: { 
+                    title: 'Áreas dinâmicas só podem ser adicionadas após salvar o blog',
+                    style: 'color: #ff9800; font-size: 16px;'
+                }
+            });
+
+            editor.Commands.add('show-dynamic-info', {
+                run(editor) {
+                    alert('Primeiro, crie o blog com as informações básicas e salve. Depois, na página de edição, você poderá adicionar áreas dinâmicas!');
+                }
+            });
         });
     </script>
 </head>
@@ -268,8 +269,20 @@ function minifyCss($css)
     <div class="w-full h-2 bg-yellow-400"></div>
 
     <div class="max-w-7xl mx-auto mt-1">
+        <?php if (isset($erro)): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <?php echo $erro; ?>
+            </div>
+        <?php endif; ?>
+
         <section class="bg-white p-6 shadow-md">
-            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Criar Novo Blog</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-eyefind-blue">Criar Novo Blog</h2>
+                <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Passo 1: Informações básicas
+                </div>
+            </div>
             
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
                 <div class="flex">
@@ -278,8 +291,11 @@ function minifyCss($css)
                     </div>
                     <div class="ml-3">
                         <p class="text-sm text-yellow-700">
-                            <strong>Importante:</strong> Primeiro crie o blog com as informações básicas. 
-                            Depois de salvar, você poderá adicionar áreas dinâmicas na página de edição.
+                            <strong>Como funciona:</strong><br>
+                            1. Preencha as informações básicas abaixo<br>
+                            2. Crie o conteúdo no editor visual<br>
+                            3. Clique em "Criar Blog" para salvar<br>
+                            4. Depois de salvo, você poderá adicionar áreas dinâmicas na página de edição
                         </p>
                     </div>
                 </div>
@@ -287,24 +303,29 @@ function minifyCss($css)
             
             <form action="new_blog.php" method="POST">
                 <div class="mb-4">
-                    <label for="nome" class="block text-eyefind-dark font-bold mb-2">Nome do Blog</label>
-                    <input type="text" name="nome" id="nome" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded" required>
+                    <label for="nome" class="block text-eyefind-dark font-bold mb-2">Nome do Blog <span class="text-red-500">*</span></label>
+                    <input type="text" name="nome" id="nome" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
                 
                 <div class="mb-4">
-                    <label for="descricao" class="block text-eyefind-dark font-bold mb-2">Descrição</label>
-                    <textarea name="descricao" id="descricao" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded" required></textarea>
+                    <label for="descricao" class="block text-eyefind-dark font-bold mb-2">Descrição <span class="text-red-500">*</span></label>
+                    <textarea name="descricao" id="descricao" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" required></textarea>
                 </div>
                 
                 <div class="mb-4">
-                    <label for="imagem_url" class="block text-eyefind-dark font-bold mb-2">URL da Imagem</label>
-                    <input type="url" name="imagem_url" id="imagem_url" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded" oninput="previewImage()" required>
-                    <div id="image-preview" class="mt-3"></div>
+                    <label for="imagem_url" class="block text-eyefind-dark font-bold mb-2">URL da Imagem de Capa <span class="text-red-500">*</span></label>
+                    <input type="url" name="imagem_url" id="imagem_url" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="previewImage()" placeholder="https://exemplo.com/imagem.jpg" required>
+                    <div id="image-preview" class="mt-3">
+                        <div class="w-full h-48 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500">
+                            Pré-visualização aparecerá aqui
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="mb-4">
-                    <label for="categoria_id" class="block text-eyefind-dark font-bold mb-2">Categoria</label>
-                    <select name="categoria_id" id="categoria_id" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded" required>
+                    <label for="categoria_id" class="block text-eyefind-dark font-bold mb-2">Categoria <span class="text-red-500">*</span></label>
+                    <select name="categoria_id" id="categoria_id" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="">Selecione uma categoria</option>
                         <?php foreach ($categorias as $categoria): ?>
                             <option value="<?php echo $categoria['id']; ?>"><?php echo $categoria['nome']; ?></option>
                         <?php endforeach; ?>
@@ -312,19 +333,24 @@ function minifyCss($css)
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog (você pode editar depois)</label>
+                    <label class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog (editor visual)</label>
                     <div id="grapesjs-editor"></div>
                     <input type="hidden" name="conteudo" id="conteudo" value="">
                     <input type="hidden" name="css" id="css" value="">
                 </div>
                 
                 <div class="flex justify-end">
-                    <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded font-bold hover:bg-green-700 transition text-lg">
+                    <button type="submit" class="bg-green-600 text-white px-8 py-3 rounded font-bold hover:bg-green-700 transition text-lg">
                         <i class="fas fa-save mr-2"></i> Criar Blog
                     </button>
                 </div>
             </form>
         </section>
     </div>
+
+    <script>
+        // Pré-visualização inicial
+        previewImage();
+    </script>
 </body>
 </html>
