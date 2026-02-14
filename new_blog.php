@@ -416,6 +416,65 @@ function minifyCss($css)
             });
 
 
+            // Adiciona um botão na barra de ferramentas para tornar o componente dinâmico
+        editor.Panels.addButton('options', {
+            id: 'make-dynamic',
+            className: 'fa fa-cog',
+            command: 'open-dynamic-modal',
+            attributes: { title: 'Gerenciar área dinâmica' }
+        });
+
+        // Comando para abrir o modal
+        editor.Commands.add('open-dynamic-modal', {
+            run(editor, sender) {
+                const selected = editor.getSelected();
+                if (!selected) {
+                    alert('Selecione um elemento primeiro.');
+                    return;
+                }
+
+                // Verifica se o elemento já tem um data-dynamic-area
+                let dynamicId = selected.get('attributes')?.['data-dynamic-area'];
+                const websiteId = <?php echo isset($blog) ? $blog['id'] : 'null'; ?>; // ID do site (se for edição) ou null se for novo
+
+                // Se não tiver, criar uma nova área dinâmica via AJAX
+                if (!dynamicId) {
+                    if (!websiteId) {
+                        alert('Salve o site primeiro antes de criar áreas dinâmicas.');
+                        return;
+                    }
+                    // Gerar um ID único temporário (ex: 'new_' + Date.now())
+                    dynamicId = 'new_' + Date.now();
+                    // Enviar requisição para criar a área no banco
+                    fetch('ajax/create_dynamic_area.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ website_id: websiteId, element_id: dynamicId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Atualizar o componente com o atributo
+                            selected.addAttributes({ 'data-dynamic-area': data.element_id });
+                            // Abrir o modal de edição
+                            openDynamicContentModal(editor, selected, data.element_id);
+                        } else {
+                            alert('Erro ao criar área dinâmica.');
+                        }
+                    });
+                } else {
+                    // Se já existe, abrir o modal de edição
+                    openDynamicContentModal(editor, selected, dynamicId);
+                }
+            }
+        });
+
+        // Função para abrir o modal de edição de conteúdo
+        function openDynamicContentModal(editor, component, dynamicId) {
+            // Aqui você pode criar um modal personalizado ou redirecionar para uma página separada
+            // Por simplicidade, vamos redirecionar para uma página de edição da área
+            window.location.href = `edit_dynamic_area.php?website_id=<?php echo isset($blog) ? $blog['id'] : 0; ?>&element_id=${dynamicId}`;
+        }
 
             // Manipulador do formulário
             const form = document.querySelector('form[action="new_blog.php"]');
