@@ -33,10 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $categoria_id = $_POST['categoria_id'];
     $conteudo = minifyHtml($_POST['conteudo']);
     $css = minifyCss($_POST['css']);
-    $dynamic_blocks_data = $_POST['dynamic_blocks_data'] ?? '[]';
 
-    // Atualizar o blog
-    $stmt = $pdo->prepare("UPDATE websites SET nome = :nome, descricao = :descricao, imagem = :imagem, categoria_id = :categoria_id, conteudo = :conteudo, css = :css, dynamic_config = :dynamic_config WHERE id = :id");
+    $stmt = $pdo->prepare("UPDATE websites SET nome = :nome, descricao = :descricao, imagem = :imagem, categoria_id = :categoria_id, conteudo = :conteudo, css = :css WHERE id = :id");
     $stmt->execute([
         ':nome' => $nome,
         ':descricao' => $descricao,
@@ -44,26 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':categoria_id' => $categoria_id,
         ':conteudo' => $conteudo,
         ':css' => $css,
-        ':dynamic_config' => $dynamic_blocks_data,
         ':id' => $blog['id']
     ]);
-
-    // Atualizar blocos dinâmicos na tabela separada
-    $dynamicBlocks = json_decode($dynamic_blocks_data, true);
-    if (is_array($dynamicBlocks)) {
-        // Remover blocos antigos
-        $stmt = $pdo->prepare("DELETE FROM dynamic_blocks WHERE website_id = ?");
-        $stmt->execute([$blog['id']]);
-        
-        // Inserir novos
-        foreach ($dynamicBlocks as $index => $block) {
-            $type = $block['type'] ?? 'unknown';
-            $attrs = json_encode($block['attributes'] ?? []);
-            
-            $stmt = $pdo->prepare("INSERT INTO dynamic_blocks (website_id, block_type, content, block_order) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$blog['id'], $type, $attrs, $index]);
-        }
-    }
 
     header('Location: manage_blogs.php?updated=1');
     exit;
@@ -79,22 +59,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Editar Blog - Eyefind.info</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/grapesjs@0.22.6/dist/css/grapes.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/grapesjs@0.22.6/dist/grapes.min.js"></script>
+    <link href="https://unpkg.com/grapesjs@0.22.6/dist/css/grapes.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/grapesjs@0.22.6/dist/grapes.min.js"></script>
     <script src="https://unpkg.com/grapesjs-plugin-forms"></script>
     <script src="https://unpkg.com/grapesjs-plugin-export"></script>
     <script src="https://unpkg.com/grapesjs-custom-code"></script>
     <script src="https://unpkg.com/grapesjs-blocks-flexbox"></script>
     <script src="https://unpkg.com/grapesjs-blocks-basic"></script>
-    <script src="https://cdn.jsdelivr.net/npm/grapesjs-plugin-forms@2.0.6/dist/grapesjs-plugin-forms.min.js"></script>
-    <script src="https://unpkg.com/grapesjs-tailwind@latest/dist/grapesjs-tailwind.min.js"></script>
-    <script src="https://unpkg.com/grapesjs-preset-webpage@1.0.3/dist/grapesjs-preset-webpage.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/grapesjs-plugin-export@1.0.7/dist/grapesjs-plugin-export.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/grapesjs-templates-manager@1.0.0/dist/grapesjs-templates-manager.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/grapesjs-blocks-bootstrap5@1.0.0/dist/grapesjs-blocks-bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/grapesjs-plugin-toolbox@0.1.0/dist/grapesjs-plugin-toolbox.min.js"></script>
-    <script src="https://unpkg.com/grapesjs-symbols@1.0.0/dist/grapesjs-symbols.min.js"></script>
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -123,104 +95,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 container: '#grapesjs-editor',
                 fromElement: true,
                 storageManager: false,
+                height: '500px',
                 plugins: [
                     'grapesjs-plugin-forms',
-                    'grapesjs-tailwind',
-                    'grapesjs-preset-webpage',
                     'grapesjs-blocks-basic',
                     'grapesjs-plugin-export',
                     'grapesjs-custom-code',
-                    'grapesjs-blocks-flexbox',
-                    'grapesjs-templates-manager',
-                    'grapesjs-plugin-toolbox',
-                    'grapesjs-symbols',
-                    'grapesjs-blocks-bootstrap5'
+                    'grapesjs-blocks-flexbox'
                 ],
                 pluginsOpts: {
                     'grapesjs-plugin-forms': {},
-                    'grapesjs-tailwind': {},
-                    'grapesjs-preset-webpage': {},
-                    'grapesjs-blocks-basic': {},
+                    'grapesjs-blocks-basic': { flexGrid: true },
                     'grapesjs-plugin-export': {},
                     'grapesjs-custom-code': {},
-                    'grapesjs-blocks-flexbox': {},
-                    'grapesjs-templates-manager': {},
-                    'grapesjs-blocks-bootstrap5': {},
-                    'grapesjs-plugin-toolbox': {},
-                    'grapesjs-symbols': {}
-                },
-                blockManager: {
-                    blocks: [
-                        // Blocos básicos
-                        {
-                            id: 'text',
-                            label: 'Texto',
-                            category: 'Básicos',
-                            content: '<div style="padding: 10px;">Insira seu texto aqui...</div>',
-                        },
-                        {
-                            id: 'heading',
-                            label: 'Título',
-                            category: 'Básicos',
-                            content: '<h1 style="padding: 10px;">Título</h1>',
-                        },
-                        {
-                            id: 'image',
-                            label: 'Imagem',
-                            category: 'Básicos',
-                            content: '<img src="https://via.placeholder.com/400x200" style="max-width:100%; padding: 10px;">',
-                        },
-                        {
-                            id: 'button',
-                            label: 'Botão',
-                            category: 'Básicos',
-                            content: '<button style="background: #067191; color: white; padding: 10px 20px; border-radius: 5px;">Clique aqui</button>',
-                        },
-                        
-                        // BLOCOS DINÂMICOS
-                        {
-                            id: 'dynamic-news',
-                            label: '📰 Últimas Notícias',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="latest-news" data-limit="5" data-class="dynamic-news-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff;">🔴 Bloco Dinâmico: Últimas Notícias</div>',
-                        },
-                        {
-                            id: 'dynamic-bleets',
-                            label: '💬 Bleets Recentes',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="recent-bleets" data-limit="3" data-class="dynamic-bleets-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff;">🟢 Bloco Dinâmico: Bleets Recentes</div>',
-                        },
-                        {
-                            id: 'dynamic-quote',
-                            label: '✨ Citação Aleatória',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="random-quote" data-class="dynamic-quote-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff;">💭 Bloco Dinâmico: Citação Aleatória</div>',
-                        },
-                        {
-                            id: 'dynamic-products',
-                            label: '🛍️ Produtos em Destaque',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="featured-products" data-limit="4" data-class="dynamic-products-grid" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff;">🛒 Bloco Dinâmico: Produtos</div>',
-                        },
-                        {
-                            id: 'dynamic-stats',
-                            label: '📊 Estatísticas do Usuário',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="user-stats" data-class="dynamic-stats" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff;">👤 Bloco Dinâmico: Estatísticas</div>',
-                        },
-                        {
-                            id: 'dynamic-counter',
-                            label: '🔢 Contador Interativo',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="counter" data-initial="0" data-class="dynamic-counter" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff;">🧮 Bloco Dinâmico: Contador</div>',
-                        }
-                    ]
+                    'grapesjs-blocks-flexbox': {}
                 }
             });
 
+            // Adicionar bloco de ajuda
+            editor.BlockManager.add('dynamic-helper', {
+                label: '📌 Ajuda: Marcadores',
+                category: 'Dinâmico',
+                content: '<div style="padding: 20px; background: #f0f9ff; border: 2px dashed #067191; border-radius: 8px; text-align: center;">' +
+                         '<p style="font-weight: bold; margin-bottom: 10px;">✨ Marcadores Dinâmicos</p>' +
+                         '<code style="display: block; background: #fff; padding: 5px; margin: 5px 0;">{{noticias}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 5px; margin: 5px 0;">{{bleets}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 5px; margin: 5px 0;">{{citacao}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 5px; margin: 5px 0;">{{produtos}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 5px; margin: 5px 0;">{{data}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 5px; margin: 5px 0;">{{hora}}</code>' +
+                         '<p style="font-size: 12px; margin-top: 10px;">Use :N para limitar (ex: {{noticias:5}})</p>' +
+                         '</div>'
+            });
+
             // Carregar conteúdo existente
-            editor.setComponents('<?php echo addslashes($blog['conteudo']); ?>');
-            editor.setStyle('<?php echo addslashes($blog['css']); ?>');
+            editor.setComponents(`<?php echo addslashes($blog['conteudo']); ?>`);
+            editor.setStyle(`<?php echo addslashes($blog['css']); ?>`);
 
             const form = document.querySelector('form[action="edit_blog.php?id=<?php echo $blog['id']; ?>"]');
             if (form) {
@@ -231,34 +141,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         const html = editor.getHtml();
                         const css = editor.getCss();
 
-                        // Coletar blocos dinâmicos
-                        const dynamicBlocks = [];
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = html;
-                        
-                        tempDiv.querySelectorAll('[data-dynamic-type]').forEach(el => {
-                            const block = {
-                                type: el.dataset.dynamicType,
-                                attributes: {}
-                            };
-                            
-                            for (let attr of el.attributes) {
-                                if (attr.name.startsWith('data-') && attr.name !== 'data-dynamic-type') {
-                                    block.attributes[attr.name] = attr.value;
-                                }
-                            }
-                            
-                            dynamicBlocks.push(block);
-                        });
-
                         document.getElementById('conteudo').value = html || '';
                         document.getElementById('css').value = css || '';
-                        document.getElementById('dynamic_blocks_data').value = JSON.stringify(dynamicBlocks);
 
                         form.removeEventListener('submit', arguments.callee);
                         form.submit();
                     } catch (error) {
-                        console.error('Erro ao salvar conteúdo:', error);
+                        console.error('Erro ao salvar:', error);
                     }
                 });
             }
@@ -280,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <img src="imagens/eyefind-logo.png" alt="Eyefind.info Logo" class="w-full">
                     </div>
                     <div class="w-full md:w-96">
-                        <form action="busca.php" method="GET">
+                        <form action="search.php" method="GET">
                             <div class="relative">
                                 <input type="text" name="q"
                                     class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
@@ -309,9 +198,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <section class="mt-1 bg-white p-6 shadow-md">
             <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Editar Blog</h2>
             
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-                <p class="text-blue-700 font-bold">✨ Blocos Dinâmicos Disponíveis:</p>
-                <p class="text-blue-600">Use blocos da categoria "Blocos Dinâmicos" para adicionar conteúdo que se atualiza automaticamente!</p>
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+                <p class="text-green-700 font-bold">✨ CONTEÚDO DINÂMICO!</p>
+                <p class="text-green-600">Use marcadores como <strong>{{noticias}}</strong>, <strong>{{bleets}}</strong>, <strong>{{data}}</strong> no seu HTML.</p>
             </div>
             
             <form action="edit_blog.php?id=<?php echo $blog['id']; ?>" method="POST">
@@ -326,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 
                 <div class="mb-4">
-                    <label for="imagem_url" class="block text-eyefind-dark font-bold mb-2">URL da Imagem do Blog</label>
+                    <label for="imagem_url" class="block text-eyefind-dark font-bold mb-2">URL da Imagem</label>
                     <input type="url" name="imagem_url" id="imagem_url" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" value="<?php echo htmlspecialchars($blog['imagem']); ?>" oninput="previewImage()" required>
                     <div id="image-preview" class="mt-2">
                         <?php if ($blog['imagem']): ?>
@@ -345,11 +234,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 
                 <div class="mb-4">
-                    <label for="conteudo" class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog</label>
+                    <label for="conteudo" class="block text-eyefind-dark font-bold mb-2">Conteúdo</label>
                     <div id="grapesjs-editor"></div>
                     <input type="hidden" name="conteudo" id="conteudo" value="<?php echo htmlspecialchars($blog['conteudo']); ?>">
                     <input type="hidden" name="css" id="css" value="<?php echo htmlspecialchars($blog['css']); ?>">
-                    <input type="hidden" name="dynamic_blocks_data" id="dynamic_blocks_data" value="<?php echo htmlspecialchars($blog['dynamic_config'] ?? '[]'); ?>">
                 </div>
                 
                 <div class="flex justify-end">
