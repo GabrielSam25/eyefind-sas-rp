@@ -47,23 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erro = "Erro ao salvar o blog.";
     }
 }
-
-function minifyHtml($html)
-{
-    $html = preg_replace('/<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->/s', '', $html);
-    $html = preg_replace('/\s+/', ' ', $html);
-    $html = preg_replace('/>\s+</', '><', $html);
-    return trim($html);
-}
-
-function minifyCss($css)
-{
-    $css = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $css);
-    $css = str_replace(["\r\n", "\r", "\n", "\t", '  ', '    ', '    '], '', $css);
-    $css = preg_replace('/\s*([{}:;,+>~])\s*/', '$1', $css);
-    $css = preg_replace('/;}/', '}', $css);
-    return trim($css);
-}
 ?>
 
 <!DOCTYPE html>
@@ -135,20 +118,59 @@ function minifyCss($css)
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Criar um conteúdo inicial para o editor
+            // CONTEÚDO INICIAL DO EDITOR - VAI APARECER NA TELA
             const initialContent = `
-                <div class="p-8 max-w-4xl mx-auto">
-                    <h1 class="text-3xl font-bold text-blue-600 mb-4">Meu Novo Blog</h1>
-                    <p class="text-gray-600 mb-4">Comece a editar este conteúdo arrastando elementos da barra lateral.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-gray-100 p-4 rounded">
-                            <h2 class="text-xl font-bold mb-2">Seção 1</h2>
-                            <p>Conteúdo da primeira seção...</p>
+                <div class="max-w-6xl mx-auto p-8">
+                    <!-- Cabeçalho -->
+                    <div class="text-center mb-12">
+                        <h1 class="text-4xl font-bold text-blue-600 mb-4">Bem-vindo ao meu novo blog!</h1>
+                        <p class="text-xl text-gray-600">Este é um template inicial. Você pode editar tudo aqui.</p>
+                    </div>
+                    
+                    <!-- Seção de cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                        <div class="bg-white rounded-lg shadow-lg p-6">
+                            <div class="text-blue-500 text-3xl mb-4">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Inovação</h3>
+                            <p class="text-gray-600">Crie conteúdos incríveis com nosso editor visual.</p>
                         </div>
-                        <div class="bg-gray-100 p-4 rounded">
-                            <h2 class="text-xl font-bold mb-2">Seção 2</h2>
-                            <p>Conteúdo da segunda seção...</p>
+                        
+                        <div class="bg-white rounded-lg shadow-lg p-6">
+                            <div class="text-green-500 text-3xl mb-4">
+                                <i class="fas fa-paint-brush"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Design</h3>
+                            <p class="text-gray-600">Personalize cada detalhe do seu site.</p>
                         </div>
+                        
+                        <div class="bg-white rounded-lg shadow-lg p-6">
+                            <div class="text-purple-500 text-3xl mb-4">
+                                <i class="fas fa-magic"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Dinâmico</h3>
+                            <p class="text-gray-600">Adicione áreas dinâmicas depois de salvar.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção de conteúdo -->
+                    <div class="bg-gray-100 rounded-lg p-8 mb-8">
+                        <h2 class="text-2xl font-bold mb-4">Sobre este blog</h2>
+                        <p class="text-gray-700 mb-4">
+                            Este é um template inicial para você começar. Você pode:
+                        </p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-2">
+                            <li>Editar qualquer texto clicando duas vezes</li>
+                            <li>Arrastar novos elementos da barra lateral</li>
+                            <li>Alterar cores e estilos no painel direito</li>
+                            <li>Adicionar imagens, vídeos e muito mais</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Rodapé -->
+                    <div class="text-center text-gray-500 text-sm">
+                        <p>Comece a editar este conteúdo agora mesmo!</p>
                     </div>
                 </div>
             `;
@@ -156,7 +178,7 @@ function minifyCss($css)
             const editor = grapesjs.init({
                 container: '#grapesjs-editor',
                 fromElement: true,
-                components: initialContent,
+                components: initialContent, // Define o conteúdo inicial
                 storageManager: false,
                 allowScripts: true,
                 plugins: [
@@ -193,18 +215,25 @@ function minifyCss($css)
             const form = document.querySelector('form');
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    e.preventDefault(); // Prevenir envio normal
+                    e.preventDefault();
                     
                     try {
                         // Pegar o HTML e CSS do editor
                         const html = editor.getHtml();
                         const css = editor.getCss();
                         
-                        console.log('HTML capturado:', html); // Debug
+                        console.log('HTML que será salvo:', html); // Para debug
                         
                         // Colocar nos campos hidden
                         document.getElementById('conteudo').value = html || '';
                         document.getElementById('css').value = css || '';
+                        
+                        // Verificar se o conteúdo não está vazio
+                        if (!html || html.trim() === '') {
+                            if (!confirm('O conteúdo está vazio. Deseja continuar mesmo assim?')) {
+                                return;
+                            }
+                        }
                         
                         // Agora enviar o formulário
                         form.submit();
@@ -215,21 +244,20 @@ function minifyCss($css)
                 });
             }
 
-            // Botão de área dinâmica (será usado apenas no edit_blog.php)
-            // No new_blog.php, mostramos apenas uma mensagem
+            // Botão informativo (já que não podemos criar áreas dinâmicas aqui)
             editor.Panels.addButton('options', {
                 id: 'make-dynamic-info',
                 className: 'fa fa-info-circle',
                 command: 'show-dynamic-info',
                 attributes: { 
-                    title: 'Áreas dinâmicas só podem ser adicionadas após salvar o blog',
+                    title: 'Áreas dinâmicas disponíveis após salvar',
                     style: 'color: #ff9800; font-size: 16px;'
                 }
             });
 
             editor.Commands.add('show-dynamic-info', {
                 run(editor) {
-                    alert('Primeiro, crie o blog com as informações básicas e salve. Depois, na página de edição, você poderá adicionar áreas dinâmicas!');
+                    alert('📝 Áreas Dinâmicas\n\nPrimeiro, complete a criação do blog clicando em "Criar Blog".\n\nDepois de salvo, você será redirecionado para a página de edição onde poderá:\n\n• Selecionar qualquer elemento\n• Clicar no botão ⚙️ para torná-lo dinâmico\n• Adicionar itens (notícias, produtos, etc.)');
                 }
             });
         });
@@ -278,62 +306,67 @@ function minifyCss($css)
         <section class="bg-white p-6 shadow-md">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-eyefind-blue">Criar Novo Blog</h2>
-                <div class="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg text-sm">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    Passo 1: Informações básicas
+                <div class="flex gap-2">
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-check-circle mr-1"></i> Passo 1 de 2
+                    </span>
                 </div>
             </div>
             
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-info-circle text-yellow-400"></i>
+                        <i class="fas fa-info-circle text-blue-500"></i>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm text-yellow-700">
-                            <strong>Como funciona:</strong><br>
-                            1. Preencha as informações básicas abaixo<br>
-                            2. Crie o conteúdo no editor visual<br>
+                        <p class="text-sm text-blue-700">
+                            <strong>🚀 Pronto para começar?</strong><br>
+                            1. Preencha as informações básicas do seu blog<br>
+                            2. Use o editor visual abaixo para criar seu conteúdo<br>
                             3. Clique em "Criar Blog" para salvar<br>
-                            4. Depois de salvo, você poderá adicionar áreas dinâmicas na página de edição
+                            4. Depois de salvo, você poderá adicionar áreas dinâmicas!
                         </p>
                     </div>
                 </div>
             </div>
             
             <form action="new_blog.php" method="POST">
-                <div class="mb-4">
-                    <label for="nome" class="block text-eyefind-dark font-bold mb-2">Nome do Blog <span class="text-red-500">*</span></label>
-                    <input type="text" name="nome" id="nome" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="nome" class="block text-eyefind-dark font-bold mb-2">Nome do Blog <span class="text-red-500">*</span></label>
+                        <input type="text" name="nome" id="nome" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: Meu Blog Pessoal" required>
+                    </div>
+                    
+                    <div>
+                        <label for="categoria_id" class="block text-eyefind-dark font-bold mb-2">Categoria <span class="text-red-500">*</span></label>
+                        <select name="categoria_id" id="categoria_id" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Selecione uma categoria</option>
+                            <?php foreach ($categorias as $categoria): ?>
+                                <option value="<?php echo $categoria['id']; ?>"><?php echo $categoria['nome']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="mb-4">
                     <label for="descricao" class="block text-eyefind-dark font-bold mb-2">Descrição <span class="text-red-500">*</span></label>
-                    <textarea name="descricao" id="descricao" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" required></textarea>
+                    <textarea name="descricao" id="descricao" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Uma breve descrição do seu blog..." required></textarea>
                 </div>
                 
-                <div class="mb-4">
+                <div class="mb-6">
                     <label for="imagem_url" class="block text-eyefind-dark font-bold mb-2">URL da Imagem de Capa <span class="text-red-500">*</span></label>
                     <input type="url" name="imagem_url" id="imagem_url" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="previewImage()" placeholder="https://exemplo.com/imagem.jpg" required>
                     <div id="image-preview" class="mt-3">
                         <div class="w-full h-48 bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500">
-                            Pré-visualização aparecerá aqui
+                            <i class="fas fa-image text-4xl mb-2"></i>
+                            <p>Pré-visualização da imagem aparecerá aqui</p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="mb-4">
-                    <label for="categoria_id" class="block text-eyefind-dark font-bold mb-2">Categoria <span class="text-red-500">*</span></label>
-                    <select name="categoria_id" id="categoria_id" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <option value="">Selecione uma categoria</option>
-                        <?php foreach ($categorias as $categoria): ?>
-                            <option value="<?php echo $categoria['id']; ?>"><?php echo $categoria['nome']; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="mb-4">
                     <label class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog (editor visual)</label>
+                    <p class="text-sm text-gray-500 mb-2">Arraste elementos da barra lateral para construir seu blog</p>
                     <div id="grapesjs-editor"></div>
                     <input type="hidden" name="conteudo" id="conteudo" value="">
                     <input type="hidden" name="css" id="css" value="">
