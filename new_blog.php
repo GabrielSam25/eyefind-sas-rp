@@ -16,19 +16,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conteudo = minifyHtml($_POST['conteudo']);
     $css = minifyCss($_POST['css']);
     $usuario_id = $_SESSION['usuario_id'];
-    $is_dynamic = isset($_POST['is_dynamic']) ? 1 : 0;
-    $dynamic_blocks_data = $_POST['dynamic_blocks_data'] ?? '[]';
 
-    // Verificar se há blocos dinâmicos no conteúdo
-    $usingDynamicBlocks = strpos($conteudo, 'data-dynamic-type') !== false;
-    if ($usingDynamicBlocks) {
-        $is_dynamic = 1;
+    // Gerar URL amigável
+    $url = strtolower(trim(preg_replace('/[^a-zA-Z0-9-]+/', '-', $nome), '-'));
+    
+    // Verificar se URL já existe
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM websites WHERE url = ?");
+    $stmt->execute([$url]);
+    if ($stmt->fetchColumn() > 0) {
+        $url .= '-' . uniqid();
     }
 
-    // Inserir o website
-    $stmt = $pdo->prepare("INSERT INTO websites (nome, url, imagem, descricao, categoria_id, destaque, ordem, usuario_id, conteudo, css, is_dynamic, dynamic_config) VALUES (:nome, :url, :imagem, :descricao, :categoria_id, 0, 0, :usuario_id, :conteudo, :css, :is_dynamic, :dynamic_config)");
-    
-    $url = strtolower(trim(preg_replace('/[^a-zA-Z0-9-]+/', '-', $nome), '-'));
+    $stmt = $pdo->prepare("INSERT INTO websites (nome, url, imagem, descricao, categoria_id, usuario_id, conteudo, css) VALUES (:nome, :url, :imagem, :descricao, :categoria_id, :usuario_id, :conteudo, :css)");
     
     $stmt->execute([
         ':nome' => $nome,
@@ -38,26 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':categoria_id' => $categoria_id,
         ':usuario_id' => $usuario_id,
         ':conteudo' => $conteudo,
-        ':css' => $css,
-        ':is_dynamic' => $is_dynamic,
-        ':dynamic_config' => $dynamic_blocks_data
+        ':css' => $css
     ]);
-
-    $websiteId = $pdo->lastInsertId();
-
-    // Se estiver usando blocos dinâmicos, processar para a tabela dynamic_blocks
-    if ($usingDynamicBlocks) {
-        $dynamicBlocks = json_decode($dynamic_blocks_data, true);
-        if (is_array($dynamicBlocks)) {
-            foreach ($dynamicBlocks as $index => $block) {
-                $type = $block['type'] ?? 'unknown';
-                $attrs = json_encode($block['attributes'] ?? []);
-                
-                $stmt = $pdo->prepare("INSERT INTO dynamic_blocks (website_id, block_type, content, block_order) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$websiteId, $type, $attrs, $index]);
-            }
-        }
-    }
 
     header('Location: manage_blogs.php?success=1');
     exit;
@@ -80,23 +61,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- GRAPESJS Core -->
+    <!-- GRAPESJS -->
     <link href="https://unpkg.com/grapesjs@0.22.6/dist/css/grapes.min.css" rel="stylesheet">
     <script src="https://unpkg.com/grapesjs@0.22.6/dist/grapes.min.js"></script>
-
-    <!-- Plugins -->
-    <script src="https://unpkg.com/grapesjs-plugin-forms@2.0.5"></script>
-    <script src="https://unpkg.com/grapesjs-tailwind@latest"></script>
-    <script src="https://unpkg.com/grapesjs-preset-webpage@1.0.3"></script>
-    <script src="https://unpkg.com/grapesjs-blocks-basic@1.0.1"></script>
-    <script src="https://unpkg.com/grapesjs-plugin-export@1.0.7"></script>
-    <script src="https://unpkg.com/grapesjs-custom-code@1.0.1"></script>
-    <script src="https://unpkg.com/grapesjs-blocks-flexbox@1.0.1"></script>
-    <script src="https://unpkg.com/grapesjs-templates-manager@1.0.2"></script>
-    <script src="https://unpkg.com/grapesjs-plugin-toolbox@0.1.0"></script>
-    <script src="https://unpkg.com/grapesjs-symbols@1.0.0"></script>
-    <script src="https://unpkg.com/grapesjs-blocks-bootstrap5@1.0.0"></script>
-    <script src="https://unpkg.com/grapesjs-style-filter@1.0.0"></script>
+    <script src="https://unpkg.com/grapesjs-plugin-forms"></script>
+    <script src="https://unpkg.com/grapesjs-plugin-export"></script>
+    <script src="https://unpkg.com/grapesjs-custom-code"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-flexbox"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-basic"></script>
 
     <script>
         tailwind.config = {
@@ -135,144 +107,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.addEventListener('DOMContentLoaded', function() {
             const editor = grapesjs.init({
                 container: '#grapesjs-editor',
-                dragMode: 'translate',
-                snapToGrid: true,
-                snapGrid: 10,
+                fromElement: true,
                 storageManager: false,
-                allowScripts: true,
-                components: {
-                    wrapper: {
-                        removable: false,
-                        scripts: [],
-                    }
-                },
+                height: '500px',
                 plugins: [
                     'grapesjs-plugin-forms',
-                    'grapesjs-tailwind',
-                    'grapesjs-preset-webpage',
                     'grapesjs-blocks-basic',
                     'grapesjs-plugin-export',
                     'grapesjs-custom-code',
-                    'grapesjs-blocks-flexbox',
-                    'grapesjs-templates-manager',
-                    'grapesjs-plugin-toolbox',
-                    'grapesjs-symbols',
-                    'grapesjs-blocks-bootstrap5',
-                    'grapesjs-style-filter',
+                    'grapesjs-blocks-flexbox'
                 ],
                 pluginsOpts: {
                     'grapesjs-plugin-forms': {},
-                    'grapesjs-tailwind': {},
-                    'grapesjs-preset-webpage': {},
-                    'grapesjs-blocks-basic': {
-                        flexGrid: true,
-                        blocks: ['*']
-                    },
+                    'grapesjs-blocks-basic': { flexGrid: true },
                     'grapesjs-plugin-export': {},
                     'grapesjs-custom-code': {},
-                    'grapesjs-blocks-flexbox': {},
-                    'grapesjs-templates-manager': {},
-                    'grapesjs-blocks-bootstrap5': {},
-                    'grapesjs-plugin-toolbox': {},
-                    'grapesjs-symbols': {},
-                    'grapesjs-style-filter': {}
-                },
-                blockManager: {
-                    blocks: [
-                        // Blocos básicos
-                        {
-                            id: 'text',
-                            label: 'Texto',
-                            category: 'Básicos',
-                            content: '<div style="padding: 10px;">Insira seu texto aqui...</div>',
-                        },
-                        {
-                            id: 'heading',
-                            label: 'Título',
-                            category: 'Básicos',
-                            content: '<h1 style="padding: 10px;">Título</h1>',
-                        },
-                        {
-                            id: 'image',
-                            label: 'Imagem',
-                            category: 'Básicos',
-                            content: '<img src="https://via.placeholder.com/400x200" style="max-width:100%; padding: 10px;">',
-                        },
-                        {
-                            id: 'button',
-                            label: 'Botão',
-                            category: 'Básicos',
-                            content: '<button style="background: #067191; color: white; padding: 10px 20px; border-radius: 5px;">Clique aqui</button>',
-                        },
-                        
-                        // BLOCOS DINÂMICOS - NOVOS!
-                        {
-                            id: 'dynamic-news',
-                            label: '📰 Últimas Notícias',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="latest-news" data-limit="5" data-class="dynamic-news-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">🔴 Bloco Dinâmico: Últimas Notícias (será carregado automaticamente)</div>',
-                        },
-                        {
-                            id: 'dynamic-bleets',
-                            label: '💬 Bleets Recentes',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="recent-bleets" data-limit="3" data-class="dynamic-bleets-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">🟢 Bloco Dinâmico: Bleets Recentes</div>',
-                        },
-                        {
-                            id: 'dynamic-quote',
-                            label: '✨ Citação Aleatória',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="random-quote" data-class="dynamic-quote-block" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">💭 Bloco Dinâmico: Citação Aleatória</div>',
-                        },
-                        {
-                            id: 'dynamic-products',
-                            label: '🛍️ Produtos em Destaque',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="featured-products" data-limit="4" data-class="dynamic-products-grid" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">🛒 Bloco Dinâmico: Produtos</div>',
-                        },
-                        {
-                            id: 'dynamic-stats',
-                            label: '📊 Estatísticas do Usuário',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="user-stats" data-class="dynamic-stats" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">👤 Bloco Dinâmico: Estatísticas do Usuário</div>',
-                        },
-                        {
-                            id: 'dynamic-counter',
-                            label: '🔢 Contador Interativo',
-                            category: 'Blocos Dinâmicos',
-                            content: '<div data-dynamic-type="counter" data-initial="0" data-class="dynamic-counter" style="padding: 10px; border: 2px dashed #067191; background: #f0f9ff; text-align: center;">🧮 Bloco Dinâmico: Contador</div>',
-                        }
-                    ]
-                },
-                styleManager: {
-                    sectors: [
-                        {
-                            name: 'Geral',
-                            properties: [
-                                { type: 'color', property: 'color', label: 'Cor do Texto' },
-                                { type: 'color', property: 'background-color', label: 'Cor de Fundo' },
-                                { type: 'select', property: 'text-align', label: 'Alinhamento', options: [
-                                    { value: 'left', label: 'Esquerda' },
-                                    { value: 'center', label: 'Centro' },
-                                    { value: 'right', label: 'Direita' },
-                                ]},
-                                { type: 'slider', property: 'font-size', label: 'Tamanho da Fonte', defaults: '16px', step: 1, max: 100, min: 10 },
-                            ]
-                        },
-                        {
-                            name: 'Dimensões',
-                            properties: [
-                                { type: 'slider', property: 'width', label: 'Largura', units: ['px', '%', 'vw'], defaults: 'auto', min: 0, max: 1000 },
-                                { type: 'slider', property: 'height', label: 'Altura', units: ['px', '%', 'vh'], defaults: 'auto', min: 0, max: 1000 },
-                                { type: 'slider', property: 'margin', label: 'Margem', units: ['px', 'em', '%'], defaults: '0', min: 0, max: 100 },
-                                { type: 'slider', property: 'padding', label: 'Preenchimento', units: ['px', 'em', '%'], defaults: '0', min: 0, max: 100 },
-                            ]
-                        }
-                    ]
+                    'grapesjs-blocks-flexbox': {}
                 }
             });
 
-            // Manipulador do formulário - INCLUINDO COLETA DOS BLOCOS DINÂMICOS
+            // Adicionar blocos de ajuda para marcadores dinâmicos
+            editor.BlockManager.add('dynamic-helper', {
+                label: '📌 Ajuda: Marcadores',
+                category: 'Dinâmico',
+                content: '<div style="padding: 20px; background: #f0f9ff; border: 2px dashed #067191; border-radius: 8px; text-align: center;">' +
+                         '<p style="font-weight: bold; margin-bottom: 10px;">✨ Marcadores Dinâmicos</p>' +
+                         '<p style="font-size: 14px;">Use no seu HTML:</p>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{noticias}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{noticias:5}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{bleets}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{citacao}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{produtos}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{data}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{hora}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{usuario}}</code>' +
+                         '<code style="display: block; background: #fff; padding: 10px; margin: 10px 0; border-radius: 4px;">{{contador}}</code>' +
+                         '<p style="font-size: 12px; color: #666; margin-top: 10px;">Os marcadores serão substituídos automaticamente!</p>' +
+                         '</div>'
+            });
+
             const form = document.querySelector('form[action="new_blog.php"]');
             if (form) {
                 form.addEventListener('submit', function(e) {
@@ -282,36 +155,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         const html = editor.getHtml();
                         const css = editor.getCss();
 
-                        // COLETAR BLOCOS DINÂMICOS
-                        const dynamicBlocks = [];
-                        const tempDiv = document.createElement('div');
-                        tempDiv.innerHTML = html;
-                        
-                        tempDiv.querySelectorAll('[data-dynamic-type]').forEach(el => {
-                            const block = {
-                                type: el.dataset.dynamicType,
-                                attributes: {}
-                            };
-                            
-                            // Copiar todos os atributos data-* exceto dynamic-type
-                            for (let attr of el.attributes) {
-                                if (attr.name.startsWith('data-') && attr.name !== 'data-dynamic-type') {
-                                    block.attributes[attr.name] = attr.value;
-                                }
-                            }
-                            
-                            dynamicBlocks.push(block);
-                        });
-
-                        // Preencher campos hidden
                         document.getElementById('conteudo').value = html || '';
                         document.getElementById('css').value = css || '';
-                        document.getElementById('dynamic_blocks_data').value = JSON.stringify(dynamicBlocks);
 
                         form.removeEventListener('submit', arguments.callee);
                         form.submit();
                     } catch (error) {
-                        console.error('Erro ao salvar conteúdo:', error);
+                        console.error('Erro ao salvar:', error);
                         alert('Erro ao salvar. Verifique o console.');
                     }
                 });
@@ -323,8 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
         body { font-family: 'Roboto Condensed', sans-serif; }
         #grapesjs-editor { height: 500px; border: 1px solid #e2e8f0; border-radius: 0.5rem; margin-bottom: 1rem; }
-        .gjs-block { width: auto !important; height: auto !important; margin: 5px !important; }
-        .gjs-block-label { font-size: 12px; }
+        .gjs-block { width: auto !important; height: auto !important; }
     </style>
 </head>
 <body class="bg-eyefind-light">
@@ -335,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <img src="imagens/eyefind-logo.png" alt="Eyefind.info Logo" class="w-full">
                 </div>
                 <div class="w-full md:w-96">
-                    <form action="busca.php" method="GET">
+                    <form action="search.php" method="GET">
                         <div class="relative">
                             <input type="text" name="q"
                                 class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
@@ -365,9 +214,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <section class="bg-white p-6 shadow-md">
             <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Criar Novo Blog</h2>
             
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-                <p class="text-blue-700 font-bold">✨ NOVIDADE: Blocos Dinâmicos!</p>
-                <p class="text-blue-600">Arraste blocos da categoria "Blocos Dinâmicos" para adicionar conteúdo que se atualiza automaticamente: notícias, bleets, citações, produtos e mais!</p>
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+                <p class="text-green-700 font-bold">✨ CONTEÚDO DINÂMICO SIMPLES!</p>
+                <p class="text-green-600">No editor, use marcadores como <strong>{{noticias}}</strong>, <strong>{{bleets}}</strong>, <strong>{{citacao}}</strong>, <strong>{{data}}</strong> e eles serão substituídos automaticamente!</p>
+                <p class="text-green-600 mt-2">Exemplo: <code>{{noticias:5}}</code> mostra as 5 últimas notícias.</p>
             </div>
             
             <form action="new_blog.php" method="POST">
@@ -406,10 +256,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <div class="mb-4">
                     <label for="conteudo" class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog</label>
+                    <p class="text-sm text-gray-600 mb-2">💡 Dica: Use {{noticias}}, {{bleets}}, {{citacao}}, {{data}}, {{hora}} para conteúdo dinâmico!</p>
                     <div id="grapesjs-editor"></div>
                     <input type="hidden" name="conteudo" id="conteudo" value="">
                     <input type="hidden" name="css" id="css" value="">
-                    <input type="hidden" name="dynamic_blocks_data" id="dynamic_blocks_data" value="[]">
                 </div>
                 
                 <div class="flex justify-end gap-2">
