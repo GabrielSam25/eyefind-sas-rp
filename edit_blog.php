@@ -393,69 +393,6 @@ function minifyCss($css)
                 }
             });
 
-            // ===== BOTÃO PARA ÁREAS DINÂMICAS =====
-            editor.Panels.addButton('options', {
-                id: 'make-dynamic',
-                className: 'fa fa-cog',
-                command: 'open-dynamic-modal',
-                attributes: { 
-                    title: 'Tornar área dinâmica (selecione um elemento)',
-                    style: 'color: #3b82f6; font-size: 16px;'
-                }
-            });
-
-            editor.Commands.add('open-dynamic-modal', {
-                run(editor, sender) {
-                    const selected = editor.getSelected();
-                    if (!selected) {
-                        alert('Por favor, selecione um elemento (div, section, etc.) primeiro.');
-                        return;
-                    }
-
-                    // Verifica se o elemento já tem um data-dynamic-area
-                    let dynamicId = selected.get('attributes')?.['data-dynamic-area'];
-                    const websiteId = <?php echo $blog['id']; ?>; // AGORA TEMOS O ID!
-
-                    // Se não tiver, criar uma nova área dinâmica via AJAX
-                    if (!dynamicId) {
-                        // Gerar um ID único
-                        dynamicId = 'area_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                        
-                        // Enviar requisição para criar a área no banco
-                        fetch('ajax/create_dynamic_area.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
-                                website_id: websiteId, 
-                                element_id: dynamicId 
-                            })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Atualizar o componente com o atributo
-                                selected.addAttributes({ 'data-dynamic-area': data.element_id });
-                                
-                                // Adicionar uma classe visual
-                                const currentClasses = selected.get('classes') || [];
-                                selected.set('classes', [...currentClasses, 'dynamic-area-highlight']);
-                                
-                                // Redirecionar para editar a área
-                                window.location.href = `edit_dynamic_area.php?website_id=${websiteId}&element_id=${data.element_id}`;
-                            } else {
-                                alert('Erro ao criar área dinâmica: ' + (data.error || 'Erro desconhecido'));
-                            }
-                        })
-                        .catch(error => {
-                            alert('Erro na requisição: ' + error);
-                        });
-                    } else {
-                        // Se já existe, abrir a página de edição da área
-                        window.location.href = `edit_dynamic_area.php?website_id=${websiteId}&element_id=${dynamicId}`;
-                    }
-                }
-            });
-
             // Configurações adicionais para posicionamento livre
             editor.on('load', function() {
                 // Desativa o snap to grid
