@@ -1,113 +1,127 @@
 <?php
+// Incluir arquivo de configuração e conexão
 require_once 'config.php';
+
+// Verificar se o usuário está logado
 if (!isLogado()) {
     header('Location: login.php');
     exit;
 }
 
+// Obter o usuário atual
 $usuario = getUsuarioAtual($pdo);
 $usuario_id = $usuario['id'];
 
-// Obter o blog do usuário (assumindo um por usuário)
-$blog = getBlogDoUsuario($pdo, $usuario_id);
-if (!$blog) {
+// Obter todos os blogs do usuário
+$stmt = $pdo->prepare("SELECT * FROM websites WHERE usuario_id = ?");
+$stmt->execute([$usuario_id]);
+$blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Redirecionar para a página de criação de blog se o usuário não tiver blogs
+if (empty($blogs)) {
     header('Location: new_blog.php');
     exit;
 }
 
-// Processar formulário de novo post
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'])) {
-    if ($_POST['acao'] === 'criar') {
-        $titulo = $_POST['titulo'];
-        $conteudo = $_POST['conteudo'];
-        $imagem = $_POST['imagem'];
-        $status = $_POST['status'];
-        $stmt = $pdo->prepare("INSERT INTO website_posts (website_id, titulo, conteudo, imagem, status) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$blog['id'], $titulo, $conteudo, $imagem, $status]);
-    } elseif ($_POST['acao'] === 'editar') {
-        $id = $_POST['id'];
-        $titulo = $_POST['titulo'];
-        $conteudo = $_POST['conteudo'];
-        $imagem = $_POST['imagem'];
-        $status = $_POST['status'];
-        $stmt = $pdo->prepare("UPDATE website_posts SET titulo=?, conteudo=?, imagem=?, status=? WHERE id=? AND website_id=?");
-        $stmt->execute([$titulo, $conteudo, $imagem, $status, $id, $blog['id']]);
-    } elseif ($_POST['acao'] === 'excluir') {
-        $id = $_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM website_posts WHERE id=? AND website_id=?");
-        $stmt->execute([$id, $blog['id']]);
-    }
-    header('Location: manage_posts.php');
+// Processar a exclusão de um blog
+if (isset($_GET['excluir'])) {
+    $blog_id = intval($_GET['excluir']);
+    $stmt = $pdo->prepare("DELETE FROM websites WHERE id = ? AND usuario_id = ?");
+    $stmt->execute([$blog_id, $usuario_id]);
+    header('Location: manage_blogs.php');
     exit;
 }
-
-// Listar posts
-$stmt = $pdo->prepare("SELECT * FROM website_posts WHERE website_id = ? ORDER BY data_publicacao DESC");
-$stmt->execute([$blog['id']]);
-$posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Gerenciar Posts</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="max-w-6xl mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4">Gerenciar Posts do Blog</h1>
-        <a href="index.php" class="bg-blue-500 text-white px-4 py-2 rounded">Voltar</a>
-        <hr class="my-4">
-        <h2 class="text-xl font-bold">Criar Novo Post</h2>
-        <form method="POST" class="bg-white p-4 rounded shadow">
-            <input type="hidden" name="acao" value="criar">
-            <div class="mb-4">
-                <label class="block">Título</label>
-                <input type="text" name="titulo" required class="w-full border p-2">
-            </div>
-            <div class="mb-4">
-                <label class="block">Conteúdo</label>
-                <textarea name="conteudo" rows="5" class="w-full border p-2"></textarea>
-            </div>
-            <div class="mb-4">
-                <label class="block">URL da Imagem</label>
-                <input type="url" name="imagem" class="w-full border p-2">
-            </div>
-            <div class="mb-4">
-                <label class="block">Status</label>
-                <select name="status" class="border p-2">
-                    <option value="rascunho">Rascunho</option>
-                    <option value="publicado">Publicado</option>
-                </select>
-            </div>
-            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Salvar Post</button>
-        </form>
 
-        <h2 class="text-xl font-bold mt-8">Posts Existentes</h2>
-        <div class="space-y-4">
-            <?php foreach ($posts as $post): ?>
-                <div class="bg-white p-4 rounded shadow flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold"><?= htmlspecialchars($post['titulo']) ?></h3>
-                        <p class="text-sm"><?= $post['status'] ?> - <?= $post['data_publicacao'] ?></p>
-                    </div>
-                    <div>
-                        <button onclick="editarPost(<?= $post['id'] ?>)" class="bg-yellow-500 text-white px-3 py-1 rounded">Editar</button>
-                        <form method="POST" class="inline">
-                            <input type="hidden" name="acao" value="excluir">
-                            <input type="hidden" name="id" value="<?= $post['id'] ?>">
-                            <button type="submit" onclick="return confirm('Excluir?')" class="bg-red-500 text-white px-3 py-1 rounded">Excluir</button>
-                        </form>
-                    </div>
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Blogs - Eyefind.info</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="icon/android-chrome-192x192.png">
+
+    <link rel="icon" type="image/png" sizes="512x512" href="icon/android-chrome-512x512.png">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-touch-icon.png">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="icon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32x32.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-eyefind-light">
+    <section class="bg-[#488BC2] shadow-md">
+        <div class="p-4 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="w-64">
+                    <img src="imagens/eyefind-logo.png" alt="Eyefind.info Logo" class="w-full">
                 </div>
-            <?php endforeach; ?>
+                <div class="w-full md:w-96">
+                    <form action="busca.php" method="GET">
+                        <div class="relative">
+                            <input type="text" name="q"
+                                class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
+                                placeholder="Procurar no Eyefind">
+                            <button type="submit" class="absolute right-3 top-3 text-eyefind-blue">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 mt-4 md:mt-0">
+                <a href="index.php" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 transition">
+                    Voltar
+                </a>
+                <a href="logout.php" class="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition">
+                    Logout
+                </a>
+            </div>
         </div>
+    </section>
+
+    <div class="w-full h-2 bg-yellow-400"></div>
+
+
+    <div class="max-w-7xl mx-auto mt-1">
+        <section class="bg-white p-6 shadow-md">
+            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Meus Blogs</h2>
+            <div class="space-y-4">
+                <?php foreach ($blogs as $blog): ?>
+                    <div class="flex items-center justify-between p-4 border border-eyefind-blue rounded-lg">
+                        <div class="flex items-center gap-4">
+                            <?php if ($blog['imagem']): ?>
+                                <img src="<?php echo htmlspecialchars($blog['imagem']); ?>" alt="Imagem do Blog" class="w-64 h-auto object-cover rounded">
+                            <?php endif; ?>
+                            <div>
+                                <h3 class="text-lg font-bold text-eyefind-dark"><?php echo htmlspecialchars($blog['nome']); ?></h3>
+                                <p class="text-sm text-gray-600"><?php echo htmlspecialchars($blog['descricao']); ?></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="edit_blog.php?id=<?php echo $blog['id']; ?>" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a href="manage_blogs.php?excluir=<?php echo $blog['id']; ?>" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition" onclick="return confirm('Tem certeza que deseja excluir este blog?');">
+                                <i class="fas fa-trash"></i> Excluir
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="mt-6">
+                <a href="new_blog.php" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
+                    <i class="fas fa-plus"></i> Criar Novo Blog
+                </a>
+            </div>
+        </section>
     </div>
-    <!-- Modal de edição (simples, via JS) -->
-    <script>
-        function editarPost(id) {
-            // Abrir formulário preenchido via fetch ou redirect
-            window.location = 'editar_post.php?id=' + id;
-        }
-    </script>
 </body>
+
 </html>
