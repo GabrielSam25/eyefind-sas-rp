@@ -988,48 +988,128 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="w-full h-2 bg-yellow-400"></div>
 
 
-        <section class="mt-1 bg-white p-6 shadow-md">
-            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Editar Blog</h2>
-            <form action="edit_blog.php?id=<?php echo $blog['id']; ?>" method="POST">
-                <div class="mb-4">
-                    <label for="nome" class="block text-eyefind-dark font-bold mb-2">Nome do Blog</label>
-                    <input type="text" name="nome" id="nome" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" value="<?php echo htmlspecialchars($blog['nome']); ?>" required>
-                </div>
-                <div class="mb-4">
-                    <label for="descricao" class="block text-eyefind-dark font-bold mb-2">Descrição</label>
-                    <textarea name="descricao" id="descricao" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" required><?php echo htmlspecialchars($blog['descricao']); ?></textarea>
-                </div>
-                <div class="mb-4">
-                    <label for="imagem_url" class="block text-eyefind-dark font-bold mb-2">URL da Imagem do Blog</label>
-                    <input type="url" name="imagem_url" id="imagem_url" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" value="<?php echo htmlspecialchars($blog['imagem']); ?>" oninput="previewImage()" required>
-                    <div id="image-preview" class="mt-2">
-                        <?php if ($blog['imagem']): ?>
-                            <img src="<?php echo htmlspecialchars($blog['imagem']); ?>" alt="Pré-visualização da imagem" class="w-full h-48 object-cover rounded">
-                        <?php endif; ?>
+<section class="mt-1 bg-white p-6 shadow-md">
+    <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Editar Blog</h2>
+
+    <form action="edit_blog.php?id=<?php echo $blog['id']; ?>" method="POST">
+
+        <!-- Nome -->
+        <div class="mb-4">
+            <label for="nome" class="block text-eyefind-dark font-bold mb-2">Nome do Blog</label>
+            <input type="text"
+                   name="nome"
+                   id="nome"
+                   class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
+                   value="<?php echo htmlspecialchars($blog['nome']); ?>"
+                   required>
+        </div>
+
+        <!-- Descrição -->
+        <div class="mb-4">
+            <label for="descricao" class="block text-eyefind-dark font-bold mb-2">Descrição</label>
+            <textarea name="descricao"
+                      id="descricao"
+                      class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
+                      required><?php echo htmlspecialchars($blog['descricao']); ?></textarea>
+        </div>
+
+        <!-- Imagem -->
+        <div class="mb-4">
+            <label for="imagem_url" class="block text-eyefind-dark font-bold mb-2">URL da Imagem do Blog</label>
+            <input type="url"
+                   name="imagem_url"
+                   id="imagem_url"
+                   class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
+                   value="<?php echo htmlspecialchars($blog['imagem']); ?>"
+                   oninput="previewImage()"
+                   required>
+
+            <div id="image-preview" class="mt-2">
+                <?php if ($blog['imagem']): ?>
+                    <img src="<?php echo htmlspecialchars($blog['imagem']); ?>"
+                         alt="Pré-visualização da imagem"
+                         class="w-full h-48 object-cover rounded">
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Categoria -->
+        <div class="mb-6">
+            <label for="categoria_id" class="block text-eyefind-dark font-bold mb-2">Categoria</label>
+            <select name="categoria_id"
+                    id="categoria_id"
+                    class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
+                    required>
+                <?php foreach ($categorias as $categoria): ?>
+                    <option value="<?php echo $categoria['id']; ?>"
+                        <?php echo $categoria['id'] == $blog['categoria_id'] ? 'selected' : ''; ?>>
+                        <?php echo $categoria['nome']; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <!-- Editor Completo -->
+        <div class="mb-6">
+            <label class="block text-eyefind-dark font-bold mb-4">Conteúdo do Blog</label>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+                <!-- Painel Esquerdo -->
+                <div class="lg:col-span-1">
+                    <div class="bg-gray-100 p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-bold text-eyefind-blue mb-4">Elementos</h3>
+                        <div id="blocks-container" class="space-y-2 max-h-[600px] overflow-y-auto"></div>
+                    </div>
+
+                    <div class="bg-gray-100 p-4 rounded-lg mt-4 shadow">
+                        <h3 class="text-lg font-bold text-eyefind-blue mb-4">Camadas</h3>
+                        <div id="layers-container" class="max-h-[300px] overflow-y-auto"></div>
                     </div>
                 </div>
-                <div class="mb-4">
-                    <label for="categoria_id" class="block text-eyefind-dark font-bold mb-2">Categoria</label>
-                    <select name="categoria_id" id="categoria_id" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" required>
-                        <?php foreach ($categorias as $categoria): ?>
-                            <option value="<?php echo $categoria['id']; ?>" <?php echo $categoria['id'] == $blog['categoria_id'] ? 'selected' : ''; ?>><?php echo $categoria['nome']; ?></option>
-                        <?php endforeach; ?>
-                    </select>
+
+                <!-- Editor Central -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white border border-gray-200 rounded-lg shadow">
+                        <div class="panel__basic-actions border-b border-gray-200 p-2 flex gap-2"></div>
+                        <div class="panel__devices border-b border-gray-200 p-2 flex gap-2"></div>
+
+                        <div id="grapesjs-editor" style="height: 700px;"></div>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="conteudo" class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog</label>
-                    <div id="grapesjs-editor"></div>
-                    <input type="hidden" name="conteudo" id="conteudo" value="<?php echo htmlspecialchars($blog['conteudo']); ?>">
-                    <input type="hidden" name="css" id="css" value="<?php echo htmlspecialchars($blog['css']); ?>">
+
+                <!-- Painel Direito -->
+                <div class="lg:col-span-1">
+                    <div class="bg-gray-100 p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-bold text-eyefind-blue mb-4">Estilos</h3>
+                        <div id="styles-container" class="max-h-[700px] overflow-y-auto"></div>
+                    </div>
                 </div>
-                <div class="flex justify-end">
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
-                        Salvar Alterações
-                    </button>
-                </div>
-            </form>
-        </section>
-    </div>
-</body>
+
+            </div>
+
+            <!-- Campos ocultos -->
+            <input type="hidden"
+                   name="conteudo"
+                   id="conteudo"
+                   value="<?php echo htmlspecialchars($blog['conteudo']); ?>">
+
+            <input type="hidden"
+                   name="css"
+                   id="css"
+                   value="<?php echo htmlspecialchars($blog['css']); ?>">
+        </div>
+
+        <!-- Botão -->
+        <div class="flex justify-end">
+            <button type="submit"
+                    class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
+                Salvar Alterações
+            </button>
+        </div>
+
+    </form>
+</section>
+
 
 </html>
