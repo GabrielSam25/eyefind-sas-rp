@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
             ],
             scripts: [
-                'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js'
+                'https://cdn.tailwindcss.com'
             ]
         },
         deviceManager: {
