@@ -125,57 +125,57 @@ function minifyCss($css)
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const editor = grapesjs.init({
-                container: '#grapesjs-editor',
-                fromElement: true,
-                storageManager: false,
-                plugins: [
-                    'grapesjs-plugin-forms',
-                    'grapesjs-tailwind',
-                    'grapesjs-preset-webpage',
-                    'grapesjs-blocks-basic',
-                    'grapesjs-plugin-export',
-                    'grapesjs-custom-code',
-                    'grapesjs-blocks-flexbox',
-                    'grapesjs-templates-manager',
-                    'grapesjs-plugin-toolbox',
-                    'grapesjs-symbols',
-                    'grapesjs-blocks-bootstrap5',
-                    'grapesjs-plugin-absolute'
-                ],
-                pluginsOpts: {
-                    'grapesjs-plugin-forms': {},
-                    'grapesjs-tailwind': {},
-                    'grapesjs-preset-webpage': {},
-                    'grapesjs-blocks-basic': {},
-                    'grapesjs-plugin-export': {},
-                    'grapesjs-custom-code': {},
-                    'grapesjs-blocks-flexbox': {},
-                    'grapesjs-templates-manager': {},
-                    'grapesjs-blocks-bootstrap5': {},
-                    'grapesjs-plugin-toolbox': {},
-                    'grapesjs-symbols': {},
-                    'grapesjs-plugin-absolute': {
-                        positionFixed: false, // Permite posicionamento absoluto
-                        keepBlockSelected: true // Mantém o bloco selecionado após mover
-                    }
-                },
-                canvas: {
-                    styles: [
-                        'https://unpkg.com/grapesjs/dist/css/grapes.min.css',
-                    ],
-                },
-                deviceManager: {
-                    devices: [{
-                        name: 'Desktop',
-                        width: '',
-                    }]
-                },
-                selectorManager: {
-                    componentFirst: true
-                },
-                canvasCss: `
+document.addEventListener('DOMContentLoaded', function() {
+    const editor = grapesjs.init({
+        container: '#grapesjs-editor',
+        fromElement: true,
+        storageManager: false,
+        plugins: [
+            'grapesjs-plugin-forms',
+            'grapesjs-tailwind',
+            'grapesjs-preset-webpage',
+            'grapesjs-blocks-basic',
+            'grapesjs-plugin-export',
+            'grapesjs-custom-code',
+            'grapesjs-blocks-flexbox',
+            'grapesjs-templates-manager',
+            'grapesjs-plugin-toolbox',
+            'grapesjs-symbols',
+            'grapesjs-blocks-bootstrap5',
+            'grapesjs-plugin-absolute'
+        ],
+        pluginsOpts: {
+            'grapesjs-plugin-forms': {},
+            'grapesjs-tailwind': {},
+            'grapesjs-preset-webpage': {},
+            'grapesjs-blocks-basic': {},
+            'grapesjs-plugin-export': {},
+            'grapesjs-custom-code': {},
+            'grapesjs-blocks-flexbox': {},
+            'grapesjs-templates-manager': {},
+            'grapesjs-blocks-bootstrap5': {},
+            'grapesjs-plugin-toolbox': {},
+            'grapesjs-symbols': {},
+            'grapesjs-plugin-absolute': {
+                positionFixed: false,
+                keepBlockSelected: true
+            }
+        },
+        canvas: {
+            styles: [
+                'https://unpkg.com/grapesjs/dist/css/grapes.min.css',
+            ],
+        },
+        deviceManager: {
+            devices: [{
+                name: 'Desktop',
+                width: '',
+            }]
+        },
+        selectorManager: {
+            componentFirst: true
+        },
+        canvasCss: `
             .gjs-dashed *[data-gjs-highlightable] {
                 outline: none !important;
             }
@@ -188,272 +188,280 @@ function minifyCss($css)
                 margin: 10px !important;
             }
         `,
-                blockManager: {
-                    blocks: [{
-                            id: 'text',
-                            label: 'Texto',
-                            content: {
-                                tagName: 'div',
-                                style: {
-                                    position: 'absolute',
-                                    left: '50px',
-                                    top: '50px',
-                                    padding: '10px',
-                                    'min-width': '50px',
-                                    'min-height': '20px'
-                                },
-                                content: '<p>Insira seu texto aqui...</p>'
-                            },
-                            attributes: {
-                                class: 'gjs-block-section'
-                            }
+        blockManager: {
+            blocks: [{
+                    id: 'text',
+                    label: 'Texto',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '50px',
+                            padding: '10px',
+                            'min-width': '50px',
+                            'min-height': '20px'
+                        },
+                        content: '<p>Insira seu texto aqui...</p>'
+                    },
+                    attributes: {
+                        class: 'gjs-block-section'
+                    }
+                },
+                {
+                    id: 'heading',
+                    label: 'Título',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '100px',
+                            padding: '10px',
+                            'min-width': '50px'
+                        },
+                        content: '<h1>Insira um título</h1>'
+                    }
+                },
+                {
+                    id: 'image',
+                    label: 'Imagem',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '150px',
+                            padding: '10px'
+                        },
+                        content: '<img src="https://via.placeholder.com/400x200" alt="Imagem" style="max-width:100%">'
+                    }
+                },
+                {
+                    id: 'video',
+                    label: 'Vídeo',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '200px',
+                            padding: '10px'
+                        },
+                        content: '<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>'
+                    }
+                },
+                {
+                    id: 'button',
+                    label: 'Botão',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '250px',
+                            padding: '10px'
+                        },
+                        content: '<button class="bg-blue-500 text-white px-4 py-2 rounded">Clique aqui</button>'
+                    }
+                },
+                {
+                    id: 'form',
+                    label: 'Formulário',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '300px',
+                            padding: '10px'
+                        },
+                        content: '<form><input type="text" placeholder="Nome"><button type="submit">Enviar</button></form>'
+                    }
+                },
+                {
+                    id: 'icon',
+                    label: 'Ícone',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '350px',
+                            padding: '10px'
+                        },
+                        content: '<i class="fas fa-star"></i>'
+                    }
+                }
+            ]
+        },
+        styleManager: {
+            sectors: [{
+                    name: 'Posição',
+                    open: true,
+                    properties: [{
+                            type: 'integer',
+                            property: 'left',
+                            units: ['px', '%'],
+                            defaults: 'auto',
+                            label: 'Esquerda',
                         },
                         {
-                            id: 'heading',
-                            label: 'Título',
-                            content: {
-                                tagName: 'div',
-                                style: {
-                                    position: 'absolute',
-                                    left: '50px',
-                                    top: '100px',
-                                    padding: '10px',
-                                    'min-width': '50px'
-                                },
-                                content: '<h1>Insira um título</h1>'
-                            }
+                            type: 'integer',
+                            property: 'top',
+                            units: ['px', '%'],
+                            defaults: 'auto',
+                            label: 'Topo',
                         },
                         {
-                            id: 'image',
-                            label: 'Imagem',
-                            content: {
-                                tagName: 'div',
-                                style: {
-                                    position: 'absolute',
-                                    left: '50px',
-                                    top: '150px',
-                                    padding: '10px'
-                                },
-                                content: '<img src="https://via.placeholder.com/400x200" alt="Imagem" style="max-width:100%">'
-                            }
+                            type: 'integer',
+                            property: 'width',
+                            units: ['px', '%', 'auto'],
+                            defaults: 'auto',
+                            label: 'Largura',
                         },
                         {
-                            id: 'video',
-                            label: 'Vídeo',
-                            content: {
-                                tagName: 'div',
-                                style: {
-                                    position: 'absolute',
-                                    left: '50px',
-                                    top: '200px',
-                                    padding: '10px'
-                                },
-                                content: '<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>'
-                            }
+                            type: 'integer',
+                            property: 'height',
+                            units: ['px', '%', 'auto'],
+                            defaults: 'auto',
+                            label: 'Altura',
                         },
                         {
-                            id: 'button',
-                            label: 'Botão',
-                            content: {
-                                tagName: 'div',
-                                style: {
-                                    position: 'absolute',
-                                    left: '50px',
-                                    top: '250px',
-                                    padding: '10px'
+                            type: 'select',
+                            property: 'position',
+                            defaults: 'absolute',
+                            label: 'Posição',
+                            options: [{
+                                    value: 'absolute',
+                                    label: 'Absoluta'
                                 },
-                                content: '<button class="bg-blue-500 text-white px-4 py-2 rounded">Clique aqui</button>'
-                            }
-                        },
-                        {
-                            id: 'form',
-                            label: 'Formulário',
-                            content: {
-                                tagName: 'div',
-                                style: {
-                                    position: 'absolute',
-                                    left: '50px',
-                                    top: '300px',
-                                    padding: '10px'
+                                {
+                                    value: 'relative',
+                                    label: 'Relativa'
                                 },
-                                content: '<form><input type="text" placeholder="Nome"><button type="submit">Enviar</button></form>'
-                            }
-                        },
-                        {
-                            id: 'icon',
-                            label: 'Ícone',
-                            content: {
-                                tagName: 'div',
-                                style: {
-                                    position: 'absolute',
-                                    left: '50px',
-                                    top: '350px',
-                                    padding: '10px'
+                                {
+                                    value: 'fixed',
+                                    label: 'Fixa'
                                 },
-                                content: '<i class="fas fa-star"></i>'
-                            }
+                            ],
                         }
                     ]
                 },
-                styleManager: {
-                    sectors: [{
-                            name: 'Posição',
-                            open: true,
-                            properties: [{
-                                    type: 'integer',
-                                    property: 'left',
-                                    units: ['px', '%'],
-                                    defaults: 'auto',
-                                    label: 'Esquerda',
+                {
+                    name: 'Geral',
+                    properties: [{
+                            type: 'color',
+                            property: 'color',
+                            label: 'Cor do Texto',
+                        },
+                        {
+                            type: 'color',
+                            property: 'background-color',
+                            label: 'Cor de Fundo',
+                        },
+                        {
+                            type: 'select',
+                            property: 'text-align',
+                            label: 'Alinhamento',
+                            options: [{
+                                    value: 'left',
+                                    label: 'Esquerda'
                                 },
                                 {
-                                    type: 'integer',
-                                    property: 'top',
-                                    units: ['px', '%'],
-                                    defaults: 'auto',
-                                    label: 'Topo',
+                                    value: 'center',
+                                    label: 'Centro'
                                 },
                                 {
-                                    type: 'integer',
-                                    property: 'width',
-                                    units: ['px', '%', 'auto'],
-                                    defaults: 'auto',
-                                    label: 'Largura',
+                                    value: 'right',
+                                    label: 'Direita'
                                 },
-                                {
-                                    type: 'integer',
-                                    property: 'height',
-                                    units: ['px', '%', 'auto'],
-                                    defaults: 'auto',
-                                    label: 'Altura',
-                                },
-                                {
-                                    type: 'select',
-                                    property: 'position',
-                                    defaults: 'absolute',
-                                    label: 'Posição',
-                                    options: [{
-                                            value: 'absolute',
-                                            label: 'Absoluta'
-                                        },
-                                        {
-                                            value: 'relative',
-                                            label: 'Relativa'
-                                        },
-                                        {
-                                            value: 'fixed',
-                                            label: 'Fixa'
-                                        },
-                                    ],
-                                }
                             ]
                         },
                         {
-                            name: 'Geral',
-                            properties: [{
-                                    type: 'color',
-                                    property: 'color',
-                                    label: 'Cor do Texto',
-                                },
-                                {
-                                    type: 'color',
-                                    property: 'background-color',
-                                    label: 'Cor de Fundo',
-                                },
-                                {
-                                    type: 'select',
-                                    property: 'text-align',
-                                    label: 'Alinhamento',
-                                    options: [{
-                                            value: 'left',
-                                            label: 'Esquerda'
-                                        },
-                                        {
-                                            value: 'center',
-                                            label: 'Centro'
-                                        },
-                                        {
-                                            value: 'right',
-                                            label: 'Direita'
-                                        },
-                                    ]
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'font-size',
-                                    label: 'Tamanho da Fonte',
-                                    defaults: '16px',
-                                    step: 1,
-                                    max: 100,
-                                    min: 10,
-                                }
-                            ]
+                            type: 'slider',
+                            property: 'font-size',
+                            label: 'Tamanho da Fonte',
+                            defaults: '16px',
+                            step: 1,
+                            max: 100,
+                            min: 10,
                         }
                     ]
                 }
-            });
+            ]
+        }
+    });
 
-            // Configurações adicionais para posicionamento livre
-            editor.on('load', function() {
-                // Desativa o snap to grid
-                editor.Canvas.getModel().set('snap', false);
+    // Configurações adicionais para posicionamento livre
+    editor.on('load', function() {
+        // Desativa o snap to grid
+        editor.Canvas.getModel().set('snap', false);
 
-                // Configura todos os componentes como arrastáveis
-                editor.DomComponents.getTypes().map(type => {
-                    editor.DomComponents.addType(type.id, {
-                        model: {
-                            defaults: {
-                                draggable: true,
-                                resizable: true,
-                                style: {
-                                    position: 'absolute',
-                                    'min-height': 'auto'
-                                }
-                            }
-                        }
-                    });
-                });
-
-                // Atualiza o estilo quando um componente é selecionado
-                editor.on('component:selected', function(model) {
-                    model.set('draggable', true);
-                    model.set('resizable', true);
-
-                    // Garante que o componente tenha posição absoluta
-                    const style = model.get('style');
-                    if (!style.position || style.position !== 'absolute') {
-                        model.set('style', {
-                            ...style,
+        // Configura todos os componentes como arrastáveis
+        editor.DomComponents.getTypes().map(type => {
+            editor.DomComponents.addType(type.id, {
+                model: {
+                    defaults: {
+                        draggable: true,
+                        resizable: true,
+                        style: {
                             position: 'absolute',
-                            left: style.left || '50px',
-                            top: style.top || '50px'
-                        });
+                            'min-height': 'auto'
+                        }
                     }
-                });
+                }
             });
         });
 
+        // Atualiza o estilo quando um componente é selecionado
+        editor.on('component:selected', function(model) {
+            model.set('draggable', true);
+            model.set('resizable', true);
 
-        const form = document.querySelector('form[action="edit_blog.php?id=<?php echo $blog['id']; ?>"]');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
+            // Garante que o componente tenha posição absoluta
+            const style = model.get('style');
+            if (!style.position || style.position !== 'absolute') {
+                model.set('style', {
+                    ...style,
+                    position: 'absolute',
+                    left: style.left || '50px',
+                    top: style.top || '50px'
+                });
+            }
+        });
+    });
 
-                try {
-                    const html = editor.getHtml();
-                    const css = editor.getCss();
+    // Carregar o conteúdo do blog APÓS o editor ser inicializado
+    <?php if (!empty($blog['conteudo'])): ?>
+        editor.setComponents(`<?php echo addslashes($blog['conteudo']); ?>`);
+    <?php endif; ?>
+    
+    <?php if (!empty($blog['css'])): ?>
+        editor.setStyle(`<?php echo addslashes($blog['css']); ?>`);
+    <?php endif; ?>
 
-                    document.getElementById('conteudo').value = html || '';
-                    document.getElementById('css').value = css || '';
+    // Manipulador do formulário
+    const form = document.querySelector('form[action="edit_blog.php?id=<?php echo $blog['id']; ?>"]');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
 
-                    form.removeEventListener('submit', arguments.callee);
+            try {
+                const html = editor.getHtml();
+                const css = editor.getCss();
 
-                    form.submit();
-                } catch (error) {
-                    console.error('Erro ao salvar conteúdo:', error);
-                }
-            });
-        }
+                document.getElementById('conteudo').value = html || '';
+                document.getElementById('css').value = css || '';
+
+                form.removeEventListener('submit', arguments.callee);
+                form.submit();
+            } catch (error) {
+                console.error('Erro ao salvar conteúdo:', error);
+            }
+        });
+    }
+});
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
