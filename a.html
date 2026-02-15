@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lone Star Ad Company</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#ff7a00",
+            darknav: "#2e2e2e",
+            lightgray: "#d9d9d9"
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-primary font-sans">
+
+  <!-- HEADER -->
+  <header class="flex justify-between items-center px-12 py-6">
+    <div>
+      <h1 class="text-white text-4xl font-serif font-bold">Lone Star</h1>
+      <p class="text-white text-lg -mt-2">Ad Company★</p>
+    </div>
+
+    <nav class="bg-darknav px-8 py-3 rounded-xl shadow-lg">
+      <ul class="flex gap-8 text-white font-medium">
+        <li class="bg-gray-600 px-4 py-1 rounded-md">HOME</li>
+        <li>SOBRE</li>
+        <li>COMO FUNCIONA?</li>
+        <li>NOSSOS SERVIÇOS</li>
+        <li>LOJA</li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="px-12 mt-6">
+    <div class="bg-white rounded-xl p-6 shadow-xl">
+      <div class="relative overflow-hidden rounded-lg">
+        <img src="https://images.unsplash.com/photo-1508057198894-247b23fe5ade"
+             class="w-full h-[350px] object-cover rounded-lg">
+
+        <!-- Orange Shape -->
+        <div class="absolute top-16 left-12 bg-primary text-white p-10 w-[400px]"
+             style="clip-path: polygon(0 0, 85% 0, 100% 50%, 85% 100%, 0 100%);">
+          <h2 class="text-3xl font-serif font-bold leading-tight">
+            Agência de Publicidade que veio para facilitar a vida do empreendedor
+          </h2>
+          <button class="mt-6 bg-black text-white px-6 py-2 rounded-lg font-semibold">
+            Nossos serviços
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOBRE -->
+  <section class="px-12 mt-12">
+    <div class="bg-lightgray rounded-xl py-16 px-20 relative text-center">
+
+      <h2 class="text-6xl font-serif text-primary font-extrabold mb-6">
+        SOBRE
+      </h2>
+
+      <p class="max-w-3xl mx-auto text-black font-medium leading-relaxed">
+        Lone Star é uma agência criativa idealizada por dois amigos com o objetivo
+        de revolucionar o mercado e elevar o nível da publicidade local.
+        Sempre buscando o melhor resultado e a satisfação dos nossos clientes,
+        trabalhamos com design gráfico e criação de identidade visual,
+        estratégias de marketing e social media.
+        Se interessou? O orçamento é grátis,
+        entre em contato ou visite nosso escritório!
+      </p>
+
+      <!-- Texto vertical decorativo -->
+      <div class="absolute left-4 top-1/2 -translate-y-1/2 rotate-[-90deg] opacity-20">
+        <p class="text-5xl font-serif text-black">Lone Star Ad Company★</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOJA -->
+  <section class="px-12 mt-12 mb-10">
+    <div class="bg-lightgray rounded-xl py-16 text-center">
+
+      <h2 class="text-6xl font-serif text-primary font-extrabold mb-12">
+        LOJA
+      </h2>
+
+      <div class="flex justify-center gap-20">
+
+        <!-- CARD 1 -->
+        <div class="bg-gray-200 p-10 rounded-xl w-64 shadow">
+          <div class="bg-primary/20 p-6 rounded-lg mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png"
+                 class="w-20 mx-auto">
+          </div>
+          <h3 class="text-xl font-serif font-semibold">Flyer</h3>
+          <p class="text-primary font-semibold mt-2">U$ 500,00</p>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="bg-gray-200 p-10 rounded-xl w-64 shadow">
+          <div class="bg-primary/20 p-6 rounded-lg mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                 class="w-20 mx-auto">
+          </div>
+          <h3 class="text-xl font-serif font-semibold">Identidade Visual</h3>
+          <p class="text-primary font-semibold mt-2">U$ 1,800,00</p>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="bg-gray-200 p-10 rounded-xl w-64 shadow">
+          <div class="bg-primary/20 p-6 rounded-lg mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/906/906361.png"
+                 class="w-20 mx-auto">
+          </div>
+          <h3 class="text-xl font-serif font-semibold">Social Media</h3>
+          <p class="text-primary font-semibold mt-2">U$ 2,900,00</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-center text-black pb-6">
+    by Alvez
+  </footer>
+
+</body>
+</html>
