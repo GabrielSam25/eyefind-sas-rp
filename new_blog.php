@@ -152,25 +152,21 @@ function minifyCss($css)
             }
         }
 
-        // Função de preview de imagem
+        // Função de preview da imagem
         function previewImage() {
             const url = document.getElementById('imagem_url').value;
             const preview = document.getElementById('image-preview');
-
             if (url) {
-                preview.innerHTML = `
-            <div class="relative w-full rounded border-2 border-eyefind-blue overflow-hidden">
-                <img src="${url}" alt="Pré-visualização da imagem" 
-                     class="w-full h-auto max-h-[400px] object-cover"
-                     onerror="this.onerror=null;preview.innerHTML='<div class=\'relative w-full bg-red-50 rounded border-2 border-red-300 flex items-center justify-center min-h-[200px] text-red-500\'>Imagem não encontrada</div>'">
-            </div>
-        `;
+                preview.innerHTML = `<div class="relative w-full rounded border-2 border-eyefind-blue overflow-hidden">
+                    <img src="${url}" alt="Pré-visualização da imagem" class="w-full h-auto max-h-[400px] object-cover"
+                        onerror="this.onerror=null; preview.innerHTML='<div class=\\'relative w-full bg-red-50 rounded border-2 border-red-300 flex items-center justify-center min-h-[200px] text-red-500\\'>Imagem não encontrada</div>'">
+                </div>`;
+                document.getElementById('imagem_final').value = url;
             } else {
-                preview.innerHTML = `
-            <div class="relative w-full bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center min-h-[200px]">
-                <span class="text-gray-500">Pré-visualização aparecerá aqui</span>
-            </div>
-        `;
+                preview.innerHTML = `<div class="relative w-full bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center min-h-[200px]">
+                    <span class="text-gray-500">Pré-visualização aparecerá aqui</span>
+                </div>`;
+                document.getElementById('imagem_final').value = '';
             }
         }
 
@@ -491,18 +487,20 @@ function minifyCss($css)
                 }
             });
 
-        editor.on('component:drag', (component) => {
-            const wrapper = editor.getWrapper();
-            const wrapperEl = wrapper.getEl();
+            editor.on('component:drag', (component) => {
+                const wrapper = editor.getWrapper();
+                const wrapperEl = wrapper.getEl();
+                const compEl = component.view.el;
+                if (wrapperEl && compEl) {
+                    const rect = compEl.getBoundingClientRect();
+                    const wrapRect = wrapperEl.getBoundingClientRect();
+                    if (rect.left < wrapRect.left) {
+                        compEl.style.left = '0px';
+                    }
+                }
+            });
 
-            // pega posição do componente e limita dentro do wrapper
-            const compEl = component.view.el;
-            const rect = compEl.getBoundingClientRect();
-            const wrapRect = wrapperEl.getBoundingClientRect();
-
-            if (rect.left < wrapRect.left) {
-                compEl.style.left = '0px';
-            }
+            console.log('GrapesJS inicializado com sucesso!');
         });
     </script>
     <style>
