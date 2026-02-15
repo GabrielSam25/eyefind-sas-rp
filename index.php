@@ -157,18 +157,18 @@ if ($weatherId == 800 && $isDayTime) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'eyefind-blue': '#067191',
-                        'eyefind-light': '#EEF3F5',
-                        'eyefind-dark': '#02343F',
-                        'eyefind-container': '#DCE7EB'
-                    }
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'eyefind-blue': '#067191',
+                    'eyefind-light': '#EEF3F5',
+                    'eyefind-dark': '#02343F',
+                    'eyefind-container': '#DCE7EB'
                 }
             }
         }
+    }
 
     </script>
     <style>
@@ -250,6 +250,10 @@ if ($weatherId == 800 && $isDayTime) {
     <div class="w-full bg-white shadow-md">
         <div class="max-w-6xl mx-auto">
             <div class="flex overflow-x-auto scrollbar-hide whitespace-nowrap">
+                <a href="/lifeinvader/index.php" class="inline-flex items-center text-left p-3 hover:bg-eyefind-light cursor-pointer transition group space-x-3 border-r">
+                    <i class="fas fa-briefcase text-2xl text-red-500 group-hover:scale-110 transition"></i>
+                    <p class="font-bold text-eyefind-dark">LifeInvader</p>
+                </a>
 
                 <?php foreach ($categorias as $categoria): ?>
                     <a href="category.php?id=<?php echo $categoria["id"]; ?>" class="inline-flex items-center text-left p-3 hover:bg-eyefind-light cursor-pointer transition group space-x-3 border-r">
