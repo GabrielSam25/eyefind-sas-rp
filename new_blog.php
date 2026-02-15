@@ -174,7 +174,275 @@ function minifyCss($css)
             }
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const editor = grapesjs.init({
+                container: '#grapesjs-editor',
+                dragMode: 'translate',
+                snapToGrid: true,
+                snapGrid: 10,
+                storageManager: false,
+                allowScripts: true,
+                components: {
+                    wrapper: {
+                        removable: false,
+                        scripts: [],
+                    }
+                },
+                plugins: [
+                    'grapesjs-plugin-forms',
+                    'grapesjs-tailwind',
+                    'grapesjs-preset-webpage',
+                    'grapesjs-blocks-basic',
+                    'grapesjs-plugin-export',
+                    'grapesjs-custom-code',
+                    'grapesjs-blocks-flexbox',
+                    'grapesjs-templates-manager',
+                    'grapesjs-plugin-toolbox',
+                    'grapesjs-symbols',
+                    'grapesjs-blocks-bootstrap5',
+                    'grapesjs-style-filter',
+                ],
+                pluginsOpts: {
+                    'grapesjs-plugin-forms': {},
+                    'grapesjs-tailwind': {},
+                    'grapesjs-preset-webpage': {},
+                    'grapesjs-blocks-basic': {
+                        flexGrid: true,
+                        blocks: ['*']
+                    },
+                    'grapesjs-plugin-export': {},
+                    'grapesjs-custom-code': {},
+                    'grapesjs-blocks-flexbox': {},
+                    'grapesjs-templates-manager': {},
+                    'grapesjs-blocks-bootstrap5': {},
+                    'grapesjs-plugin-toolbox': {},
+                    'grapesjs-symbols': {},
+                    'grapesjs-style-filter': {}
+                },
+                styleManager: {
+                    sectors: [{
+                            name: 'Geral',
+                            properties: [{
+                                    type: 'color',
+                                    property: 'color',
+                                    label: 'Cor do Texto',
+                                },
+                                {
+                                    type: 'color',
+                                    property: 'background-color',
+                                    label: 'Cor de Fundo',
+                                },
+                                {
+                                    type: 'select',
+                                    property: 'text-align',
+                                    label: 'Alinhamento',
+                                    options: [{
+                                            value: 'left',
+                                            label: 'Esquerda'
+                                        },
+                                        {
+                                            value: 'center',
+                                            label: 'Centro'
+                                        },
+                                        {
+                                            value: 'right',
+                                            label: 'Direita'
+                                        },
+                                    ]
+                                },
+                                {
+                                    type: 'slider',
+                                    property: 'font-size',
+                                    label: 'Tamanho da Fonte',
+                                    defaults: '16px',
+                                    step: 1,
+                                    max: 100,
+                                    min: 10,
+                                }
+                            ]
+                        },
+                        {
+                            name: 'Dimensões',
+                            properties: [{
+                                    type: 'slider',
+                                    property: 'width',
+                                    label: 'Largura',
+                                    units: ['px', '%', 'vw'],
+                                    defaults: 'auto',
+                                    min: 0,
+                                    max: 1000,
+                                },
+                                {
+                                    type: 'slider',
+                                    property: 'height',
+                                    label: 'Altura',
+                                    units: ['px', '%', 'vh'],
+                                    defaults: 'auto',
+                                    min: 0,
+                                    max: 1000,
+                                },
+                                {
+                                    type: 'slider',
+                                    property: 'margin',
+                                    label: 'Margem',
+                                    units: ['px', 'em', '%'],
+                                    defaults: '0',
+                                    min: 0,
+                                    max: 100,
+                                },
+                                {
+                                    type: 'slider',
+                                    property: 'padding',
+                                    label: 'Preenchimento',
+                                    units: ['px', 'em', '%'],
+                                    defaults: '0',
+                                    min: 0,
+                                    max: 100,
+                                }
+                            ]
+                        },
+                        {
+                            name: 'Decorações',
+                            properties: [{
+                                    type: 'slider',
+                                    property: 'border-radius',
+                                    label: 'Borda Arredondada',
+                                    units: ['px', '%'],
+                                    defaults: '0',
+                                    min: 0,
+                                    max: 100,
+                                },
+                                {
+                                    type: 'slider',
+                                    property: 'border-width',
+                                    label: 'Espessura da Borda',
+                                    units: ['px'],
+                                    defaults: '0',
+                                    min: 0,
+                                    max: 20,
+                                },
+                                {
+                                    type: 'color',
+                                    property: 'border-color',
+                                    label: 'Cor da Borda',
+                                },
+                                {
+                                    type: 'select',
+                                    property: 'border-style',
+                                    label: 'Estilo da Borda',
+                                    options: [{
+                                            value: 'none',
+                                            label: 'Nenhum'
+                                        },
+                                        {
+                                            value: 'solid',
+                                            label: 'Sólido'
+                                        },
+                                        {
+                                            value: 'dashed',
+                                            label: 'Tracejado'
+                                        },
+                                        {
+                                            value: 'dotted',
+                                            label: 'Pontilhado'
+                                        },
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: 'Sombras e Efeitos',
+                            properties: [{
+                                    type: 'stack',
+                                    property: 'box-shadow',
+                                    label: 'Sombra',
+                                    properties: [{
+                                            type: 'slider',
+                                            units: ['px'],
+                                            property: 'offsetX',
+                                            defaults: 0,
+                                            min: -50,
+                                            max: 50,
+                                            label: 'X'
+                                        },
+                                        {
+                                            type: 'slider',
+                                            units: ['px'],
+                                            property: 'offsetY',
+                                            defaults: 0,
+                                            min: -50,
+                                            max: 50,
+                                            label: 'Y'
+                                        },
+                                        {
+                                            type: 'slider',
+                                            units: ['px'],
+                                            property: 'blur',
+                                            defaults: 0,
+                                            min: 0,
+                                            max: 50,
+                                            label: 'Desfoque'
+                                        },
+                                        {
+                                            type: 'slider',
+                                            units: ['px'],
+                                            property: 'spread',
+                                            defaults: 0,
+                                            min: 0,
+                                            max: 50,
+                                            label: 'Expansão'
+                                        },
+                                        {
+                                            type: 'color',
+                                            property: 'color',
+                                            label: 'Cor'
+                                        },
+                                    ]
+                                },
+                                {
+                                    type: 'slider',
+                                    property: 'opacity',
+                                    label: 'Opacidade',
+                                    defaults: 1,
+                                    step: 0.1,
+                                    max: 1,
+                                    min: 0,
+                                }
+                            ]
+                        }
+                    ]
+                }
+            });
 
+
+
+            // Manipulador do formulário
+            const form = document.querySelector('form[action="new_blog.php"]');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    try {
+                        const html = editor.getHtml();
+                        const css = editor.getCss();
+
+                        document.getElementById('conteudo').value = html || '';
+                        document.getElementById('css').value = css || '';
+
+                        form.removeEventListener('submit', arguments.callee);
+                        form.submit();
+                    } catch (error) {
+                        console.error('Erro ao salvar conteúdo:', error);
+                    }
+                });
+            }
+        });
+
+        editor.on('component:drag:start', (component) => {
+            if (component.get('type') === 'header' || component.get('customNoDrag')) {
+                editor.get('DomComponents').getWrapper().trigger('component:drag:stop');
+            }
+        });
 
         editor.on('component:drag', (component) => {
             const wrapper = editor.getWrapper();
