@@ -143,633 +143,331 @@ document.addEventListener('DOMContentLoaded', function() {
         container: '#grapesjs-editor',
         fromElement: true,
         storageManager: false,
-        height: '700px',
-        width: 'auto',
-        
-        // Interface mais amigável
-        panels: {
-            defaults: [
+        plugins: [
+            'grapesjs-plugin-forms',
+            'grapesjs-tailwind',
+            'grapesjs-preset-webpage',
+            'grapesjs-blocks-basic',
+            'grapesjs-plugin-export',
+            'grapesjs-custom-code',
+            'grapesjs-blocks-flexbox',
+            'grapesjs-templates-manager',
+            'grapesjs-plugin-toolbox',
+            'grapesjs-symbols',
+            'grapesjs-blocks-bootstrap5',
+            'grapesjs-plugin-absolute'
+        ],
+        pluginsOpts: {
+            'grapesjs-plugin-forms': {},
+            'grapesjs-tailwind': {
+                // Configuração do Tailwind
+                tailwindConfig: {
+                    theme: {
+                        extend: {
+                            colors: {
+                                primary: '#ff7a00',
+                                darknav: '#2e2e2e',
+                                lightgray: '#d9d9d9'
+                            },
+                            fontFamily: {
+                                serif: ['Playfair Display', 'serif'],
+                                sans: ['Inter', 'sans-serif']
+                            }
+                        }
+                    }
+                }
+            },
+            'grapesjs-preset-webpage': {},
+            'grapesjs-blocks-basic': {},
+            'grapesjs-plugin-export': {},
+            'grapesjs-custom-code': {},
+            'grapesjs-blocks-flexbox': {},
+            'grapesjs-templates-manager': {},
+            'grapesjs-blocks-bootstrap5': {},
+            'grapesjs-plugin-toolbox': {},
+            'grapesjs-symbols': {},
+            'grapesjs-plugin-absolute': {
+                positionFixed: false,
+                keepBlockSelected: true
+            }
+        },
+        canvas: {
+            styles: [
+                'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
+                'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;500;600&display=swap',
+                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+            ],
+            scripts: [
+                'https://cdn.tailwindcss.com'
+            ]
+        },
+        deviceManager: {
+            devices: [{
+                name: 'Desktop',
+                width: '',
+            }]
+        },
+        selectorManager: {
+            componentFirst: true
+        },
+        canvasCss: `
+            .gjs-dashed *[data-gjs-highlightable] {
+                outline: none !important;
+            }
+            .gjs-selected {
+                outline: 2px solid #3b97e3 !important;
+            }
+            .gjs-block {
+                width: auto !important;
+                height: auto !important;
+                margin: 10px !important;
+            }
+        `,
+        blockManager: {
+            blocks: [{
+                    id: 'text',
+                    label: 'Texto',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '50px',
+                            padding: '10px',
+                            'min-width': '50px',
+                            'min-height': '20px'
+                        },
+                        content: '<p>Insira seu texto aqui...</p>'
+                    },
+                    attributes: {
+                        class: 'gjs-block-section'
+                    }
+                },
                 {
-                    id: 'basic-actions',
-                    el: '.panel__basic-actions',
-                    buttons: [
-                        {
-                            id: 'visibility',
-                            active: true,
-                            className: 'btn-toggle-borders',
-                            label: '<i class="fa fa-clone"></i>',
-                            command: 'sw-visibility',
-                            context: 'sw-visibility',
+                    id: 'heading',
+                    label: 'Título',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '100px',
+                            padding: '10px',
+                            'min-width': '50px'
+                        },
+                        content: '<h1>Insira um título</h1>'
+                    }
+                },
+                {
+                    id: 'image',
+                    label: 'Imagem',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '150px',
+                            padding: '10px'
+                        },
+                        content: '<img src="https://via.placeholder.com/400x200" alt="Imagem" style="max-width:100%">'
+                    }
+                },
+                {
+                    id: 'video',
+                    label: 'Vídeo',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '200px',
+                            padding: '10px'
+                        },
+                        content: '<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>'
+                    }
+                },
+                {
+                    id: 'button',
+                    label: 'Botão',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '250px',
+                            padding: '10px'
+                        },
+                        content: '<button class="bg-blue-500 text-white px-4 py-2 rounded">Clique aqui</button>'
+                    }
+                },
+                {
+                    id: 'form',
+                    label: 'Formulário',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '300px',
+                            padding: '10px'
+                        },
+                        content: '<form><input type="text" placeholder="Nome"><button type="submit">Enviar</button></form>'
+                    }
+                },
+                {
+                    id: 'icon',
+                    label: 'Ícone',
+                    content: {
+                        tagName: 'div',
+                        style: {
+                            position: 'absolute',
+                            left: '50px',
+                            top: '350px',
+                            padding: '10px'
+                        },
+                        content: '<i class="fas fa-star"></i>'
+                    }
+                }
+            ]
+        },
+        styleManager: {
+            sectors: [{
+                    name: 'Posição',
+                    open: true,
+                    properties: [{
+                            type: 'integer',
+                            property: 'left',
+                            units: ['px', '%'],
+                            defaults: 'auto',
+                            label: 'Esquerda',
                         },
                         {
-                            id: 'export',
-                            className: 'btn-open-export',
-                            label: '<i class="fa fa-code"></i>',
-                            command: 'export-template',
-                            context: 'export-template',
+                            type: 'integer',
+                            property: 'top',
+                            units: ['px', '%'],
+                            defaults: 'auto',
+                            label: 'Topo',
                         },
                         {
-                            id: 'undo',
-                            className: 'btn-undo',
-                            label: '<i class="fa fa-undo"></i>',
-                            command: 'undo',
+                            type: 'integer',
+                            property: 'width',
+                            units: ['px', '%', 'auto'],
+                            defaults: 'auto',
+                            label: 'Largura',
                         },
                         {
-                            id: 'redo',
-                            className: 'btn-redo',
-                            label: '<i class="fa fa-repeat"></i>',
-                            command: 'redo',
+                            type: 'integer',
+                            property: 'height',
+                            units: ['px', '%', 'auto'],
+                            defaults: 'auto',
+                            label: 'Altura',
                         },
                         {
-                            id: 'clear',
-                            className: 'btn-clear',
-                            label: '<i class="fa fa-trash"></i>',
-                            command: 'core:canvas-clear',
+                            type: 'select',
+                            property: 'position',
+                            defaults: 'absolute',
+                            label: 'Posição',
+                            options: [{
+                                    value: 'absolute',
+                                    label: 'Absoluta'
+                                },
+                                {
+                                    value: 'relative',
+                                    label: 'Relativa'
+                                },
+                                {
+                                    value: 'fixed',
+                                    label: 'Fixa'
+                                },
+                            ],
                         }
                     ]
                 },
                 {
-                    id: 'panel-devices',
-                    el: '.panel__devices',
-                    buttons: [{
-                        id: 'device-desktop',
-                        label: '<i class="fa fa-desktop"></i>',
-                        command: 'set-device-desktop',
-                        active: true,
-                        togglable: false,
-                    }, {
-                        id: 'device-tablet',
-                        label: '<i class="fa fa-tablet"></i>',
-                        command: 'set-device-tablet',
-                        togglable: false,
-                    }, {
-                        id: 'device-mobile',
-                        label: '<i class="fa fa-mobile"></i>',
-                        command: 'set-device-mobile',
-                        togglable: false,
-                    }]
-                }
-            ]
-        },
-        
-        // Configuração dos painéis
-        layerManager: {
-            appendTo: '#layers-container',
-        },
-        styleManager: {
-            appendTo: '#styles-container',
-            sectors: [{
-                name: 'Tipografia',
-                open: true,
-                properties: [
-                    {
-                        name: 'Fonte',
-                        property: 'font-family',
-                        type: 'select',
-                        defaults: 'Arial, sans-serif',
-                        options: [
-                            { value: 'Arial, sans-serif', name: 'Arial' },
-                            { value: 'Helvetica, sans-serif', name: 'Helvetica' },
-                            { value: 'Georgia, serif', name: 'Georgia' },
-                            { value: 'Times New Roman, serif', name: 'Times New Roman' },
-                            { value: 'Verdana, sans-serif', name: 'Verdana' },
-                            { value: "'Inter', sans-serif", name: 'Inter' },
-                            { value: "'Playfair Display', serif", name: 'Playfair Display' }
-                        ]
-                    },
-                    {
-                        name: 'Tamanho',
-                        property: 'font-size',
-                        type: 'slider',
-                        units: ['px', 'em', 'rem'],
-                        defaults: '16px',
-                        min: 8,
-                        max: 100,
-                    },
-                    {
-                        name: 'Peso',
-                        property: 'font-weight',
-                        type: 'select',
-                        defaults: '400',
-                        options: [
-                            { value: '100', name: 'Thin' },
-                            { value: '300', name: 'Light' },
-                            { value: '400', name: 'Normal' },
-                            { value: '500', name: 'Medium' },
-                            { value: '600', name: 'Semi Bold' },
-                            { value: '700', name: 'Bold' },
-                            { value: '800', name: 'Extra Bold' },
-                            { value: '900', name: 'Black' }
-                        ]
-                    },
-                    {
-                        name: 'Cor',
-                        property: 'color',
-                        type: 'color',
-                    },
-                    {
-                        name: 'Alinhamento',
-                        property: 'text-align',
-                        type: 'radio',
-                        defaults: 'left',
-                        options: [
-                            { value: 'left', name: 'Esquerda', className: 'fa fa-align-left' },
-                            { value: 'center', name: 'Centro', className: 'fa fa-align-center' },
-                            { value: 'right', name: 'Direita', className: 'fa fa-align-right' },
-                            { value: 'justify', name: 'Justificar', className: 'fa fa-align-justify' }
-                        ]
-                    }
-                ]
-            }, {
-                name: 'Fundo',
-                open: false,
-                properties: [
-                    {
-                        name: 'Cor de Fundo',
-                        property: 'background-color',
-                        type: 'color',
-                    },
-                    {
-                        name: 'Imagem de Fundo',
-                        property: 'background-image',
-                        type: 'file',
-                    },
-                    {
-                        name: 'Repetir',
-                        property: 'background-repeat',
-                        type: 'select',
-                        defaults: 'repeat',
-                        options: [
-                            { value: 'repeat', name: 'Repetir' },
-                            { value: 'no-repeat', name: 'Não repetir' },
-                            { value: 'repeat-x', name: 'Repetir X' },
-                            { value: 'repeat-y', name: 'Repetir Y' }
-                        ]
-                    },
-                    {
-                        name: 'Posição',
-                        property: 'background-position',
-                        type: 'select',
-                        defaults: '0% 0%',
-                        options: [
-                            { value: '0% 0%', name: 'Esquerda Superior' },
-                            { value: '50% 0%', name: 'Centro Superior' },
-                            { value: '100% 0%', name: 'Direita Superior' },
-                            { value: '0% 50%', name: 'Esquerda Meio' },
-                            { value: '50% 50%', name: 'Centro Meio' },
-                            { value: '100% 50%', name: 'Direita Meio' },
-                            { value: '0% 100%', name: 'Esquerda Inferior' },
-                            { value: '50% 100%', name: 'Centro Inferior' },
-                            { value: '100% 100%', name: 'Direita Inferior' }
-                        ]
-                    },
-                    {
-                        name: 'Tamanho',
-                        property: 'background-size',
-                        type: 'select',
-                        defaults: 'auto',
-                        options: [
-                            { value: 'auto', name: 'Auto' },
-                            { value: 'cover', name: 'Cobrir' },
-                            { value: 'contain', name: 'Conter' }
-                        ]
-                    }
-                ]
-            }, {
-                name: 'Espaçamento',
-                open: false,
-                properties: [
-                    {
-                        name: 'Margem',
-                        property: 'margin',
-                        type: 'composite',
-                        properties: [
-                            { name: 'Topo', property: 'margin-top', type: 'slider', units: ['px', '%'], defaults: 0, min: -100, max: 500 },
-                            { name: 'Direita', property: 'margin-right', type: 'slider', units: ['px', '%'], defaults: 0, min: -100, max: 500 },
-                            { name: 'Inferior', property: 'margin-bottom', type: 'slider', units: ['px', '%'], defaults: 0, min: -100, max: 500 },
-                            { name: 'Esquerda', property: 'margin-left', type: 'slider', units: ['px', '%'], defaults: 0, min: -100, max: 500 }
-                        ]
-                    },
-                    {
-                        name: 'Preenchimento',
-                        property: 'padding',
-                        type: 'composite',
-                        properties: [
-                            { name: 'Topo', property: 'padding-top', type: 'slider', units: ['px', '%'], defaults: 0, min: 0, max: 500 },
-                            { name: 'Direita', property: 'padding-right', type: 'slider', units: ['px', '%'], defaults: 0, min: 0, max: 500 },
-                            { name: 'Inferior', property: 'padding-bottom', type: 'slider', units: ['px', '%'], defaults: 0, min: 0, max: 500 },
-                            { name: 'Esquerda', property: 'padding-left', type: 'slider', units: ['px', '%'], defaults: 0, min: 0, max: 500 }
-                        ]
-                    }
-                ]
-            }, {
-                name: 'Borda',
-                open: false,
-                properties: [
-                    {
-                        name: 'Tipo',
-                        property: 'border-style',
-                        type: 'select',
-                        defaults: 'solid',
-                        options: [
-                            { value: 'none', name: 'Nenhum' },
-                            { value: 'solid', name: 'Sólido' },
-                            { value: 'dashed', name: 'Tracejado' },
-                            { value: 'dotted', name: 'Pontilhado' },
-                            { value: 'double', name: 'Dupla' },
-                            { value: 'groove', name: 'Ranhura' },
-                            { value: 'ridge', name: 'Crista' },
-                            { value: 'inset', name: 'Interno' },
-                            { value: 'outset', name: 'Externo' }
-                        ]
-                    },
-                    {
-                        name: 'Largura',
-                        property: 'border-width',
-                        type: 'slider',
-                        units: ['px'],
-                        defaults: 1,
-                        min: 0,
-                        max: 20,
-                    },
-                    {
-                        name: 'Cor',
-                        property: 'border-color',
-                        type: 'color',
-                        defaults: 'black',
-                    },
-                    {
-                        name: 'Raio',
-                        property: 'border-radius',
-                        type: 'slider',
-                        units: ['px', '%'],
-                        defaults: 0,
-                        min: 0,
-                        max: 100,
-                    }
-                ]
-            }, {
-                name: 'Dimensões',
-                open: false,
-                properties: [
-                    {
-                        name: 'Largura',
-                        property: 'width',
-                        type: 'slider',
-                        units: ['px', '%', 'vw'],
-                        defaults: 'auto',
-                        min: 0,
-                        max: 1920,
-                    },
-                    {
-                        name: 'Altura',
-                        property: 'height',
-                        type: 'slider',
-                        units: ['px', '%', 'vh'],
-                        defaults: 'auto',
-                        min: 0,
-                        max: 1080,
-                    },
-                    {
-                        name: 'Largura Mín.',
-                        property: 'min-width',
-                        type: 'slider',
-                        units: ['px', '%'],
-                        defaults: 0,
-                        min: 0,
-                        max: 1920,
-                    },
-                    {
-                        name: 'Altura Mín.',
-                        property: 'min-height',
-                        type: 'slider',
-                        units: ['px', '%'],
-                        defaults: 0,
-                        min: 0,
-                        max: 1080,
-                    }
-                ]
-            }, {
-                name: 'Posição',
-                open: false,
-                properties: [
-                    {
-                        name: 'Tipo',
-                        property: 'position',
-                        type: 'select',
-                        defaults: 'static',
-                        options: [
-                            { value: 'static', name: 'Estático' },
-                            { value: 'relative', name: 'Relativo' },
-                            { value: 'absolute', name: 'Absoluto' },
-                            { value: 'fixed', name: 'Fixo' },
-                            { value: 'sticky', name: 'Sticky' }
-                        ]
-                    },
-                    {
-                        name: 'Esquerda',
-                        property: 'left',
-                        type: 'slider',
-                        units: ['px', '%'],
-                        defaults: 'auto',
-                        min: -1000,
-                        max: 1000,
-                    },
-                    {
-                        name: 'Direita',
-                        property: 'right',
-                        type: 'slider',
-                        units: ['px', '%'],
-                        defaults: 'auto',
-                        min: -1000,
-                        max: 1000,
-                    },
-                    {
-                        name: 'Topo',
-                        property: 'top',
-                        type: 'slider',
-                        units: ['px', '%'],
-                        defaults: 'auto',
-                        min: -1000,
-                        max: 1000,
-                    },
-                    {
-                        name: 'Inferior',
-                        property: 'bottom',
-                        type: 'slider',
-                        units: ['px', '%'],
-                        defaults: 'auto',
-                        min: -1000,
-                        max: 1000,
-                    }
-                ]
-            }]
-        },
-        
-        // Configuração dos blocos (elementos que podem ser arrastados)
-        blockManager: {
-            appendTo: '#blocks-container',
-            blocks: [
-                // Blocos básicos
-                {
-                    id: 'section',
-                    label: '<i class="fa fa-square-o"></i> Seção',
-                    content: '<section style="min-height: 100px; padding: 20px;"><h2>Título da Seção</h2><p>Conteúdo da seção...</p></section>',
-                    category: 'Básicos',
-                },
-                {
-                    id: 'text',
-                    label: '<i class="fa fa-font"></i> Texto',
-                    content: '<p>Digite seu texto aqui...</p>',
-                    category: 'Básicos',
-                },
-                {
-                    id: 'heading',
-                    label: '<i class="fa fa-header"></i> Título',
-                    content: '<h1>Título Principal</h1>',
-                    category: 'Básicos',
-                },
-                {
-                    id: 'image',
-                    label: '<i class="fa fa-image"></i> Imagem',
-                    content: '<img src="https://via.placeholder.com/400x300" alt="Imagem" style="max-width:100%"/>',
-                    category: 'Mídia',
-                },
-                {
-                    id: 'video',
-                    label: '<i class="fa fa-video-camera"></i> Vídeo',
-                    content: '<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>',
-                    category: 'Mídia',
-                },
-                {
-                    id: 'button',
-                    label: '<i class="fa fa-hand-pointer-o"></i> Botão',
-                    content: '<button style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Clique Aqui</button>',
-                    category: 'Componentes',
-                },
-                {
-                    id: 'card',
-                    label: '<i class="fa fa-id-card-o"></i> Card',
-                    content: `
-                        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; max-width: 300px; background: white;">
-                            <img src="https://via.placeholder.com/300x200" style="width: 100%; border-radius: 4px;">
-                            <h3 style="margin: 12px 0 8px;">Título do Card</h3>
-                            <p style="color: #666;">Descrição do card aqui...</p>
-                            <button style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px;">Saiba Mais</button>
-                        </div>
-                    `,
-                    category: 'Componentes',
-                },
-                {
-                    id: 'form',
-                    label: '<i class="fa fa-wpforms"></i> Formulário',
-                    content: `
-                        <form style="padding: 20px; background: #f9f9f9; border-radius: 8px;">
-                            <h3>Formulário de Contato</h3>
-                            <input type="text" placeholder="Nome" style="width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px;">
-                            <input type="email" placeholder="Email" style="width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px;">
-                            <textarea placeholder="Mensagem" style="width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-                            <button style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px;">Enviar</button>
-                        </form>
-                    `,
-                    category: 'Componentes',
-                },
-                // Blocos de layout
-                {
-                    id: 'grid-2',
-                    label: '<i class="fa fa-th-large"></i> 2 Colunas',
-                    content: `
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div style="background: #f0f0f0; padding: 20px; text-align: center;">Coluna 1</div>
-                            <div style="background: #f0f0f0; padding: 20px; text-align: center;">Coluna 2</div>
-                        </div>
-                    `,
-                    category: 'Layout',
-                },
-                {
-                    id: 'grid-3',
-                    label: '<i class="fa fa-th"></i> 3 Colunas',
-                    content: `
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-                            <div style="background: #f0f0f0; padding: 20px; text-align: center;">Coluna 1</div>
-                            <div style="background: #f0f0f0; padding: 20px; text-align: center;">Coluna 2</div>
-                            <div style="background: #f0f0f0; padding: 20px; text-align: center;">Coluna 3</div>
-                        </div>
-                    `,
-                    category: 'Layout',
-                },
-                {
-                    id: 'hero',
-                    label: '<i class="fa fa-star"></i> Hero Section',
-                    content: `
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 80px 20px; text-align: center;">
-                            <h1 style="font-size: 3em; margin-bottom: 20px;">Título Hero</h1>
-                            <p style="font-size: 1.2em; margin-bottom: 30px;">Descrição impactante aqui...</p>
-                            <button style="background: white; color: #667eea; border: none; padding: 15px 30px; border-radius: 5px; font-size: 1.1em;">Começar Agora</button>
-                        </div>
-                    `,
-                    category: 'Layout',
-                },
-                {
-                    id: 'product-grid',
-                    label: '<i class="fa fa-shopping-cart"></i> Grade de Produtos',
-                    content: `
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px;">
-                            <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-                                <img src="https://via.placeholder.com/250x200" style="width: 100%;">
-                                <div style="padding: 15px;">
-                                    <h3>Produto 1</h3>
-                                    <p style="color: #666;">R$ 99,90</p>
-                                    <button style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px;">Comprar</button>
-                                </div>
-                            </div>
-                            <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-                                <img src="https://via.placeholder.com/250x200" style="width: 100%;">
-                                <div style="padding: 15px;">
-                                    <h3>Produto 2</h3>
-                                    <p style="color: #666;">R$ 149,90</p>
-                                    <button style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px;">Comprar</button>
-                                </div>
-                            </div>
-                        </div>
-                    `,
-                    category: 'Layout',
-                },
-                // Elementos de navegação
-                {
-                    id: 'navbar',
-                    label: '<i class="fa fa-bars"></i> Menu',
-                    content: `
-                        <nav style="background: #333; padding: 15px; color: white;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
-                                <div style="font-size: 1.5em; font-weight: bold;">Logo</div>
-                                <div>
-                                    <a href="#" style="color: white; margin: 0 15px; text-decoration: none;">Home</a>
-                                    <a href="#" style="color: white; margin: 0 15px; text-decoration: none;">Sobre</a>
-                                    <a href="#" style="color: white; margin: 0 15px; text-decoration: none;">Serviços</a>
-                                    <a href="#" style="color: white; margin: 0 15px; text-decoration: none;">Contato</a>
-                                </div>
-                            </div>
-                        </nav>
-                    `,
-                    category: 'Navegação',
-                },
-                {
-                    id: 'footer',
-                    label: '<i class="fa fa-copyright"></i> Rodapé',
-                    content: `
-                        <footer style="background: #333; color: white; padding: 40px 20px;">
-                            <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
-                                <div>
-                                    <h4>Sobre Nós</h4>
-                                    <p style="color: #ccc;">Descrição da empresa...</p>
-                                </div>
-                                <div>
-                                    <h4>Links Rápidos</h4>
-                                    <ul style="list-style: none; padding: 0;">
-                                        <li><a href="#" style="color: #ccc; text-decoration: none;">Link 1</a></li>
-                                        <li><a href="#" style="color: #ccc; text-decoration: none;">Link 2</a></li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4>Contato</h4>
-                                    <p style="color: #ccc;">email@exemplo.com</p>
-                                </div>
-                            </div>
-                        </footer>
-                    `,
-                    category: 'Navegação',
-                },
-                // Elementos de mídia social
-                {
-                    id: 'social-icons',
-                    label: '<i class="fa fa-share-alt"></i> Redes Sociais',
-                    content: `
-                        <div style="display: flex; gap: 15px; justify-content: center;">
-                            <a href="#"><i class="fa fa-facebook" style="font-size: 2em; color: #3b5998;"></i></a>
-                            <a href="#"><i class="fa fa-twitter" style="font-size: 2em; color: #1da1f2;"></i></a>
-                            <a href="#"><i class="fa fa-instagram" style="font-size: 2em; color: #e4405f;"></i></a>
-                            <a href="#"><i class="fa fa-linkedin" style="font-size: 2em; color: #0077b5;"></i></a>
-                            <a href="#"><i class="fa fa-youtube" style="font-size: 2em; color: #ff0000;"></i></a>
-                        </div>
-                    `,
-                    category: 'Mídia',
-                },
-                // Elementos de preços
-                {
-                    id: 'pricing-table',
-                    label: '<i class="fa fa-dollar"></i> Tabela de Preços',
-                    content: `
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto; padding: 40px 20px;">
-                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
-                                <h3>Básico</h3>
-                                <p style="font-size: 2em; color: #007bff;">R$ 29</p>
-                                <ul style="list-style: none; padding: 0; margin: 20px 0;">
-                                    <li>Item 1</li>
-                                    <li>Item 2</li>
-                                    <li>Item 3</li>
-                                </ul>
-                                <button style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Escolher</button>
-                            </div>
-                            <div style="border: 2px solid #007bff; border-radius: 8px; padding: 20px; text-align: center;">
-                                <h3>Profissional</h3>
-                                <p style="font-size: 2em; color: #007bff;">R$ 79</p>
-                                <ul style="list-style: none; padding: 0; margin: 20px 0;">
-                                    <li>Item 1</li>
-                                    <li>Item 2</li>
-                                    <li>Item 3</li>
-                                </ul>
-                                <button style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Escolher</button>
-                            </div>
-                            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center;">
-                                <h3>Empresarial</h3>
-                                <p style="font-size: 2em; color: #007bff;">R$ 199</p>
-                                <ul style="list-style: none; padding: 0; margin: 20px 0;">
-                                    <li>Item 1</li>
-                                    <li>Item 2</li>
-                                    <li>Item 3</li>
-                                </ul>
-                                <button style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Escolher</button>
-                            </div>
-                        </div>
-                    `,
-                    category: 'Componentes',
+                    name: 'Geral',
+                    properties: [{
+                            type: 'color',
+                            property: 'color',
+                            label: 'Cor do Texto',
+                        },
+                        {
+                            type: 'color',
+                            property: 'background-color',
+                            label: 'Cor de Fundo',
+                        },
+                        {
+                            type: 'select',
+                            property: 'text-align',
+                            label: 'Alinhamento',
+                            options: [{
+                                    value: 'left',
+                                    label: 'Esquerda'
+                                },
+                                {
+                                    value: 'center',
+                                    label: 'Centro'
+                                },
+                                {
+                                    value: 'right',
+                                    label: 'Direita'
+                                },
+                            ]
+                        },
+                        {
+                            type: 'slider',
+                            property: 'font-size',
+                            label: 'Tamanho da Fonte',
+                            defaults: '16px',
+                            step: 1,
+                            max: 100,
+                            min: 10,
+                        }
+                    ]
                 }
             ]
         }
     });
 
-    // Configurar comandos para dispositivos
-    editor.Commands.add('set-device-desktop', {
-        run: editor => editor.setDevice('Desktop')
-    });
-    editor.Commands.add('set-device-tablet', {
-        run: editor => editor.setDevice('Tablet')
-    });
-    editor.Commands.add('set-device-mobile', {
-        run: editor => editor.setDevice('Mobile portrait')
+    // Configurações adicionais para posicionamento livre
+    editor.on('load', function() {
+        // Desativa o snap to grid
+        editor.Canvas.getModel().set('snap', false);
+
+        // Configura todos os componentes como arrastáveis
+        editor.DomComponents.getTypes().map(type => {
+            editor.DomComponents.addType(type.id, {
+                model: {
+                    defaults: {
+                        draggable: true,
+                        resizable: true,
+                        style: {
+                            position: 'absolute',
+                            'min-height': 'auto'
+                        }
+                    }
+                }
+            });
+        });
+
+        // Atualiza o estilo quando um componente é selecionado
+        editor.on('component:selected', function(model) {
+            model.set('draggable', true);
+            model.set('resizable', true);
+
+            // Garante que o componente tenha posição absoluta
+            const style = model.get('style');
+            if (!style.position || style.position !== 'absolute') {
+                model.set('style', {
+                    ...style,
+                    position: 'absolute',
+                    left: style.left || '50px',
+                    top: style.top || '50px'
+                });
+            }
+        });
     });
 
-    // Adicionar dispositivos personalizados
-    editor.Devices.add({
-        id: 'desktop',
-        name: 'Desktop',
-        width: ''
-    });
-    editor.Devices.add({
-        id: 'tablet',
-        name: 'Tablet',
-        width: '768px',
-        widthMedia: '810px'
-    });
-    editor.Devices.add({
-        id: 'mobile-portrait',
-        name: 'Mobile',
-        width: '320px',
-        widthMedia: '480px'
-    });
-
-    // Carregar conteúdo existente
+    // Carregar o conteúdo do blog APÓS o editor ser inicializado
     <?php if (!empty($blog['conteudo'])): ?>
         editor.setComponents(`<?php echo addslashes($blog['conteudo']); ?>`);
     <?php endif; ?>
@@ -783,13 +481,19 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const html = editor.getHtml();
-            const css = editor.getCss();
-            
-            document.getElementById('conteudo').value = html;
-            document.getElementById('css').value = css;
-            
-            form.submit();
+
+            try {
+                const html = editor.getHtml();
+                const css = editor.getCss();
+
+                document.getElementById('conteudo').value = html || '';
+                document.getElementById('css').value = css || '';
+
+                form.removeEventListener('submit', arguments.callee);
+                form.submit();
+            } catch (error) {
+                console.error('Erro ao salvar conteúdo:', error);
+            }
         });
     }
 });
