@@ -162,7 +162,7 @@ if ($weatherId == 800 && $isDayTime) {
                 extend: {
                     colors: {
                         'eyefind-blue': '#067191',
-                        'eyefind-light': '#E8F4F8',
+                        'eyefind-light': '#F5F5F7',
                         'eyefind-dark': '#02404F',
                         'eyefind-conteiner': '#E6F0F3'
                     }
