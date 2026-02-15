@@ -433,8 +433,6 @@ function minifyCss($css)
             });
         });
 
-        editor.setComponents('<?php echo addslashes($blog['conteudo']); ?>');
-        editor.setStyle('<?php echo addslashes($blog['css']); ?>');
 
         const form = document.querySelector('form[action="edit_blog.php?id=<?php echo $blog['id']; ?>"]');
         if (form) {
