@@ -174,6 +174,7 @@ function minifyCss($css)
             }
         }
 
+        // Inicialização do GrapesJS
         document.addEventListener('DOMContentLoaded', function() {
             const editor = grapesjs.init({
                 container: '#grapesjs-editor',
@@ -185,264 +186,310 @@ function minifyCss($css)
                 components: {
                     wrapper: {
                         removable: false,
-                        scripts: [],
+                        scripts: []
                     }
                 },
                 plugins: [
-                    'grapesjs-plugin-forms',
-                    'grapesjs-tailwind',
-                    'grapesjs-preset-webpage',
                     'grapesjs-blocks-basic',
+                    'grapesjs-plugin-forms',
                     'grapesjs-plugin-export',
                     'grapesjs-custom-code',
                     'grapesjs-blocks-flexbox',
-                    'grapesjs-templates-manager',
-                    'grapesjs-plugin-toolbox',
-                    'grapesjs-symbols',
+                    'grapesjs-tabs',
+                    'grapesjs-navbar',
+                    'grapesjs-component-countdown',
+                    'grapesjs-style-bg',
+                    'grapesjs-tooltip',
+                    'grapesjs-parser',
+                    'grapesjs-tailwind',
                     'grapesjs-blocks-bootstrap5',
-                    'grapesjs-style-filter',
+                    'grapesjs-style-filter'
                 ],
                 pluginsOpts: {
-                    'grapesjs-plugin-forms': {},
-                    'grapesjs-tailwind': {},
-                    'grapesjs-preset-webpage': {},
                     'grapesjs-blocks-basic': {
                         flexGrid: true,
-                        blocks: ['*']
+                        blocks: ['*'] // Todos os blocos básicos
                     },
+                    'grapesjs-plugin-forms': {},
                     'grapesjs-plugin-export': {},
                     'grapesjs-custom-code': {},
                     'grapesjs-blocks-flexbox': {},
-                    'grapesjs-templates-manager': {},
+                    'grapesjs-tabs': {},
+                    'grapesjs-navbar': {},
+                    'grapesjs-component-countdown': {},
+                    'grapesjs-style-bg': {},
+                    'grapesjs-tooltip': {},
+                    'grapesjs-parser': {},
+                    'grapesjs-tailwind': {
+                        // Configuração para usar classes Tailwind nos estilos
+                        tailwindConfig: {
+                            theme: {
+                                extend: {
+                                    colors: {
+                                        'eyefind-blue': '#067191',
+                                        'eyefind-light': '#E8F4F8',
+                                        'eyefind-dark': '#02404F'
+                                    }
+                                }
+                            }
+                        }
+                    },
                     'grapesjs-blocks-bootstrap5': {},
-                    'grapesjs-plugin-toolbox': {},
-                    'grapesjs-symbols': {},
                     'grapesjs-style-filter': {}
                 },
+                // Configuração avançada do gerenciador de estilos
                 styleManager: {
-                    sectors: [{
-                            name: 'Geral',
-                            properties: [{
-                                    type: 'color',
-                                    property: 'color',
-                                    label: 'Cor do Texto',
-                                },
-                                {
-                                    type: 'color',
-                                    property: 'background-color',
-                                    label: 'Cor de Fundo',
-                                },
-                                {
-                                    type: 'select',
-                                    property: 'text-align',
-                                    label: 'Alinhamento',
-                                    options: [{
-                                            value: 'left',
-                                            label: 'Esquerda'
-                                        },
-                                        {
-                                            value: 'center',
-                                            label: 'Centro'
-                                        },
-                                        {
-                                            value: 'right',
-                                            label: 'Direita'
-                                        },
+                    sectors: [
+                        {
+                            name: 'Tipografia',
+                            open: false,
+                            properties: [
+                                { type: 'color', property: 'color', label: 'Cor do texto' },
+                                { type: 'select', property: 'font-family', label: 'Fonte', 
+                                    options: [
+                                        { value: 'Arial, sans-serif', label: 'Arial' },
+                                        { value: 'Helvetica, sans-serif', label: 'Helvetica' },
+                                        { value: 'Georgia, serif', label: 'Georgia' },
+                                        { value: 'Times New Roman, serif', label: 'Times New Roman' },
+                                        { value: 'Verdana, sans-serif', label: 'Verdana' },
+                                        { value: 'Courier New, monospace', label: 'Courier New' }
                                     ]
                                 },
-                                {
-                                    type: 'slider',
-                                    property: 'font-size',
-                                    label: 'Tamanho da Fonte',
-                                    defaults: '16px',
-                                    step: 1,
-                                    max: 100,
-                                    min: 10,
+                                { type: 'slider', property: 'font-size', label: 'Tamanho', units: ['px', 'em', 'rem'], defaults: '16px', min: 8, max: 100 },
+                                { type: 'slider', property: 'line-height', label: 'Altura da linha', units: ['', 'px', 'em'], defaults: '1.5', min: 0.5, max: 3, step: 0.1 },
+                                { type: 'slider', property: 'letter-spacing', label: 'Espaçamento', units: ['px', 'em'], defaults: '0', min: -5, max: 20 },
+                                { type: 'select', property: 'font-weight', label: 'Peso', 
+                                    options: [
+                                        { value: 'normal', label: 'Normal' },
+                                        { value: 'bold', label: 'Negrito' },
+                                        { value: 'lighter', label: 'Leve' },
+                                        { value: '100', label: '100' },
+                                        { value: '200', label: '200' },
+                                        { value: '300', label: '300' },
+                                        { value: '400', label: '400' },
+                                        { value: '500', label: '500' },
+                                        { value: '600', label: '600' },
+                                        { value: '700', label: '700' },
+                                        { value: '800', label: '800' },
+                                        { value: '900', label: '900' }
+                                    ]
+                                },
+                                { type: 'select', property: 'text-align', label: 'Alinhamento', 
+                                    options: [
+                                        { value: 'left', label: 'Esquerda' },
+                                        { value: 'center', label: 'Centro' },
+                                        { value: 'right', label: 'Direita' },
+                                        { value: 'justify', label: 'Justificado' }
+                                    ]
+                                },
+                                { type: 'select', property: 'text-transform', label: 'Transformar', 
+                                    options: [
+                                        { value: 'none', label: 'Normal' },
+                                        { value: 'uppercase', label: 'MAIÚSCULAS' },
+                                        { value: 'lowercase', label: 'minúsculas' },
+                                        { value: 'capitalize', label: 'Primeira Maiúscula' }
+                                    ]
                                 }
                             ]
                         },
                         {
                             name: 'Dimensões',
-                            properties: [{
-                                    type: 'slider',
-                                    property: 'width',
-                                    label: 'Largura',
-                                    units: ['px', '%', 'vw'],
-                                    defaults: 'auto',
-                                    min: 0,
-                                    max: 1000,
+                            open: false,
+                            properties: [
+                                { type: 'slider', property: 'width', label: 'Largura', units: ['px', '%', 'vw'], defaults: 'auto', min: 0, max: 2000 },
+                                { type: 'slider', property: 'height', label: 'Altura', units: ['px', '%', 'vh'], defaults: 'auto', min: 0, max: 2000 },
+                                { type: 'slider', property: 'max-width', label: 'Largura máxima', units: ['px', '%'], min: 0, max: 2000 },
+                                { type: 'slider', property: 'min-height', label: 'Altura mínima', units: ['px', '%'], min: 0, max: 2000 },
+                                { type: 'composite', property: 'margin', label: 'Margem', properties: [
+                                    { type: 'slider', property: 'margin-top', label: 'Topo', units: ['px', 'em', '%'], min: -100, max: 500 },
+                                    { type: 'slider', property: 'margin-right', label: 'Direita', units: ['px', 'em', '%'], min: -100, max: 500 },
+                                    { type: 'slider', property: 'margin-bottom', label: 'Inferior', units: ['px', 'em', '%'], min: -100, max: 500 },
+                                    { type: 'slider', property: 'margin-left', label: 'Esquerda', units: ['px', 'em', '%'], min: -100, max: 500 }
+                                ]},
+                                { type: 'composite', property: 'padding', label: 'Preenchimento', properties: [
+                                    { type: 'slider', property: 'padding-top', label: 'Topo', units: ['px', 'em', '%'], min: 0, max: 500 },
+                                    { type: 'slider', property: 'padding-right', label: 'Direita', units: ['px', 'em', '%'], min: 0, max: 500 },
+                                    { type: 'slider', property: 'padding-bottom', label: 'Inferior', units: ['px', 'em', '%'], min: 0, max: 500 },
+                                    { type: 'slider', property: 'padding-left', label: 'Esquerda', units: ['px', 'em', '%'], min: 0, max: 500 }
+                                ]}
+                            ]
+                        },
+                        {
+                            name: 'Fundo',
+                            open: false,
+                            buildProps: ['background-color', 'background-image', 'background-repeat', 'background-attachment', 'background-position', 'background-size'],
+                            properties: [
+                                { type: 'color', property: 'background-color', label: 'Cor de fundo' },
+                                { type: 'background-image', property: 'background-image', label: 'Imagem de fundo' },
+                                { type: 'select', property: 'background-repeat', label: 'Repetir', 
+                                    options: [
+                                        { value: 'repeat', label: 'Repetir' },
+                                        { value: 'no-repeat', label: 'Não repetir' },
+                                        { value: 'repeat-x', label: 'Repetir horizontal' },
+                                        { value: 'repeat-y', label: 'Repetir vertical' }
+                                    ]
                                 },
-                                {
-                                    type: 'slider',
-                                    property: 'height',
-                                    label: 'Altura',
-                                    units: ['px', '%', 'vh'],
-                                    defaults: 'auto',
-                                    min: 0,
-                                    max: 1000,
+                                { type: 'select', property: 'background-size', label: 'Tamanho',
+                                    options: [
+                                        { value: 'auto', label: 'Automático' },
+                                        { value: 'cover', label: 'Cobrir' },
+                                        { value: 'contain', label: 'Conter' }
+                                    ]
                                 },
-                                {
-                                    type: 'slider',
-                                    property: 'margin',
-                                    label: 'Margem',
-                                    units: ['px', 'em', '%'],
-                                    defaults: '0',
-                                    min: 0,
-                                    max: 100,
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'padding',
-                                    label: 'Preenchimento',
-                                    units: ['px', 'em', '%'],
-                                    defaults: '0',
-                                    min: 0,
-                                    max: 100,
+                                { type: 'select', property: 'background-position', label: 'Posição',
+                                    options: [
+                                        { value: 'left top', label: 'Esquerda topo' },
+                                        { value: 'left center', label: 'Esquerda centro' },
+                                        { value: 'left bottom', label: 'Esquerda inferior' },
+                                        { value: 'center top', label: 'Centro topo' },
+                                        { value: 'center center', label: 'Centro centro' },
+                                        { value: 'center bottom', label: 'Centro inferior' },
+                                        { value: 'right top', label: 'Direita topo' },
+                                        { value: 'right center', label: 'Direita centro' },
+                                        { value: 'right bottom', label: 'Direita inferior' }
+                                    ]
                                 }
                             ]
                         },
                         {
-                            name: 'Decorações',
-                            properties: [{
-                                    type: 'slider',
-                                    property: 'border-radius',
-                                    label: 'Borda Arredondada',
-                                    units: ['px', '%'],
-                                    defaults: '0',
-                                    min: 0,
-                                    max: 100,
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'border-width',
-                                    label: 'Espessura da Borda',
-                                    units: ['px'],
-                                    defaults: '0',
-                                    min: 0,
-                                    max: 20,
-                                },
-                                {
-                                    type: 'color',
-                                    property: 'border-color',
-                                    label: 'Cor da Borda',
-                                },
-                                {
-                                    type: 'select',
-                                    property: 'border-style',
-                                    label: 'Estilo da Borda',
-                                    options: [{
-                                            value: 'none',
-                                            label: 'Nenhum'
-                                        },
-                                        {
-                                            value: 'solid',
-                                            label: 'Sólido'
-                                        },
-                                        {
-                                            value: 'dashed',
-                                            label: 'Tracejado'
-                                        },
-                                        {
-                                            value: 'dotted',
-                                            label: 'Pontilhado'
-                                        },
-                                    ]
-                                }
+                            name: 'Bordas',
+                            open: false,
+                            properties: [
+                                { type: 'composite', property: 'border-radius', label: 'Raio da borda', properties: [
+                                    { type: 'slider', property: 'border-top-left-radius', label: 'Superior esquerdo', units: ['px', '%'], min: 0, max: 200 },
+                                    { type: 'slider', property: 'border-top-right-radius', label: 'Superior direito', units: ['px', '%'], min: 0, max: 200 },
+                                    { type: 'slider', property: 'border-bottom-right-radius', label: 'Inferior direito', units: ['px', '%'], min: 0, max: 200 },
+                                    { type: 'slider', property: 'border-bottom-left-radius', label: 'Inferior esquerdo', units: ['px', '%'], min: 0, max: 200 }
+                                ]},
+                                { type: 'composite', property: 'border', label: 'Borda', properties: [
+                                    { type: 'slider', property: 'border-width', label: 'Espessura', units: ['px'], min: 0, max: 50 },
+                                    { type: 'select', property: 'border-style', label: 'Estilo', 
+                                        options: [
+                                            { value: 'none', label: 'Nenhum' },
+                                            { value: 'solid', label: 'Sólido' },
+                                            { value: 'dashed', label: 'Tracejado' },
+                                            { value: 'dotted', label: 'Pontilhado' },
+                                            { value: 'double', label: 'Dupla' },
+                                            { value: 'groove', label: 'Sulco' },
+                                            { value: 'ridge', label: 'Crista' }
+                                        ]
+                                    },
+                                    { type: 'color', property: 'border-color', label: 'Cor' }
+                                ]}
                             ]
                         },
                         {
                             name: 'Sombras e Efeitos',
-                            properties: [{
-                                    type: 'stack',
-                                    property: 'box-shadow',
-                                    label: 'Sombra',
-                                    properties: [{
-                                            type: 'slider',
-                                            units: ['px'],
-                                            property: 'offsetX',
-                                            defaults: 0,
-                                            min: -50,
-                                            max: 50,
-                                            label: 'X'
-                                        },
-                                        {
-                                            type: 'slider',
-                                            units: ['px'],
-                                            property: 'offsetY',
-                                            defaults: 0,
-                                            min: -50,
-                                            max: 50,
-                                            label: 'Y'
-                                        },
-                                        {
-                                            type: 'slider',
-                                            units: ['px'],
-                                            property: 'blur',
-                                            defaults: 0,
-                                            min: 0,
-                                            max: 50,
-                                            label: 'Desfoque'
-                                        },
-                                        {
-                                            type: 'slider',
-                                            units: ['px'],
-                                            property: 'spread',
-                                            defaults: 0,
-                                            min: 0,
-                                            max: 50,
-                                            label: 'Expansão'
-                                        },
-                                        {
-                                            type: 'color',
-                                            property: 'color',
-                                            label: 'Cor'
-                                        },
+                            open: false,
+                            properties: [
+                                { type: 'box-shadow', property: 'box-shadow', label: 'Sombra da caixa' },
+                                { type: 'text-shadow', property: 'text-shadow', label: 'Sombra do texto' },
+                                { type: 'slider', property: 'opacity', label: 'Opacidade', units: ['', '%'], defaults: 1, step: 0.1, max: 1, min: 0 },
+                                { type: 'slider', property: 'transform-rotate', label: 'Rotação', units: ['deg'], min: -180, max: 180 },
+                                { type: 'select', property: 'cursor', label: 'Cursor',
+                                    options: [
+                                        { value: 'auto', label: 'Automático' },
+                                        { value: 'pointer', label: 'Mão' },
+                                        { value: 'move', label: 'Mover' },
+                                        { value: 'text', label: 'Texto' },
+                                        { value: 'wait', label: 'Espera' },
+                                        { value: 'help', label: 'Ajuda' }
                                     ]
-                                },
-                                {
-                                    type: 'slider',
-                                    property: 'opacity',
-                                    label: 'Opacidade',
-                                    defaults: 1,
-                                    step: 0.1,
-                                    max: 1,
-                                    min: 0,
                                 }
                             ]
+                        }
+                    ]
+                },
+                // Configuração do painel de blocos
+                blockManager: {
+                    appendTo: '#blocks-container', // Opcional, se quiser customizar
+                    blocks: [
+                        // Blocos personalizados com Tailwind
+                        {
+                            id: 'tailwind-card',
+                            label: 'Card Moderno',
+                            content: '<div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition m-4"><img class="w-full h-48 object-cover" src="https://via.placeholder.com/400x200" alt="Card image"><div class="p-6"><h3 class="text-xl font-bold text-eyefind-blue mb-2">Título do Card</h3><p class="text-gray-700 mb-4">Descrição do card com um texto exemplo para mostrar o conteúdo.</p><button class="bg-eyefind-blue text-white px-4 py-2 rounded hover:bg-eyefind-dark">Saiba mais</button></div></div>',
+                            category: 'Tailwind',
+                        },
+                        {
+                            id: 'tailwind-hero',
+                            label: 'Hero Section',
+                            content: '<section class="bg-gradient-to-r from-eyefind-blue to-eyefind-dark text-white py-20 px-4"><div class="container mx-auto text-center"><h1 class="text-4xl md:text-5xl font-bold mb-4">Título Principal</h1><p class="text-xl mb-8 max-w-2xl mx-auto">Descrição da seção hero com um texto impactante para capturar a atenção.</p><button class="bg-white text-eyefind-blue px-6 py-3 rounded-lg font-semibold hover:bg-gray-100">Call to Action</button></div></section>',
+                            category: 'Tailwind',
+                        },
+                        {
+                            id: 'tailwind-grid',
+                            label: 'Grid 3 Colunas',
+                            content: '<div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6"><div class="bg-gray-100 p-4 rounded"><h3 class="font-bold">Coluna 1</h3><p>Conteúdo da coluna</p></div><div class="bg-gray-100 p-4 rounded"><h3 class="font-bold">Coluna 2</h3><p>Conteúdo da coluna</p></div><div class="bg-gray-100 p-4 rounded"><h3 class="font-bold">Coluna 3</h3><p>Conteúdo da coluna</p></div></div>',
+                            category: 'Tailwind',
                         }
                     ]
                 }
             });
 
+            // Personaliza a barra de comandos (adiciona botões)
+            editor.Panels.addButton('options', {
+                id: 'preview',
+                className: 'fa fa-eye',
+                command: 'preview',
+                attributes: { title: 'Pré-visualizar' }
+            });
 
+            editor.Panels.addButton('options', {
+                id: 'export',
+                className: 'fa fa-code',
+                command: 'export-template',
+                attributes: { title: 'Exportar HTML/CSS' }
+            });
 
-            // Manipulador do formulário
-            const form = document.querySelector('form[action="new_blog.php"]');
+            // Comando de preview personalizado (abre nova aba)
+            editor.Commands.add('preview', {
+                run: function(editor) {
+                    const html = editor.getHtml();
+                    const css = editor.getCss();
+                    const previewWindow = window.open('', '_blank');
+                    previewWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <script src="https://cdn.tailwindcss.com"></script>
+                            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+                            <style>${css}</style>
+                        </head>
+                        <body>${html}</body>
+                        </html>
+                    `);
+                    previewWindow.document.close();
+                }
+            });
+
+            // Manipulador do formulário de submissão
+            const form = document.querySelector('form[method="POST"]');
             if (form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-
                     try {
                         const html = editor.getHtml();
                         const css = editor.getCss();
-
                         document.getElementById('conteudo').value = html || '';
                         document.getElementById('css').value = css || '';
-
-                        form.removeEventListener('submit', arguments.callee);
+                        // A imagem já está em imagem_final via preview
                         form.submit();
                     } catch (error) {
                         console.error('Erro ao salvar conteúdo:', error);
+                        alert('Erro ao gerar o conteúdo do editor.');
                     }
                 });
             }
-        });
 
-        editor.on('component:drag:start', (component) => {
-            if (component.get('type') === 'header' || component.get('customNoDrag')) {
-                editor.get('DomComponents').getWrapper().trigger('component:drag:stop');
-            }
-        });
+            // Restrição de drag para componentes específicos (opcional)
+            editor.on('component:drag:start', (component) => {
+                if (component.get('type') === 'header' || component.get('customNoDrag')) {
+                    editor.get('DomComponents').getWrapper().trigger('component:drag:stop');
+                }
+            });
 
         editor.on('component:drag', (component) => {
             const wrapper = editor.getWrapper();
