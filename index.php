@@ -179,7 +179,7 @@ if ($weatherId == 800 && $isDayTime) {
     </style>
 </head>
 
-<body class="bg-eyefind-blue">
+<body class="bg-eyefind-light">
     <section class="bg-[#488BC2] shadow-md">
         <div class="max-w-6xl mx-auto p-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
