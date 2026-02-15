@@ -102,6 +102,19 @@ function minifyCss($css)
     <script src="https://cdn.jsdelivr.net/npm/grapesjs-blocks-bootstrap5@1.0.0/dist/grapesjs-blocks-bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/grapesjs-plugin-toolbox@0.1.0/dist/grapesjs-plugin-toolbox.min.js"></script>
     <script src="https://unpkg.com/grapesjs-symbols@1.0.0/dist/grapesjs-symbols.min.js"></script>
+
+    <script src="https://unpkg.com/grapesjs-plugin-forms@2.0.5"></script>
+    <script src="https://unpkg.com/grapesjs-tailwind@latest"></script>
+    <script src="https://unpkg.com/grapesjs-preset-webpage@1.0.3"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-basic@1.0.1"></script>
+    <script src="https://unpkg.com/grapesjs-plugin-export@1.0.7"></script>
+    <script src="https://unpkg.com/grapesjs-custom-code@1.0.1"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-flexbox@1.0.1"></script>
+    <script src="https://unpkg.com/grapesjs-templates-manager@1.0.2"></script>
+    <script src="https://unpkg.com/grapesjs-plugin-toolbox@0.1.0"></script>
+    <script src="https://unpkg.com/grapesjs-symbols@1.0.0"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-bootstrap5@1.0.0"></script>
+    <script src="https://unpkg.com/grapesjs-style-filter@1.0.0"></script>
     <script>
         tailwind.config = {
             theme: {
