@@ -101,40 +101,39 @@ function minifyCss($css)
 
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Novo Blog - Eyefind.info</title>
     <link rel="icon" type="image/png" sizes="192x192" href="icon/android-chrome-192x192.png">
-
     <link rel="icon" type="image/png" sizes="512x512" href="icon/android-chrome-512x512.png">
-
     <link rel="apple-touch-icon" sizes="180x180" href="icon/apple-touch-icon.png">
-
     <link rel="icon" type="image/png" sizes="16x16" href="icon/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32x32.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Tailwind CSS + Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- GRAPESJS Core -->
+    <!-- GrapesJS Core (versão estável mais recente) -->
     <link href="https://unpkg.com/grapesjs@0.22.6/dist/css/grapes.min.css" rel="stylesheet">
     <script src="https://unpkg.com/grapesjs@0.22.6/dist/grapes.min.js"></script>
 
-    <!-- Plugins -->
-    <script src="https://unpkg.com/grapesjs-plugin-forms@2.0.5"></script>
-    <script src="https://unpkg.com/grapesjs-tailwind@latest"></script>
-    <script src="https://unpkg.com/grapesjs-preset-webpage@1.0.3"></script>
+    <!-- Plugins essenciais e modernos -->
     <script src="https://unpkg.com/grapesjs-blocks-basic@1.0.1"></script>
+    <script src="https://unpkg.com/grapesjs-plugin-forms@2.0.5"></script>
     <script src="https://unpkg.com/grapesjs-plugin-export@1.0.7"></script>
     <script src="https://unpkg.com/grapesjs-custom-code@1.0.1"></script>
     <script src="https://unpkg.com/grapesjs-blocks-flexbox@1.0.1"></script>
-    <script src="https://unpkg.com/grapesjs-templates-manager@1.0.2"></script>
-    <script src="https://unpkg.com/grapesjs-plugin-toolbox@0.1.0"></script>
-    <script src="https://unpkg.com/grapesjs-symbols@1.0.0"></script>
+    <script src="https://unpkg.com/grapesjs-tabs@1.0.6"></script>
+    <script src="https://unpkg.com/grapesjs-navbar@1.0.3"></script>
+    <script src="https://unpkg.com/grapesjs-component-countdown@1.0.2"></script>
+    <script src="https://unpkg.com/grapesjs-style-bg@2.0.2"></script>
+    <script src="https://unpkg.com/grapesjs-tooltip@1.0.2"></script>
+    <script src="https://unpkg.com/grapesjs-parser@0.1.0"></script>
+    <script src="https://unpkg.com/grapesjs-tailwind@2.1.0"></script>
     <script src="https://unpkg.com/grapesjs-blocks-bootstrap5@1.0.0"></script>
     <script src="https://unpkg.com/grapesjs-style-filter@1.0.0"></script>
 
