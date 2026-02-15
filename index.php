@@ -250,10 +250,6 @@ if ($weatherId == 800 && $isDayTime) {
     <div class="w-full bg-white shadow-md">
         <div class="max-w-6xl mx-auto">
             <div class="flex overflow-x-auto scrollbar-hide whitespace-nowrap">
-                <a href="/lifeinvader/index.php" class="inline-flex items-center text-left p-3 hover:bg-eyefind-light cursor-pointer transition group space-x-3 border-r">
-                    <i class="fas fa-briefcase text-2xl text-red-500 group-hover:scale-110 transition"></i>
-                    <p class="font-bold text-eyefind-dark">LifeInvader</p>
-                </a>
 
                 <?php foreach ($categorias as $categoria): ?>
                     <a href="category.php?id=<?php echo $categoria["id"]; ?>" class="inline-flex items-center text-left p-3 hover:bg-eyefind-light cursor-pointer transition group space-x-3 border-r">
