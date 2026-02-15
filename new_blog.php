@@ -602,4 +602,4 @@ function minifyCss($css)
         </section>
     </div>
 </body>
-<html>
+</html>
