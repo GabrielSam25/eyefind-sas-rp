@@ -1016,43 +1016,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         <?php endforeach; ?>
                     </select>
                 </div>
-    <div class="mb-4">
-        <label for="conteudo" class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog</label>
-        
-        <!-- Painéis do editor -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- Painel lateral esquerdo - Blocos -->
-            <div class="lg:col-span-1">
-                <div class="bg-gray-100 p-4 rounded-lg">
-                    <h3 class="text-lg font-bold text-eyefind-blue mb-4">Elementos</h3>
-                    <div id="blocks-container" class="space-y-2 max-h-[600px] overflow-y-auto"></div>
+                <div class="mb-4">
+                    <label for="conteudo" class="block text-eyefind-dark font-bold mb-2">Conteúdo do Blog</label>
+                    <div id="grapesjs-editor"></div>
+                    <input type="hidden" name="conteudo" id="conteudo" value="<?php echo htmlspecialchars($blog['conteudo']); ?>">
+                    <input type="hidden" name="css" id="css" value="<?php echo htmlspecialchars($blog['css']); ?>">
                 </div>
-                <div class="bg-gray-100 p-4 rounded-lg mt-4">
-                    <h3 class="text-lg font-bold text-eyefind-blue mb-4">Camadas</h3>
-                    <div id="layers-container" class="max-h-[300px] overflow-y-auto"></div>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
+                        Salvar Alterações
+                    </button>
                 </div>
-            </div>
-            
-            <!-- Editor principal -->
-            <div class="lg:col-span-2">
-                <div class="bg-white border border-gray-200 rounded-lg">
-                    <div class="panel__basic-actions border-b border-gray-200 p-2 flex gap-2"></div>
-                    <div class="panel__devices border-b border-gray-200 p-2 flex gap-2"></div>
-                    <div id="grapesjs-editor" style="height: 700px;"></div>
-                </div>
-            </div>
-            
-            <!-- Painel lateral direito - Estilos -->
-            <div class="lg:col-span-1">
-                <div class="bg-gray-100 p-4 rounded-lg">
-                    <h3 class="text-lg font-bold text-eyefind-blue mb-4">Estilos</h3>
-                    <div id="styles-container" class="max-h-[700px] overflow-y-auto"></div>
-                </div>
-            </div>
-        </div>
-        
-        <input type="hidden" name="conteudo" id="conteudo" value="<?php echo htmlspecialchars($blog['conteudo']); ?>">
-        <input type="hidden" name="css" id="css" value="<?php echo htmlspecialchars($blog['css']); ?>">
+            </form>
+        </section>
     </div>
 </body>
 
