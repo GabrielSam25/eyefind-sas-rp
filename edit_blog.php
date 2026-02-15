@@ -146,7 +146,24 @@ document.addEventListener('DOMContentLoaded', function() {
         ],
         pluginsOpts: {
             'grapesjs-plugin-forms': {},
-            'grapesjs-tailwind': {},
+            'grapesjs-tailwind': {
+                // Configuração do Tailwind
+                tailwindConfig: {
+                    theme: {
+                        extend: {
+                            colors: {
+                                primary: '#ff7a00',
+                                darknav: '#2e2e2e',
+                                lightgray: '#d9d9d9'
+                            },
+                            fontFamily: {
+                                serif: ['Playfair Display', 'serif'],
+                                sans: ['Inter', 'sans-serif']
+                            }
+                        }
+                    }
+                }
+            },
             'grapesjs-preset-webpage': {},
             'grapesjs-blocks-basic': {},
             'grapesjs-plugin-export': {},
@@ -163,8 +180,13 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         canvas: {
             styles: [
-                'https://unpkg.com/grapesjs/dist/css/grapes.min.css',
+                'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
+                'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;500;600&display=swap',
+                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
             ],
+            scripts: [
+                'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js'
+            ]
         },
         deviceManager: {
             devices: [{
