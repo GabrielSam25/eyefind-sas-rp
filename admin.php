@@ -45,6 +45,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+        // Sites pendentes
+    $sites_pendentes = $pdo->query("
+        SELECT w.*, u.nome as usuario_nome 
+        FROM websites w 
+        JOIN usuarios u ON w.usuario_id = u.id 
+        WHERE w.status = 'pending'
+    ")->fetchAll(PDO::FETCH_ASSOC);
+
+    // Todos os sites (para tabela geral)
+    $sites = $pdo->query("
+        SELECT w.*, u.nome as usuario_nome 
+        FROM websites w 
+        JOIN usuarios u ON w.usuario_id = u.id
+    ")->fetchAll(PDO::FETCH_ASSOC);
+
     // Excluir site
     if (isset($_POST['excluir_site'])) {
         $site_id = intval($_POST['site_id']);
