@@ -49,9 +49,16 @@ function getCategorias($pdo)
 
 function getWebsiteDoMinuto($pdo)
 {
-    $stmt = $pdo->query("SELECT * FROM websites ORDER BY RAND() LIMIT 1");
+    $stmt = $pdo->query("
+        SELECT * 
+        FROM websites 
+        WHERE status = 'approved' 
+        ORDER BY RAND() 
+        LIMIT 1
+    ");
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
 
 function getNoticiaDestaque($pdo)
 {
