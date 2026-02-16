@@ -28,6 +28,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
+        // Aprovar site
+        if (isset($_POST['aprovar_site'])) {
+            $site_id = intval($_POST['site_id']);
+            $stmt = $pdo->prepare("UPDATE websites SET status = 'approved' WHERE id = ?");
+            $stmt->execute([$site_id]);
+            $_SESSION['sucesso'] = "Site aprovado com sucesso!";
+            header('Location: admin.php');
+            exit;
+        }
+
+        // Rejeitar site
+        if (isset($_POST['rejeitar_site'])) {
+            $site_id = intval($_POST['site_id']);
+            $stmt = $pdo->prepare("UPDATE websites SET status = 'rejected' WHERE id = ?");
+            $stmt->execute([$site_id]);
+            $_SESSION['sucesso'] = "Site rejeitado.";
+            header('Location: admin.php');
+            exit;
+        }
+
         $nome = $_POST['nome'];
         $website_id = $_POST['website_id'];
         $url = "website.php?id=" . $website_id; // Gera a URL com base no ID do website
