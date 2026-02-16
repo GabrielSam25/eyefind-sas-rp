@@ -39,6 +39,9 @@ function sanitize_css($css)
 }
 
 $sanitized_css = sanitize_css($website['css_personalizado']);
+
+$htmlFinal = renderDynamicBlocks($website['conteudo'], $website['id'], $pdo);
+echo $htmlFinal;
 ?>
 
 <!DOCTYPE html>
