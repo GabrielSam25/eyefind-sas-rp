@@ -104,7 +104,12 @@ function getCategoriaById($pdo, $id)
 
 function getWebsitesByCategoria($pdo, $categoria_id)
 {
-    $stmt = $pdo->prepare("SELECT * FROM websites WHERE categoria_id = ?");
+    $stmt = $pdo->prepare("
+        SELECT * 
+        FROM websites 
+        WHERE categoria_id = ? 
+        AND status = 'approved'
+    ");
     $stmt->execute([$categoria_id]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
