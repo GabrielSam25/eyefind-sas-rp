@@ -305,6 +305,15 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
                         <?php foreach ($sites as $site): ?>
                             <tr>
                                 <td class="py-2 px-4 border-b"><?php echo $site['id']; ?></td>
+                                <th class="py-2 px-4 border-b">Status</th>
+                                <td class="py-2 px-4 border-b">
+                                    <?php 
+                                        $status = $site['status'];
+                                        if ($status == 'approved') echo '<span class="text-green-600">Aprovado</span>';
+                                        elseif ($status == 'pending') echo '<span class="text-yellow-600">Pendente</span>';
+                                        elseif ($status == 'rejected') echo '<span class="text-red-600">Rejeitado</span>';
+                                    ?>
+                                </td>
                                 <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['nome']); ?></td>
                                 <td class="py-2 px-4 border-b">
                                     <a href="<?php echo htmlspecialchars($site['url']); ?>" target="_blank" class="text-blue-500 hover:underline">
