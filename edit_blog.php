@@ -846,6 +846,66 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    <?php 
+        $tipo = $blog['tipo'] ?? 'empresa';
+        ?>
+
+        // Blocos universais
+        editor.BlockManager.add('dynamic-container', {
+            label: 'Container Dinâmico',
+            content: '<div class="dynamic-container p-4 border-2 border-dashed border-blue-300" data-dynamic="custom" data-limit="5"><p class="text-center text-gray-500">Área dinâmica - configure itens no painel</p></div>',
+            category: 'Blocos Dinâmicos',
+        });
+
+        // Blocos específicos por tipo
+        <?php if ($tipo == 'blog'): ?>
+        editor.BlockManager.add('blog-posts', {
+            label: 'Lista de Posts',
+            content: '<div class="blog-posts-wrapper" data-dynamic="blog_posts" data-limit="5" data-template="default"><p class="text-center text-gray-500">[Lista de posts será exibida aqui]</p></div>',
+            category: 'Blog',
+        });
+
+        editor.BlockManager.add('blog-destaque', {
+            label: 'Post em Destaque',
+            content: '<div class="blog-destaque-wrapper" data-dynamic="blog_destaque"><p class="text-center text-gray-500">[Post mais visto]</p></div>',
+            category: 'Blog',
+        });
+        <?php endif; ?>
+
+        <?php if ($tipo == 'noticias'): ?>
+        editor.BlockManager.add('noticias-lista', {
+            label: 'Lista de Notícias',
+            content: '<div class="noticias-lista-wrapper" data-dynamic="noticias_lista" data-limit="5"><p class="text-center text-gray-500">[Últimas notícias]</p></div>',
+            category: 'Notícias',
+        });
+
+        editor.BlockManager.add('noticias-destaque', {
+            label: 'Notícia em Destaque',
+            content: '<div class="noticias-destaque-wrapper" data-dynamic="noticias_destaque"><p class="text-center text-gray-500">[Notícia em destaque]</p></div>',
+            category: 'Notícias',
+        });
+
+        editor.BlockManager.add('noticias-categorias', {
+            label: 'Categorias de Notícias',
+            content: '<div class="noticias-categorias-wrapper" data-dynamic="noticias_categorias"><p class="text-center text-gray-500">[Lista de categorias]</p></div>',
+            category: 'Notícias',
+        });
+        <?php endif; ?>
+
+        <?php if ($tipo == 'classificados'): ?>
+        editor.BlockManager.add('classificados-lista', {
+            label: 'Lista de Anúncios',
+            content: '<div class="classificados-lista-wrapper" data-dynamic="classificados_lista" data-limit="6"><p class="text-center text-gray-500">[Anúncios recentes]</p></div>',
+            category: 'Classificados',
+        });
+
+        editor.BlockManager.add('classificados-destaque', {
+            label: 'Anúncio em Destaque',
+            content: '<div class="classificados-destaque-wrapper" data-dynamic="classificados_destaque"><p class="text-center text-gray-500">[Anúncio mais visto]</p></div>',
+            category: 'Classificados',
+        });
+        <?php endif; ?>
+
     // Configurar comandos para dispositivos
     editor.Commands.add('set-device-desktop', {
         run: editor => editor.setDevice('Desktop')
