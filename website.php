@@ -17,6 +17,15 @@ if (!$website) {
     exit;
 }
 
+// Verifica permissão: se não estiver aprovado, só admin pode ver
+if ($website['status'] !== 'approved') {
+    $usuario = isLogado() ? getUsuarioAtual($pdo) : null;
+    if (!$usuario || $usuario['is_admin'] != 1) {
+        header('Location: index.php');
+        exit;
+    }
+}
+
 function sanitize_css($css)
 {
     // Remove any header-related CSS
