@@ -14,7 +14,51 @@ if (!$usuario || !isset($usuario['is_admin']) || $usuario['is_admin'] != 1) {
     exit;
 }
 
+// Processar ações do POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Aprovar site
+    if (isset($_POST['aprovar_site'])) {
+        $site_id = intval($_POST['site_id']);
+        $stmt = $pdo->prepare("UPDATE websites SET status = 'approved' WHERE id = ?");
+        $stmt->execute([$site_id]);
+        $_SESSION['sucesso'] = "Site aprovado com sucesso!";
+        header('Location: admin.php');
+        exit;
+    }
+
+    // Rejeitar site
+    if (isset($_POST['rejeitar_site'])) {
+        $site_id = intval($_POST['site_id']);
+        $stmt = $pdo->prepare("UPDATE websites SET status = 'rejected' WHERE id = ?");
+        $stmt->execute([$site_id]);
+        $_SESSION['sucesso'] = "Site rejeitado.";
+        header('Location: admin.php');
+        exit;
+    }
+
+    // Excluir site
+    if (isset($_POST['excluir_site'])) {
+        $site_id = intval($_POST['site_id']);
+        $stmt = $pdo->prepare("DELETE FROM websites WHERE id = ?");
+        $stmt->execute([$site_id]);
+        $_SESSION['sucesso'] = "Site excluído com sucesso!";
+        header('Location: admin.php');
+        exit;
+    }
+
+    // Excluir conta
+    if (isset($_POST['excluir_conta'])) {
+        $usuario_id = intval($_POST['usuario_id']);
+        $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
+        $stmt->execute([$usuario_id]);
+        $stmt = $pdo->prepare("DELETE FROM websites WHERE usuario_id = ?");
+        $stmt->execute([$usuario_id]);
+        $_SESSION['sucesso'] = "Conta excluída com sucesso!";
+        header('Location: admin.php');
+        exit;
+    }
+
+    // Adicionar publicidade
     if (isset($_POST['adicionar_publicidade'])) {
         if (!isset($_POST['nome']) || empty($_POST['nome'])) {
             $_SESSION['erro'] = "O campo Nome é obrigatório";
@@ -28,29 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Aprovar site
-        if (isset($_POST['aprovar_site'])) {
-            $site_id = intval($_POST['site_id']);
-            $stmt = $pdo->prepare("UPDATE websites SET status = 'approved' WHERE id = ?");
-            $stmt->execute([$site_id]);
-            $_SESSION['sucesso'] = "Site aprovado com sucesso!";
-            header('Location: admin.php');
-            exit;
-        }
-
-        // Rejeitar site
-        if (isset($_POST['rejeitar_site'])) {
-            $site_id = intval($_POST['site_id']);
-            $stmt = $pdo->prepare("UPDATE websites SET status = 'rejected' WHERE id = ?");
-            $stmt->execute([$site_id]);
-            $_SESSION['sucesso'] = "Site rejeitado.";
-            header('Location: admin.php');
-            exit;
-        }
-
         $nome = $_POST['nome'];
         $website_id = $_POST['website_id'];
-        $url = "website.php?id=" . $website_id; // Gera a URL com base no ID do website
+        $url = "website.php?id=" . $website_id;
         $imagem = $_POST['imagem'] ?? '';
         $ativo = isset($_POST['ativo']) ? 1 : 0;
 
@@ -64,44 +88,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: admin.php');
         exit;
     }
-
-        // Sites pendentes
-    $sites_pendentes = $pdo->query("
-        SELECT w.*, u.nome as usuario_nome 
-        FROM websites w 
-        JOIN usuarios u ON w.usuario_id = u.id 
-        WHERE w.status = 'pending'
-    ")->fetchAll(PDO::FETCH_ASSOC);
-
-    // Todos os sites (para tabela geral)
-    $sites = $pdo->query("
-        SELECT w.*, u.nome as usuario_nome 
-        FROM websites w 
-        JOIN usuarios u ON w.usuario_id = u.id
-    ")->fetchAll(PDO::FETCH_ASSOC);
-
-    // Excluir site
-    if (isset($_POST['excluir_site'])) {
-        $site_id = intval($_POST['site_id']);
-        $stmt = $pdo->prepare("DELETE FROM websites WHERE id = ?");
-        $stmt->execute([$site_id]);
-        $mensagem = "Site excluído com sucesso!";
-    }
-
-    // Excluir conta
-    if (isset($_POST['excluir_conta'])) {
-        $usuario_id = intval($_POST['usuario_id']);
-        $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
-        $stmt->execute([$usuario_id]);
-        $stmt = $pdo->prepare("DELETE FROM websites WHERE usuario_id = ?");
-        $stmt->execute([$usuario_id]);
-        $mensagem = "Conta excluída com sucesso!";
-    }
 }
 
 // Obter dados para exibição
 $publicidades = $pdo->query("SELECT * FROM publicidade")->fetchAll(PDO::FETCH_ASSOC);
-$sites = $pdo->query("SELECT w.*, u.nome as usuario_nome FROM websites w JOIN usuarios u ON w.usuario_id = u.id")->fetchAll(PDO::FETCH_ASSOC);
+
+// Sites pendentes
+$sites_pendentes = $pdo->query("
+    SELECT w.*, u.nome as usuario_nome 
+    FROM websites w 
+    JOIN usuarios u ON w.usuario_id = u.id 
+    WHERE w.status = 'pending'
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// Todos os sites (para tabela geral)
+$sites = $pdo->query("
+    SELECT w.*, u.nome as usuario_nome 
+    FROM websites w 
+    JOIN usuarios u ON w.usuario_id = u.id
+")->fetchAll(PDO::FETCH_ASSOC);
+
 $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -158,9 +164,16 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
     <div class="w-full h-2 bg-yellow-400"></div>
 
     <div class="max-w-7xl mx-auto mt-1">
-        <?php if (isset($mensagem)): ?>
+        <!-- Mensagens de feedback -->
+        <?php if (isset($_SESSION['sucesso'])): ?>
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <span class="block sm:inline"><?php echo $mensagem; ?></span>
+                <span class="block sm:inline"><?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?></span>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['erro'])): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline"><?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?></span>
             </div>
         <?php endif; ?>
 
@@ -174,65 +187,12 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
                     <div class="space-y-2">
                         <p>Total de Usuários: <?php echo count($usuarios); ?></p>
                         <p>Total de Sites: <?php echo count($sites); ?></p>
+                        <p>Sites Pendentes: <?php echo count($sites_pendentes); ?></p>
                         <p>Publicidades Ativas: <?php echo count(array_filter($publicidades, function ($p) {
                                                     return $p['ativo'] == 1;
                                                 })); ?></p>
                     </div>
                 </div>
-
-                <!-- Sites Pendentes -->
-            <section class="bg-white p-6 shadow-md mb-6">
-                <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Sites Pendentes de Aprovação</h2>
-                <?php if (empty($sites_pendentes)): ?>
-                    <p class="text-gray-600">Nenhum site aguardando aprovação.</p>
-                else: ?>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white">
-                            <thead>
-                                <tr>
-                                    <th class="py-2 px-4 border-b">ID</th>
-                                    <th class="py-2 px-4 border-b">Nome</th>
-                                    <th class="py-2 px-4 border-b">URL</th>
-                                    <th class="py-2 px-4 border-b">Usuário</th>
-                                    <th class="py-2 px-4 border-b">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($sites_pendentes as $site): ?>
-                                    <tr>
-                                        <td class="py-2 px-4 border-b"><?php echo $site['id']; ?></td>
-                                        <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['nome']); ?></td>
-                                        <td class="py-2 px-4 border-b">
-                                            <a href="website.php?id=<?php echo $site['id']; ?>" target="_blank" class="text-blue-500 hover:underline">
-                                                Visualizar
-                                            </a>
-                                        </td>
-                                        <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['usuario_nome']); ?></td>
-                                        <td class="py-2 px-4 border-b">
-                                            <form method="POST" class="inline">
-                                                <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
-                                                <button type="submit" name="aprovar_site" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
-                                                    Aprovar
-                                                </button>
-                                                <button type="submit" name="rejeitar_site" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
-                                                    Rejeitar
-                                                </button>
-                                            </form>
-                                            <!-- Botão de excluir também pode ser mantido -->
-                                            <form method="POST" class="inline ml-2">
-                                                <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
-                                                <button type="submit" name="excluir_site" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" onclick="return confirm('Excluir permanentemente?');">
-                                                    Excluir
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            </section>
 
                 <!-- Adicionar Publicidade -->
                 <div class="bg-gray-100 p-4 rounded-lg">
@@ -273,7 +233,10 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <h3 class="text-lg font-bold mb-4">Ações Rápidas</h3>
                     <div class="space-y-2">
-                        <a href="#gerenciar-sites" class="block bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                        <a href="#sites-pendentes" class="block bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                            Ver Pendentes (<?php echo count($sites_pendentes); ?>)
+                        </a>
+                        <a href="#gerenciar-sites" class="block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                             Gerenciar Sites
                         </a>
                         <a href="#gerenciar-usuarios" class="block bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
@@ -287,9 +250,67 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </section>
 
+        <!-- Sites Pendentes de Aprovação -->
+        <section id="sites-pendentes" class="bg-white p-6 shadow-md mb-6">
+            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Sites Pendentes de Aprovação (<?php echo count($sites_pendentes); ?>)</h2>
+            <?php if (empty($sites_pendentes)): ?>
+                <p class="text-gray-600 py-4">Nenhum site aguardando aprovação.</p>
+            <?php else: ?>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Nome</th>
+                                <th class="py-2 px-4 border-b">Visualizar</th>
+                                <th class="py-2 px-4 border-b">Usuário</th>
+                                <th class="py-2 px-4 border-b">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($sites_pendentes as $site): ?>
+                                <tr>
+                                    <td class="py-2 px-4 border-b"><?php echo $site['id']; ?></td>
+                                    <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['nome']); ?></td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="website.php?id=<?php echo $site['id']; ?>" target="_blank" class="text-blue-500 hover:underline">
+                                            <i class="fas fa-external-link-alt"></i> Visualizar
+                                        </a>
+                                    </td>
+                                    <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['usuario_nome']); ?></td>
+                                    <td class="py-2 px-4 border-b">
+                                        <div class="flex flex-wrap gap-2">
+                                            <form method="POST" class="inline">
+                                                <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
+                                                <button type="submit" name="aprovar_site" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm" onclick="return confirm('Aprovar este site? Ele será publicado imediatamente.');">
+                                                    <i class="fas fa-check"></i> Aprovar
+                                                </button>
+                                            </form>
+                                            <form method="POST" class="inline">
+                                                <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
+                                                <button type="submit" name="rejeitar_site" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-sm" onclick="return confirm('Rejeitar este site? O usuário precisará enviar novamente.');">
+                                                    <i class="fas fa-times"></i> Rejeitar
+                                                </button>
+                                            </form>
+                                            <form method="POST" class="inline">
+                                                <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
+                                                <button type="submit" name="excluir_site" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm" onclick="return confirm('Excluir permanentemente este site? Esta ação não pode ser desfeita.');">
+                                                    <i class="fas fa-trash"></i> Excluir
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </section>
+
         <!-- Gerenciar Sites -->
         <section id="gerenciar-sites" class="bg-white p-6 shadow-md mb-6">
-            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Gerenciar Sites</h2>
+            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Gerenciar Todos os Sites</h2>
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white">
                     <thead>
@@ -298,6 +319,7 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
                             <th class="py-2 px-4 border-b">Nome</th>
                             <th class="py-2 px-4 border-b">URL</th>
                             <th class="py-2 px-4 border-b">Usuário</th>
+                            <th class="py-2 px-4 border-b">Status</th>
                             <th class="py-2 px-4 border-b">Ações</th>
                         </tr>
                     </thead>
@@ -305,15 +327,6 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
                         <?php foreach ($sites as $site): ?>
                             <tr>
                                 <td class="py-2 px-4 border-b"><?php echo $site['id']; ?></td>
-                                <th class="py-2 px-4 border-b">Status</th>
-                                <td class="py-2 px-4 border-b">
-                                    <?php 
-                                        $status = $site['status'];
-                                        if ($status == 'approved') echo '<span class="text-green-600">Aprovado</span>';
-                                        elseif ($status == 'pending') echo '<span class="text-yellow-600">Pendente</span>';
-                                        elseif ($status == 'rejected') echo '<span class="text-red-600">Rejeitado</span>';
-                                    ?>
-                                </td>
                                 <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['nome']); ?></td>
                                 <td class="py-2 px-4 border-b">
                                     <a href="<?php echo htmlspecialchars($site['url']); ?>" target="_blank" class="text-blue-500 hover:underline">
@@ -322,12 +335,42 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
                                 <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['usuario_nome']); ?></td>
                                 <td class="py-2 px-4 border-b">
-                                    <form method="POST" class="inline">
-                                        <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
-                                        <button type="submit" name="excluir_site" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" onclick="return confirm('Tem certeza que deseja excluir este site?');">
-                                            Excluir
-                                        </button>
-                                    </form>
+                                    <?php 
+                                        $status = $site['status'];
+                                        if ($status == 'approved') {
+                                            echo '<span class="text-green-600 font-bold"><i class="fas fa-check-circle"></i> Aprovado</span>';
+                                        } elseif ($status == 'pending') {
+                                            echo '<span class="text-yellow-600 font-bold"><i class="fas fa-clock"></i> Pendente</span>';
+                                        } elseif ($status == 'rejected') {
+                                            echo '<span class="text-red-600 font-bold"><i class="fas fa-ban"></i> Rejeitado</span>';
+                                        }
+                                    ?>
+                                </td>
+                                <td class="py-2 px-4 border-b">
+                                    <div class="flex gap-2">
+                                        <?php if ($status != 'approved'): ?>
+                                            <form method="POST" class="inline">
+                                                <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
+                                                <button type="submit" name="aprovar_site" class="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">
+                                                    Aprovar
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <?php if ($status != 'rejected'): ?>
+                                            <form method="POST" class="inline">
+                                                <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
+                                                <button type="submit" name="rejeitar_site" class="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600">
+                                                    Rejeitar
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <form method="POST" class="inline">
+                                            <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
+                                            <button type="submit" name="excluir_site" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600" onclick="return confirm('Tem certeza que deseja excluir este site?');">
+                                                Excluir
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -380,6 +423,7 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </section>
 
+        <!-- Gerenciar Publicidades -->
         <section id="gerenciar-publicidades" class="bg-white p-6 shadow-md">
             <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Gerenciar Publicidades</h2>
             <div class="overflow-x-auto">
@@ -408,7 +452,7 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
                                     </a>
                                 </td>
                                 <td class="py-2 px-4 border-b">
-                                    <?php echo $pub['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                                    <?php echo $pub['ativo'] ? '<span class="text-green-600">Ativo</span>' : '<span class="text-red-600">Inativo</span>'; ?>
                                 </td>
                                 <td class="py-2 px-4 border-b">
                                     <a href="editar_publicidade.php?id=<?php echo $pub['id']; ?>" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
