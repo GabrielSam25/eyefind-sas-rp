@@ -73,7 +73,7 @@ function getPublicidadeAtiva($pdo)
 
 function getWebsites($pdo, $categoria_id = null, $limite = 4)
 {
-    $sql = "SELECT * FROM websites WHERE 1=1";
+    $sql = "SELECT * FROM websites WHERE status = 'approved'";
     $params = [];
 
     if ($categoria_id) {
