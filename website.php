@@ -97,7 +97,7 @@ echo $htmlFinal;
 
 <body>
     <div class="website-container">
-        <?php echo htmlspecialchars_decode($website['conteudo']); ?>
+        <?php echo renderDynamicBlocks($website['conteudo'], $website['id'], $pdo); ?>
     </div>
 
     <script>
