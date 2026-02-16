@@ -12,7 +12,7 @@ $categorias = getCategorias($pdo);
 
 function buscarWebsites($pdo, $termo_busca)
 {
-    $stmt = $pdo->prepare("SELECT * FROM websites WHERE nome LIKE :termo OR descricao LIKE :termo");
+    $stmt = $pdo->prepare("SELECT * FROM websites WHERE status = 'approved' AND (nome LIKE :termo OR descricao LIKE :termo)");
     $stmt->execute([':termo' => "%$termo_busca%"]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
