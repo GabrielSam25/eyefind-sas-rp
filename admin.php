@@ -180,6 +180,60 @@ $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
 
+                <!-- Sites Pendentes -->
+        <section class="bg-white p-6 shadow-md mb-6">
+            <h2 class="text-2xl font-bold text-eyefind-blue mb-6">Sites Pendentes de Aprovação</h2>
+            <?php if (empty($sites_pendentes)): ?>
+                <p class="text-gray-600">Nenhum site aguardando aprovação.</p>
+            else: ?>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Nome</th>
+                                <th class="py-2 px-4 border-b">URL</th>
+                                <th class="py-2 px-4 border-b">Usuário</th>
+                                <th class="py-2 px-4 border-b">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($sites_pendentes as $site): ?>
+                                <tr>
+                                    <td class="py-2 px-4 border-b"><?php echo $site['id']; ?></td>
+                                    <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['nome']); ?></td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="website.php?id=<?php echo $site['id']; ?>" target="_blank" class="text-blue-500 hover:underline">
+                                            Visualizar
+                                        </a>
+                                    </td>
+                                    <td class="py-2 px-4 border-b"><?php echo htmlspecialchars($site['usuario_nome']); ?></td>
+                                    <td class="py-2 px-4 border-b">
+                                        <form method="POST" class="inline">
+                                            <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
+                                            <button type="submit" name="aprovar_site" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
+                                                Aprovar
+                                            </button>
+                                            <button type="submit" name="rejeitar_site" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
+                                                Rejeitar
+                                            </button>
+                                        </form>
+                                        <!-- Botão de excluir também pode ser mantido -->
+                                        <form method="POST" class="inline ml-2">
+                                            <input type="hidden" name="site_id" value="<?php echo $site['id']; ?>">
+                                            <button type="submit" name="excluir_site" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600" onclick="return confirm('Excluir permanentemente?');">
+                                                Excluir
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </section>
+
                 <!-- Adicionar Publicidade -->
                 <div class="bg-gray-100 p-4 rounded-lg">
                     <h3 class="text-lg font-bold mb-4">Adicionar Publicidade</h3>
