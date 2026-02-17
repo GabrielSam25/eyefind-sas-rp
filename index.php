@@ -241,11 +241,13 @@ if ($weatherId == 800 && $isDayTime) {
                     </div>
 
                     <!-- Mais Opções -->
-                    <div class="relative group" id="dropdown-container">
+                    <div class="relative" id="dropdown-container">
+                        
                         <button class="p-3 hover:scale-110 transition duration-200" id="dropdown-button">
                             <img src="icon/maisopcoes.png" class="w-8 h-8" alt="Mais opções">
                         </button>
 
+                        <!-- Tooltip (continua por hover normal) -->
                         <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
                                     bg-black text-white text-xs px-3 py-1 rounded
                                     opacity-0 group-hover:opacity-100 transition
@@ -254,18 +256,23 @@ if ($weatherId == 800 && $isDayTime) {
                         </div>
 
                         <!-- Dropdown -->
-                        <div class="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg hidden" id="dropdown-menu">
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg hidden z-50"
+                            id="dropdown-menu">
+
                             <?php if ($is_admin): ?>
-                                <a href="admin.php" class="block px-4 py-2 text-gray-800 hover:bg-purple-100 font-bold">
+                                <a href="admin.php" 
+                                class="block px-4 py-2 text-gray-800 hover:bg-purple-100 font-bold">
                                     Admin
                                 </a>
                             <?php endif; ?>
 
-                            <a href="logout.php" class="block px-4 py-2 text-gray-800 hover:bg-red-100 font-bold">
+                            <a href="logout.php" 
+                            class="block px-4 py-2 text-gray-800 hover:bg-red-100 font-bold">
                                 Logout
                             </a>
                         </div>
                     </div>
+
 
                 <?php endif; ?>
                 </div>
