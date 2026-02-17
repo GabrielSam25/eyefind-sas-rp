@@ -147,11 +147,6 @@ if (isset($_GET['excluir'])) {
                                            class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200 transition">
                                             <i class="fas fa-newspaper mr-1"></i>Notícias
                                         </a>
-                                            <a href="gerenciar_categorias.php?website_id=<?php echo $site['id']; ?>" 
-                                            class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded text-sm hover:bg-yellow-200 transition">
-                                                <i class="fas fa-tags mr-1"></i>Categorias
-                                            </a>
-                                    <?php endif; ?>
                                     <?php elseif ($site['tipo'] == 'classificados'): ?>
                                         <a href="gerenciar_anuncios.php?website_id=<?php echo $site['id']; ?>" 
                                            class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200 transition">
