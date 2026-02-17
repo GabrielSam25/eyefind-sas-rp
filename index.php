@@ -277,12 +277,12 @@ if ($weatherId == 800 && $isDayTime) {
     <div class="w-full h-2 bg-yellow-400"></div>
 
     <div class="w-full bg-white shadow-md">
-        <div class="max-w-6xl mx-auto">
+        <div class="max-w-7xl mx-auto px-4">
             <div class="flex overflow-x-auto scrollbar-hide whitespace-nowrap">
                 
                 <?php foreach ($categorias as $categoria): ?>
                     <a href="category.php?id=<?php echo $categoria["id"]; ?>" 
-                    class="inline-flex items-center text-left p-3 hover:bg-eyefind-light cursor-pointer transition group space-x-3 border-r">
+                    class="inline-flex items-center p-4 hover:bg-eyefind-light cursor-pointer transition group space-x-3 border-r">
                         
                         <i class="<?php echo $categoria["icone"]; ?> text-2xl text-eyefind-blue group-hover:scale-110 transition"></i>
                         
@@ -295,6 +295,7 @@ if ($weatherId == 800 && $isDayTime) {
             </div>
         </div>
     </div>
+
 
 
 
