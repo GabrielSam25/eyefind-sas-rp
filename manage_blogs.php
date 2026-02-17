@@ -9,12 +9,10 @@ if (!isLogado()) {
 $usuario = getUsuarioAtual($pdo);
 $usuario_id = $usuario['id'];
 
-// Obter todos os sites do usuário
 $stmt = $pdo->prepare("SELECT * FROM websites WHERE usuario_id = ? ORDER BY id DESC");
 $stmt->execute([$usuario_id]);
 $sites = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Processar exclusão
 if (isset($_GET['excluir'])) {
     $site_id = intval($_GET['excluir']);
     $stmt = $pdo->prepare("DELETE FROM websites WHERE id = ? AND usuario_id = ?");
@@ -49,7 +47,6 @@ if (isset($_GET['excluir'])) {
     </style>
 </head>
 <body class="bg-eyefind-light">
-    <!-- Header -->
     <section class="bg-[#488BC2] shadow-md">
         <div class="p-4 flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row items-center gap-6">
@@ -71,7 +68,6 @@ if (isset($_GET['excluir'])) {
     <div class="w-full h-2 bg-yellow-400"></div>
 
     <div class="max-w-7xl mx-auto mt-8 px-4">
-        <!-- Mensagens -->
         <?php if (isset($_GET['msg'])): ?>
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                 <?php 
@@ -96,7 +92,7 @@ if (isset($_GET['excluir'])) {
                         Criar meu primeiro site
                     </a>
                 </div>
-            else: ?>
+            <?php else: ?>
                 <div class="space-y-4">
                     <?php foreach ($sites as $site): 
                         $tipoClass = 'tipo-' . $site['tipo'];
@@ -105,7 +101,6 @@ if (isset($_GET['excluir'])) {
                     ?>
                         <div class="border rounded-lg p-4 hover:shadow-md transition">
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <!-- Informações do site -->
                                 <div class="flex items-start gap-4 flex-1">
                                     <?php if ($site['imagem']): ?>
                                         <img src="<?php echo htmlspecialchars($site['imagem']); ?>" alt="" class="w-20 h-20 object-cover rounded hidden md:block">
@@ -141,9 +136,7 @@ if (isset($_GET['excluir'])) {
                                     </div>
                                 </div>
 
-                                <!-- Ações específicas por tipo -->
                                 <div class="flex flex-wrap gap-2">
-                                    <!-- Links de gerenciamento de conteúdo (NOVOS) -->
                                     <?php if ($site['tipo'] == 'blog'): ?>
                                         <a href="gerenciar_posts.php?website_id=<?php echo $site['id']; ?>" 
                                            class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200 transition">
@@ -161,7 +154,6 @@ if (isset($_GET['excluir'])) {
                                         </a>
                                     <?php endif; ?>
 
-                                    <!-- Ações gerais -->
                                     <a href="edit_blog.php?id=<?php echo $site['id']; ?>" 
                                        class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200 transition">
                                         <i class="fas fa-edit mr-1"></i>Editar
