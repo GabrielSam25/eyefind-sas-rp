@@ -283,10 +283,9 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
 // ===== FUNÇÃO PARA RENDERIZAR CONTEÚDO COM CLASSES DINÂMICAS (APENAS SUBSTITUIÇÃO) =====
 
 function renderDynamicContent($html, $website_id, $pdo) {
-    // Verificar o tipo do site
     $tipo = getTipoSite($pdo, $website_id);
     
-    // Buscar dados baseado no tipo
+    // Buscar dados
     $itens = [];
     switch ($tipo) {
         case 'blog':
@@ -294,28 +293,22 @@ function renderDynamicContent($html, $website_id, $pdo) {
             $stmt->execute([$website_id]);
             $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
             break;
-            
         case 'noticias':
             $stmt = $pdo->prepare("SELECT * FROM noticias_artigos WHERE website_id = ? AND status = 'publicado' ORDER BY data_publicacao DESC");
             $stmt->execute([$website_id]);
             $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
             break;
-            
         case 'classificados':
             $stmt = $pdo->prepare("SELECT * FROM classificados_anuncios WHERE website_id = ? AND status = 'ativo' ORDER BY data_criacao DESC");
             $stmt->execute([$website_id]);
             $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
             break;
-            
         default:
             return $html;
     }
     
-    if (empty($itens)) {
-        return $html; // Se não tiver itens, retorna o HTML original
-    }
+    if (empty($itens)) return $html;
     
-    // Usar DOMDocument para manipular o HTML
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
     @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
@@ -323,29 +316,75 @@ function renderDynamicContent($html, $website_id, $pdo) {
     
     $xpath = new DOMXPath($dom);
     
-    // Para cada item (post/notícia/anúncio), processar os elementos com classes dinâmicas
-    foreach ($itens as $index => $item) {
-        // Seletor para elementos com data-post-id específico ou todos se não tiver
-        if (isset($item['id'])) {
-            // Tenta encontrar elementos com data-post-id correspondente
-            $elements = $xpath->query("//*[@data-post-id='{$item['id']}']");
-            
-            if ($elements->length > 0) {
-                // Processa apenas os elementos com este data-post-id
-                foreach ($elements as $element) {
-                    processarElementoComClasses($element, $item, $pdo, $website_id);
-                }
-            } else if ($index === 0) {
-                // Se não encontrar por ID e for o primeiro item, processa elementos sem data-post-id
-                $elements_sem_id = $xpath->query("//*[not(@data-post-id)]");
-                foreach ($elements_sem_id as $element) {
-                    processarElementoComClasses($element, $item, $pdo, $website_id);
-                }
-            }
+    // Processa elementos sem data-post-id (globais) usando o primeiro item
+    $elementos_sem_id = $xpath->query("//*[not(@data-post-id)]");
+    foreach ($elementos_sem_id as $el) {
+        processarClasses($el, $itens[0], $pdo, $website_id);
+    }
+    
+    // Processa cada post individualmente
+    foreach ($itens as $item) {
+        $post_id = $item['id'];
+        $elementos = $xpath->query("//*[@data-post-id='$post_id']");
+        foreach ($elementos as $el) {
+            processarClasses($el, $item, $pdo, $website_id);
         }
     }
     
     return $dom->saveHTML();
+}
+
+function processarClasses($elemento, $dados, $pdo, $website_id) {
+    $classAttr = $elemento->getAttribute('class');
+    $classes = explode(' ', $classAttr);
+    
+    foreach ($classes as $classe) {
+        $classe = trim($classe);
+        switch ($classe) {
+            case 'dynamic-titulo':
+                $elemento->nodeValue = htmlspecialchars($dados['titulo'] ?? '');
+                break;
+            case 'dynamic-resumo':
+                $resumo = $dados['resumo'] ?? substr(strip_tags($dados['conteudo'] ?? ''), 0, 150) . '...';
+                $elemento->nodeValue = htmlspecialchars($resumo);
+                break;
+            case 'dynamic-imagem':
+                if ($elemento->nodeName === 'img') {
+                    $imagem = $dados['imagem'] ?? 'https://via.placeholder.com/800x400';
+                    $elemento->setAttribute('src', $imagem);
+                }
+                break;
+            case 'dynamic-data':
+                $data = !empty($dados['data_publicacao']) ? date('d/m/Y', strtotime($dados['data_publicacao'])) : date('d/m/Y');
+                $elemento->nodeValue = $data;
+                break;
+            case 'dynamic-data-completa':
+                $data = !empty($dados['data_publicacao']) ? date('l, F j, Y', strtotime($dados['data_publicacao'])) : date('l, F j, Y');
+                $elemento->nodeValue = $data;
+                break;
+            case 'dynamic-autor-nome':
+                $autor = getNoticiaAutor($pdo, $dados['autor_id'] ?? null);
+                $elemento->nodeValue = htmlspecialchars($autor['nome']);
+                break;
+            case 'dynamic-categoria':
+                $categoria = $dados['categoria'] ?? 'Geral';
+                $elemento->nodeValue = htmlspecialchars($categoria);
+                break;
+            case 'dynamic-views':
+                $views = isset($dados['views']) ? number_format($dados['views']) : '0';
+                $elemento->nodeValue = $views;
+                break;
+            case 'dynamic-ano':
+                $elemento->nodeValue = date('Y');
+                break;
+            case 'dynamic-link':
+                if ($elemento->nodeName === 'a' && isset($dados['id'])) {
+                    $link = "ver_noticia.php?website_id=$website_id&noticia_id=" . $dados['id'];
+                    $elemento->setAttribute('href', $link);
+                }
+                break;
+        }
+    }
 }
 
 // ===== FUNÇÃO AUXILIAR PARA PROCESSAR CLASSES EM UM ELEMENTO =====
