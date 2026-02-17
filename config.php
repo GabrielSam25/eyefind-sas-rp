@@ -340,29 +340,66 @@ function renderBlogPostDestaque($post, $class, $website_id) {
 }
 
 function renderNoticiasLista($noticias, $class, $website_id) {
-    if (empty($noticias)) return '<p class="text-gray-500">Nenhuma notícia encontrada.</p>';
+    if (empty($noticias)) {
+        return '<p class="text-gray-500">Nenhuma notícia encontrada.</p>';
+    }
     
     $html = '<div class="noticias-lista ' . htmlspecialchars($class) . '">';
+    
     foreach ($noticias as $noticia) {
+        $autor = getNoticiaAutor($GLOBALS['pdo'], $noticia['autor_id']);
+        $data = date('d/m/Y', strtotime($noticia['data_publicacao']));
+        $resumo = htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 150) . '...');
+        $categoria = $noticia['categoria'] ?? 'Geral';
+        $imagem = $noticia['imagem'] ?? 'https://via.placeholder.com/800x400?text=Sem+Imagem';
+        
         $html .= '
-        <article class="noticia-item mb-4 p-4 bg-white rounded shadow">
-            <div class="flex flex-col md:flex-row gap-4">
-                ' . ($noticia['imagem'] ? '<img src="' . htmlspecialchars($noticia['imagem']) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full md:w-48 h-32 object-cover rounded">' : '') . '
-                <div class="flex-1">
-                    <h3 class="text-lg font-bold mb-2">
-                        <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="text-red-600 hover:underline">' . htmlspecialchars($noticia['titulo']) . '</a>
-                    </h3>
-                    <p class="text-gray-600 text-sm mb-2">' . htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 100) . '...') . '</p>
-                    <div class="flex justify-between text-xs text-gray-500">
-                        <span>' . ($noticia['categoria'] ?? 'Geral') . '</span>
-                        <span>' . date('d/m/Y', strtotime($noticia['data_publicacao'])) . '</span>
-                    </div>
+        <div class="noticia-item mb-6 border-b pb-4">
+            <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="block">
+                ' . ($noticia['imagem'] ? '<img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full h-48 object-cover rounded-lg mb-3">' : '') . '
+                <span class="text-xs font-semibold text-red-600 uppercase tracking-wider">' . htmlspecialchars($categoria) . '</span>
+                <h3 class="font-bold text-xl mt-1 mb-2 hover:text-red-600">' . htmlspecialchars($noticia['titulo']) . '</h3>
+                <p class="text-gray-600 text-sm">' . $resumo . '</p>
+                <div class="flex items-center text-xs text-gray-500 mt-2">
+                    <span>Por ' . htmlspecialchars($autor['nome']) . '</span>
+                    <span class="mx-2">•</span>
+                    <span>' . $data . '</span>
+                    <span class="mx-2">•</span>
+                    <span>' . number_format($noticia['views']) . ' visualizações</span>
                 </div>
-            </div>
-        </article>';
+            </a>
+        </div>';
     }
+    
     $html .= '</div>';
     return $html;
+}
+
+function renderNoticiaDestaque($noticia, $class, $website_id) {
+    $autor = getNoticiaAutor($GLOBALS['pdo'], $noticia['autor_id']);
+    $data = date('d/m/Y', strtotime($noticia['data_publicacao']));
+    $resumo = htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 200) . '...');
+    $imagem = $noticia['imagem'] ?? 'https://via.placeholder.com/1200x600?text=Sem+Imagem';
+    
+    return '
+    <div class="noticia-destaque ' . htmlspecialchars($class) . ' relative rounded-xl overflow-hidden">
+        <img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full h-[400px] object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+            <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 inline-block">DESTAQUE</span>
+            <h2 class="text-4xl font-bold mb-3">
+                <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="hover:underline">' . htmlspecialchars($noticia['titulo']) . '</a>
+            </h2>
+            <p class="text-lg mb-4 text-gray-200">' . $resumo . '</p>
+            <div class="flex items-center text-sm text-gray-300">
+                <span>Por ' . htmlspecialchars($autor['nome']) . '</span>
+                <span class="mx-2">•</span>
+                <span>' . $data . '</span>
+                <span class="mx-2">•</span>
+                <span>' . number_format($noticia['views']) . ' visualizações</span>
+            </div>
+        </div>
+    </div>';
 }
 
 function renderNoticiaDestaque($noticia, $class, $website_id) {
