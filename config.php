@@ -211,10 +211,16 @@ function getClassificadosAnuncios($pdo, $website_id, $categoria = null, $limit =
     }
     
     $sql .= " ORDER BY data_criacao DESC LIMIT ?";
-    $params[] = $limit;
     
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    $stmt->bindValue(1, $website_id, PDO::PARAM_INT);
+    if ($categoria) {
+        $stmt->bindValue(2, $categoria, PDO::PARAM_STR);
+        $stmt->bindValue(3, (int)$limit, PDO::PARAM_INT);
+    } else {
+        $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
+    }
+    $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
