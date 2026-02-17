@@ -220,7 +220,7 @@ function getClassificadosAnuncios($pdo, $website_id, $categoria = null, $limit =
     } else {
         $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
     }
-    $stmt->execute();
+    $stmt->execute();   
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -392,5 +392,92 @@ function renderClassificadosLista($anuncios, $class, $website_id) {
     }
     $html .= '</div>';
     return $html;
+}
+
+// NOVA FUNÇÃO: Renderizar conteúdo com classes dinâmicas
+function renderDynamicContent($html, $website_id, $pdo) {
+    // Pega o primeiro post publicado (você pode modificar para pegar um específico)
+    $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE website_id = ? AND status = 'publicado' ORDER BY data_publicacao DESC LIMIT 1");
+    $stmt->execute([$website_id]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$post) {
+        return $html; // Se não tiver post, retorna o HTML original
+    }
+    
+    // Criar autor genérico (você pode pegar do banco de usuários depois)
+    $autor = 'Eyefind User';
+    $categoria = 'Blog';
+    
+    // Usar DOMDocument para manipular o HTML
+    $dom = new DOMDocument();
+    libxml_use_internal_errors(true);
+    @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    libxml_clear_errors();
+    
+    $xpath = new DOMXPath($dom);
+    
+    // 1. SUBSTITUIR TÍTULOS
+    $titulos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-titulo ')]");
+    foreach ($titulos as $elemento) {
+        $elemento->nodeValue = htmlspecialchars($post['titulo']);
+    }
+    
+    // 2. SUBSTITUIR CONTEÚDO
+    $conteudos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-conteudo ')]");
+    foreach ($conteudos as $elemento) {
+        $elemento->nodeValue = strip_tags($post['conteudo']);
+    }
+    
+    // 3. SUBSTITUIR RESUMO
+    $resumos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-resumo ')]");
+    foreach ($resumos as $elemento) {
+        $resumo = $post['resumo'] ?? substr(strip_tags($post['conteudo']), 0, 150) . '...';
+        $elemento->nodeValue = htmlspecialchars($resumo);
+    }
+    
+    // 4. SUBSTITUIR IMAGENS
+    $imagens = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-imagem ')]");
+    foreach ($imagens as $elemento) {
+        if ($elemento->nodeName === 'img') {
+            $imagem = $post['imagem'] ?? 'https://via.placeholder.com/800x400';
+            $elemento->setAttribute('src', $imagem);
+        }
+    }
+    
+    // 5. SUBSTITUIR DATAS
+    $datas = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-data ')]");
+    foreach ($datas as $elemento) {
+        $data = date('d/m/Y', strtotime($post['data_publicacao']));
+        $elemento->nodeValue = $data;
+    }
+    
+    // 6. SUBSTITUIR AUTOR
+    $autores = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-autor ')]");
+    foreach ($autores as $elemento) {
+        $elemento->nodeValue = $autor;
+    }
+    
+    // 7. SUBSTITUIR CATEGORIA
+    $categorias = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-categoria ')]");
+    foreach ($categorias as $elemento) {
+        $elemento->nodeValue = $categoria;
+    }
+    
+    // 8. SUBSTITUIR VIEWS
+    $views = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-views ')]");
+    foreach ($views as $elemento) {
+        $elemento->nodeValue = number_format($post['views']);
+    }
+    
+    // 9. SUBSTITUIR LINKS
+    $links = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-link ')]");
+    foreach ($links as $elemento) {
+        if ($elemento->nodeName === 'a') {
+            $elemento->setAttribute('href', 'ver_post.php?website_id=' . $website_id . '&post_id=' . $post['id']);
+        }
+    }
+    
+    return $dom->saveHTML();
 }
 ?>
