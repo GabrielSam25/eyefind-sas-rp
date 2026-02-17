@@ -277,7 +277,7 @@ if ($weatherId == 800 && $isDayTime) {
     <div class="w-full h-2 bg-yellow-400"></div>
 
     <div class="w-full bg-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4">
+        <div class="max-w-6xl mx-auto px-16">
             <div class="flex overflow-x-auto scrollbar-hide whitespace-nowrap">
                 
                 <?php foreach ($categorias as $categoria): ?>
