@@ -237,6 +237,10 @@ function criarSlug($texto) {
 
 // Função para renderizar blocos dinâmicos
 function renderDynamicBlocks($html, $website_id, $pdo) {
+    // Primeiro processa as classes dinâmicas
+    $html = renderDynamicContent($html, $website_id, $pdo);
+    
+    // Depois processa os data-dynamic (se ainda quiser manter)
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
     @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
