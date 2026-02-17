@@ -78,25 +78,33 @@ $websitesDaCategoria = getWebsitesByCategoria($pdo, $categoria_id);
                     </div>
                 </div>
 
-<div class="flex items-center gap-6 mt-4 md:mt-0">
+                <div class="flex items-center gap-6 mt-4 md:mt-0">
 
-    <!-- Voltar -->
-    <div class="relative group">
-        <a href="index.php" class="p-3 hover:scale-110 transition duration-200">
-            <img src="icon/voltar.png" class="w-8 h-8" alt="Voltar">
-        </a>
+                    <!-- Voltar -->
+                    <div class="relative group">
+                        <a href="index.php" class="p-3 hover:scale-110 transition duration-200">
+                            <img src="icon/voltar.png" class="w-8 h-8" alt="Voltar">
+                        </a>
 
-        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
-                    bg-black text-white text-xs px-3 py-1 rounded
-                    opacity-0 group-hover:opacity-100 transition
-                    pointer-events-none whitespace-nowrap">
-            Voltar
-        </div>
-    </div>
+                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                                    bg-black text-white text-xs px-3 py-1 rounded
+                                    opacity-0 group-hover:opacity-100 transition
+                                    pointer-events-none whitespace-nowrap">
+                            Voltar
+                        </div>
+                    </div>
+
+                <div class="flex items-center gap-6 mt-4 md:mt-0">
+
+                    <!-- Voltar (mantém botão original) -->
+                    <a href="index.php" 
+                    class="bg-gray-600 text-white px-4 py-2 rounded font-bold hover:bg-gray-700 transition">
+                        Voltar
+                    </a>
 
                 <?php if (!isLogado()): ?>
 
-                    <!-- Login -->
+                    <!-- Login (ícone) -->
                     <div class="relative group">
                         <a href="login.php" class="p-3 hover:scale-110 transition duration-200">
                             <img src="icon/login.png" class="w-8 h-8" alt="Login">
@@ -112,7 +120,7 @@ $websitesDaCategoria = getWebsitesByCategoria($pdo, $categoria_id);
 
                 <?php else: ?>
 
-                    <!-- Criar Blog -->
+                    <!-- Criar Blog (ícone) -->
                     <div class="relative group">
                         <a href="new_blog.php" class="p-3 hover:scale-110 transition duration-200">
                             <img src="icon/blog.png" class="w-8 h-8" alt="Criar Blog">
@@ -126,7 +134,7 @@ $websitesDaCategoria = getWebsitesByCategoria($pdo, $categoria_id);
                         </div>
                     </div>
 
-                    <!-- Gerenciar Blogs -->
+                    <!-- Gerenciar Blogs (ícone) -->
                     <div class="relative group">
                         <a href="manage_blogs.php" class="p-3 hover:scale-110 transition duration-200">
                             <img src="icon/gerenciarblog.png" class="w-8 h-8" alt="Gerenciar Blogs">
@@ -140,19 +148,11 @@ $websitesDaCategoria = getWebsitesByCategoria($pdo, $categoria_id);
                         </div>
                     </div>
 
-                    <!-- Logout -->
-                    <div class="relative group">
-                        <a href="logout.php" class="p-3 hover:scale-110 transition duration-200">
-                            <img src="icon/logout.png" class="w-8 h-8" alt="Logout">
-                        </a>
-
-                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
-                                    bg-black text-white text-xs px-3 py-1 rounded
-                                    opacity-0 group-hover:opacity-100 transition
-                                    pointer-events-none whitespace-nowrap">
-                            Logout
-                        </div>
-                    </div>
+                    <!-- Logout (mantém botão original) -->
+                    <a href="logout.php" 
+                    class="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition">
+                        Logout
+                    </a>
 
                 <?php endif; ?>
 
