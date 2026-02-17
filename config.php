@@ -122,6 +122,7 @@ function getTipoSite($pdo, $website_id) {
 }
 
 // Funções para Blog
+// Funções para Blog
 function getBlogPosts($pdo, $website_id, $limit = 10, $offset = 0) {
     $stmt = $pdo->prepare("
         SELECT * FROM blog_posts 
@@ -129,7 +130,10 @@ function getBlogPosts($pdo, $website_id, $limit = 10, $offset = 0) {
         ORDER BY data_publicacao DESC 
         LIMIT ? OFFSET ?
     ");
-    $stmt->execute([$website_id, $limit, $offset]);
+    $stmt->bindValue(1, $website_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
+    $stmt->bindValue(3, (int)$offset, PDO::PARAM_INT);
+    $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
