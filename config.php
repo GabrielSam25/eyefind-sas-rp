@@ -113,7 +113,7 @@ function getWebsitesByCategoria($pdo, $categoria_id)
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// ===== NOVAS FUNÇÕES PARA SISTEMA DE TIPOS =====
+// ===== FUNÇÕES PARA SISTEMA DE TIPOS =====
 
 function getTipoSite($pdo, $website_id) {
     $stmt = $pdo->prepare("SELECT tipo FROM websites WHERE id = ?");
@@ -166,7 +166,7 @@ function criarBlogPost($pdo, $website_id, $dados) {
     ]);
 }
 
-// ===== FUNÇÕES PARA NOTÍCIAS (CORRIGIDAS) =====
+// ===== FUNÇÕES PARA NOTÍCIAS =====
 
 function getNoticiasArtigos($pdo, $website_id, $categoria = null, $limit = 10) {
     $sql = "SELECT * FROM noticias_artigos WHERE website_id = ? AND status = 'publicado'";
@@ -256,13 +256,13 @@ function criarSlug($texto) {
     return empty($texto) ? 'post-' . time() : $texto;
 }
 
-// ===== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO =====
+// ===== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO (CORRIGIDA) =====
 
 function renderDynamicBlocks($html, $website_id, $pdo) {
-    // Primeiro processa as classes dinâmicas
+    // Primeiro processa as classes dinâmicas (substitui valores)
     $html = renderDynamicContent($html, $website_id, $pdo);
     
-    // Depois processa os data-dynamic
+    // Remove qualquer data-dynamic que possa ter sobrado (não vamos usar mais)
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
     @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
@@ -271,216 +271,51 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
     $xpath = new DOMXPath($dom);
     $nodes = $xpath->query("//*[@data-dynamic]");
     
+    // Remove os atributos data-dynamic mas mantém o conteúdo
     foreach ($nodes as $node) {
-        $type = $node->getAttribute('data-dynamic');
-        $limit = $node->getAttribute('data-limit') ?: 5;
-        $class = $node->getAttribute('class');
-        
-        $generatedHtml = gerarConteudoDinamico($type, $website_id, $pdo, $limit, $class);
-        
-        $fragment = $dom->createDocumentFragment();
-        @$fragment->appendXML($generatedHtml);
-        $node->parentNode->replaceChild($fragment, $node);
+        $node->removeAttribute('data-dynamic');
+        $node->removeAttribute('data-limit');
     }
     
     return $dom->saveHTML();
 }
 
-function gerarConteudoDinamico($type, $website_id, $pdo, $limit, $class) {
-    switch ($type) {
-        case 'blog_posts':
-            $posts = getBlogPosts($pdo, $website_id, $limit);
-            return renderBlogPosts($posts, $class, $website_id);
-            
-        case 'blog_destaque':
-            $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE website_id = ? AND status = 'publicado' ORDER BY views DESC LIMIT 1");
-            $stmt->execute([$website_id]);
-            $post = $stmt->fetch();
-            return $post ? renderBlogPostDestaque($post, $class, $website_id) : '';
-            
-        case 'noticias_lista':
-            $noticias = getNoticiasArtigos($pdo, $website_id, null, $limit);
-            return renderNoticiasLista($noticias, $class, $website_id);
-            
-        case 'noticias_destaque':
-            $noticia = getNoticiaDestaqueSite($pdo, $website_id);
-            return $noticia ? renderNoticiaDestaque($noticia, $class, $website_id) : '';
-            
-        case 'classificados_lista':
-            $anuncios = getClassificadosAnuncios($pdo, $website_id, null, $limit);
-            return renderClassificadosLista($anuncios, $class, $website_id);
-            
-        default:
-            return '<p class="text-gray-500">Conteúdo dinâmico não disponível</p>';
-    }
-}
-
-// ===== FUNÇÕES DE RENDERIZAÇÃO PARA BLOG =====
-
-function renderBlogPosts($posts, $class, $website_id) {
-    if (empty($posts)) return '<p class="text-gray-500">Nenhum post encontrado.</p>';
-    
-    $html = '<div class="blog-posts ' . htmlspecialchars($class) . '">';
-    foreach ($posts as $post) {
-        $html .= '
-        <article class="blog-post mb-6 p-4 bg-white rounded shadow">
-            ' . ($post['imagem'] ? '<img src="' . htmlspecialchars($post['imagem']) . '" alt="' . htmlspecialchars($post['titulo']) . '" class="w-full h-48 object-cover rounded mb-4">' : '') . '
-            <h3 class="text-xl font-bold mb-2">
-                <a href="ver_post.php?website_id=' . $website_id . '&post_id=' . $post['id'] . '" class="text-blue-600 hover:underline">' . htmlspecialchars($post['titulo']) . '</a>
-            </h3>
-            <p class="text-gray-600 mb-2">' . htmlspecialchars($post['resumo'] ?? substr(strip_tags($post['conteudo']), 0, 150) . '...') . '</p>
-            <div class="text-sm text-gray-500">' . date('d/m/Y', strtotime($post['data_publicacao'])) . '</div>
-        </article>';
-    }
-    $html .= '</div>';
-    return $html;
-}
-
-function renderBlogPostDestaque($post, $class, $website_id) {
-    return '
-    <div class="blog-destaque ' . htmlspecialchars($class) . ' mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-lg">
-        ' . ($post['imagem'] ? '<img src="' . htmlspecialchars($post['imagem']) . '" alt="' . htmlspecialchars($post['titulo']) . '" class="w-full h-64 object-cover rounded-lg mb-4">' : '') . '
-        <h2 class="text-2xl font-bold mb-2">
-            <a href="ver_post.php?website_id=' . $website_id . '&post_id=' . $post['id'] . '" class="text-blue-700 hover:underline">' . htmlspecialchars($post['titulo']) . '</a>
-        </h2>
-        <p class="text-gray-700 mb-3">' . htmlspecialchars($post['resumo'] ?? substr(strip_tags($post['conteudo']), 0, 200) . '...') . '</p>
-        <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-500">' . date('d/m/Y', strtotime($post['data_publicacao'])) . '</span>
-            <a href="ver_post.php?website_id=' . $website_id . '&post_id=' . $post['id'] . '" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Leia mais →</a>
-        </div>
-    </div>';
-}
-
-// ===== FUNÇÕES DE RENDERIZAÇÃO PARA NOTÍCIAS (CORRIGIDAS) =====
-
-function renderNoticiasLista($noticias, $class, $website_id) {
-    if (empty($noticias)) {
-        return '<div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                    <p class="text-yellow-700">Nenhuma notícia publicada ainda.</p>
-                    <p class="text-sm text-gray-500 mt-2">Vá em "Gerenciar Notícias" e crie sua primeira notícia.</p>
-                </div>';
-    }
-    
-    $html = '<div class="noticias-lista ' . htmlspecialchars($class) . '">';
-    
-    foreach ($noticias as $noticia) {
-        // Garantir que todos os campos existam
-        $titulo = $noticia['titulo'] ?? 'Sem título';
-        $conteudo = $noticia['conteudo'] ?? '';
-        $resumo = !empty($noticia['resumo']) ? $noticia['resumo'] : (substr(strip_tags($conteudo), 0, 150) . '...');
-        $categoria = $noticia['categoria'] ?? 'Geral';
-        $imagem = !empty($noticia['imagem']) ? $noticia['imagem'] : 'https://via.placeholder.com/800x400?text=Sem+Imagem';
-        $data = !empty($noticia['data_publicacao']) ? date('d/m/Y', strtotime($noticia['data_publicacao'])) : date('d/m/Y');
-        $views = isset($noticia['views']) ? number_format($noticia['views']) : '0';
-        
-        // Autor com fallback
-        $autor = getNoticiaAutor($GLOBALS['pdo'], $noticia['autor_id'] ?? null);
-        $autor_nome = $autor['nome'] ?? 'Redação';
-        
-        $html .= '
-        <div class="noticia-item mb-6 border-b pb-4">
-            <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="block group">
-                ' . ($noticia['imagem'] ? '<img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($titulo) . '" class="w-full h-48 object-cover rounded-lg mb-3 group-hover:opacity-90 transition">' : '') . '
-                <span class="text-xs font-semibold text-red-600 uppercase tracking-wider">' . htmlspecialchars($categoria) . '</span>
-                <h3 class="font-bold text-xl mt-1 mb-2 group-hover:text-red-600 transition">' . htmlspecialchars($titulo) . '</h3>
-                <p class="text-gray-600 text-sm">' . htmlspecialchars($resumo) . '</p>
-                <div class="flex items-center text-xs text-gray-500 mt-2">
-                    <span>Por ' . htmlspecialchars($autor_nome) . '</span>
-                    <span class="mx-2">•</span>
-                    <span>' . $data . '</span>
-                    <span class="mx-2">•</span>
-                    <span>' . $views . ' visualizações</span>
-                </div>
-            </a>
-        </div>';
-    }
-    
-    $html .= '</div>';
-    return $html;
-}
-
-function renderNoticiaDestaque($noticia, $class, $website_id) {
-    if (!$noticia) {
-        return '<div class="p-8 bg-gray-100 rounded-lg text-center">
-                    <p class="text-gray-500">Nenhuma notícia em destaque.</p>
-                </div>';
-    }
-    
-    // Garantir que todos os campos existam
-    $titulo = $noticia['titulo'] ?? 'Sem título';
-    $conteudo = $noticia['conteudo'] ?? '';
-    $resumo = !empty($noticia['resumo']) ? $noticia['resumo'] : (substr(strip_tags($conteudo), 0, 200) . '...');
-    $imagem = !empty($noticia['imagem']) ? $noticia['imagem'] : 'https://via.placeholder.com/1200x600?text=Sem+Imagem';
-    $data = !empty($noticia['data_publicacao']) ? date('d/m/Y', strtotime($noticia['data_publicacao'])) : date('d/m/Y');
-    $views = isset($noticia['views']) ? number_format($noticia['views']) : '0';
-    
-    // Autor com fallback
-    $autor = getNoticiaAutor($GLOBALS['pdo'], $noticia['autor_id'] ?? null);
-    $autor_nome = $autor['nome'] ?? 'Redação';
-    
-    return '
-    <div class="noticia-destaque ' . htmlspecialchars($class) . ' relative rounded-xl overflow-hidden">
-        <img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($titulo) . '" class="w-full h-[400px] object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
-            <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 inline-block">DESTAQUE</span>
-            <h2 class="text-4xl font-bold mb-3">
-                <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="hover:underline">' . htmlspecialchars($titulo) . '</a>
-            </h2>
-            <p class="text-lg mb-4 text-gray-200">' . htmlspecialchars($resumo) . '</p>
-            <div class="flex items-center text-sm text-gray-300">
-                <span>Por ' . htmlspecialchars($autor_nome) . '</span>
-                <span class="mx-2">•</span>
-                <span>' . $data . '</span>
-                <span class="mx-2">•</span>
-                <span>' . $views . ' visualizações</span>
-            </div>
-        </div>
-    </div>';
-}
-
-// ===== FUNÇÕES DE RENDERIZAÇÃO PARA CLASSIFICADOS =====
-
-function renderClassificadosLista($anuncios, $class, $website_id) {
-    if (empty($anuncios)) return '<p class="text-gray-500">Nenhum anúncio encontrado.</p>';
-    
-    $html = '<div class="classificados-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ' . htmlspecialchars($class) . '">';
-    foreach ($anuncios as $anuncio) {
-        $html .= '
-        <div class="anuncio-card border rounded-lg overflow-hidden bg-white hover:shadow-lg transition">
-            ' . ($anuncio['imagem'] ? '<img src="' . htmlspecialchars($anuncio['imagem']) . '" alt="' . htmlspecialchars($anuncio['titulo']) . '" class="w-full h-48 object-cover">' : '') . '
-            <div class="p-4">
-                <h3 class="font-bold text-lg mb-2">
-                    <a href="ver_anuncio.php?website_id=' . $website_id . '&anuncio_id=' . $anuncio['id'] . '" class="text-purple-600 hover:underline">' . htmlspecialchars($anuncio['titulo']) . '</a>
-                </h3>
-                <p class="text-gray-600 text-sm mb-2">' . htmlspecialchars(substr($anuncio['descricao'], 0, 80)) . '...</p>
-                ' . ($anuncio['preco'] ? '<p class="text-green-600 font-bold text-xl mb-2">R$ ' . number_format($anuncio['preco'], 2, ',', '.') . '</p>' : '') . '
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-gray-500"><i class="fas fa-phone mr-1"></i>' . ($anuncio['contato'] ?? 'Ver contato') . '</span>
-                    <a href="ver_anuncio.php?website_id=' . $website_id . '&anuncio_id=' . $anuncio['id'] . '" class="text-purple-600 hover:underline">Detalhes →</a>
-                </div>
-            </div>
-        </div>';
-    }
-    $html .= '</div>';
-    return $html;
-}
-
-// ===== FUNÇÃO PARA RENDERIZAR CONTEÚDO COM CLASSES DINÂMICAS =====
+// ===== FUNÇÃO PARA RENDERIZAR CONTEÚDO COM CLASSES DINÂMICAS (APENAS SUBSTITUIÇÃO) =====
 
 function renderDynamicContent($html, $website_id, $pdo) {
-    // Pega a primeira notícia publicada (você pode modificar para pegar um específico)
-    $stmt = $pdo->prepare("SELECT * FROM noticias_artigos WHERE website_id = ? AND status = 'publicado' ORDER BY data_publicacao DESC LIMIT 1");
-    $stmt->execute([$website_id]);
-    $noticia = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Verificar o tipo do site
+    $tipo = getTipoSite($pdo, $website_id);
     
-    if (!$noticia) {
-        return $html; // Se não tiver notícia, retorna o HTML original
+    // Buscar dados baseado no tipo
+    $itens = [];
+    switch ($tipo) {
+        case 'blog':
+            $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE website_id = ? AND status = 'publicado' ORDER BY data_publicacao DESC");
+            $stmt->execute([$website_id]);
+            $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            break;
+            
+        case 'noticias':
+            $stmt = $pdo->prepare("SELECT * FROM noticias_artigos WHERE website_id = ? AND status = 'publicado' ORDER BY data_publicacao DESC");
+            $stmt->execute([$website_id]);
+            $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            break;
+            
+        case 'classificados':
+            $stmt = $pdo->prepare("SELECT * FROM classificados_anuncios WHERE website_id = ? AND status = 'ativo' ORDER BY data_criacao DESC");
+            $stmt->execute([$website_id]);
+            $itens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            break;
+            
+        default:
+            return $html;
     }
     
-    $autor = getNoticiaAutor($pdo, $noticia['autor_id']);
-    $categoria = $noticia['categoria'] ?? 'Geral';
+    if (empty($itens)) {
+        return $html; // Se não tiver itens, retorna o HTML original
+    }
     
+    // Usar DOMDocument para manipular o HTML
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
     @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
@@ -488,80 +323,149 @@ function renderDynamicContent($html, $website_id, $pdo) {
     
     $xpath = new DOMXPath($dom);
     
-    // 1. SUBSTITUIR TÍTULOS
-    $titulos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-titulo ')]");
-    foreach ($titulos as $elemento) {
-        $elemento->nodeValue = htmlspecialchars($noticia['titulo']);
-    }
-    
-    // 2. SUBSTITUIR CONTEÚDO
-    $conteudos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-conteudo ')]");
-    foreach ($conteudos as $elemento) {
-        $elemento->nodeValue = strip_tags($noticia['conteudo']);
-    }
-    
-    // 3. SUBSTITUIR RESUMO
-    $resumos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-resumo ')]");
-    foreach ($resumos as $elemento) {
-        $resumo = $noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 150) . '...';
-        $elemento->nodeValue = htmlspecialchars($resumo);
-    }
-    
-    // 4. SUBSTITUIR IMAGENS
-    $imagens = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-imagem ')]");
-    foreach ($imagens as $elemento) {
-        if ($elemento->nodeName === 'img') {
-            $imagem = $noticia['imagem'] ?? 'https://via.placeholder.com/800x400';
-            $elemento->setAttribute('src', $imagem);
-        }
-    }
-    
-    // 5. SUBSTITUIR DATAS
-    $datas = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-data ')]");
-    foreach ($datas as $elemento) {
-        $data = date('d/m/Y', strtotime($noticia['data_publicacao']));
-        $elemento->nodeValue = $data;
-    }
-    
-    // 6. SUBSTITUIR DATA COMPLETA
-    $datas_completas = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-data-completa ')]");
-    foreach ($datas_completas as $elemento) {
-        $data = date('l, F j, Y', strtotime($noticia['data_publicacao']));
-        $elemento->nodeValue = $data;
-    }
-    
-    // 7. SUBSTITUIR AUTOR
-    $autores = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-autor-nome ')]");
-    foreach ($autores as $elemento) {
-        $elemento->nodeValue = $autor['nome'];
-    }
-    
-    // 8. SUBSTITUIR CATEGORIA
-    $categorias = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-categoria ')]");
-    foreach ($categorias as $elemento) {
-        $elemento->nodeValue = $categoria;
-    }
-    
-    // 9. SUBSTITUIR VIEWS
-    $views = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-views ')]");
-    foreach ($views as $elemento) {
-        $elemento->nodeValue = number_format($noticia['views']);
-    }
-    
-    // 10. SUBSTITUIR ANO
-    $anos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-ano ')]");
-    foreach ($anos as $elemento) {
-        $elemento->nodeValue = date('Y');
-    }
-    
-    // 11. SUBSTITUIR LINKS
-    $links = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-link ')]");
-    foreach ($links as $elemento) {
-        if ($elemento->nodeName === 'a') {
-            $elemento->setAttribute('href', 'ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id']);
+    // Para cada item (post/notícia/anúncio), processar os elementos com classes dinâmicas
+    foreach ($itens as $index => $item) {
+        // Seletor para elementos com data-post-id específico ou todos se não tiver
+        if (isset($item['id'])) {
+            // Tenta encontrar elementos com data-post-id correspondente
+            $elements = $xpath->query("//*[@data-post-id='{$item['id']}']");
+            
+            if ($elements->length > 0) {
+                // Processa apenas os elementos com este data-post-id
+                foreach ($elements as $element) {
+                    processarElementoComClasses($element, $item, $pdo, $website_id);
+                }
+            } else if ($index === 0) {
+                // Se não encontrar por ID e for o primeiro item, processa elementos sem data-post-id
+                $elements_sem_id = $xpath->query("//*[not(@data-post-id)]");
+                foreach ($elements_sem_id as $element) {
+                    processarElementoComClasses($element, $item, $pdo, $website_id);
+                }
+            }
         }
     }
     
     return $dom->saveHTML();
+}
+
+// ===== FUNÇÃO AUXILIAR PARA PROCESSAR CLASSES EM UM ELEMENTO =====
+
+function processarElementoComClasses($element, $dados, $pdo, $website_id) {
+    // Pega todas as classes do elemento
+    $classAttr = $element->getAttribute('class');
+    $classes = explode(' ', $classAttr);
+    
+    foreach ($classes as $classe) {
+        $classe = trim($classe);
+        
+        switch ($classe) {
+            case 'dynamic-titulo':
+                $element->nodeValue = htmlspecialchars($dados['titulo'] ?? '');
+                break;
+                
+            case 'dynamic-conteudo':
+                // Para conteúdo, mantém o HTML interno
+                $conteudo = $dados['conteudo'] ?? '';
+                // Remove o conteúdo antigo e adiciona o novo como HTML
+                while ($element->firstChild) {
+                    $element->removeChild($element->firstChild);
+                }
+                $fragment = $element->ownerDocument->createDocumentFragment();
+                @$fragment->appendXML($conteudo);
+                $element->appendChild($fragment);
+                break;
+                
+            case 'dynamic-resumo':
+                $resumo = $dados['resumo'] ?? substr(strip_tags($dados['conteudo'] ?? ''), 0, 150) . '...';
+                $element->nodeValue = htmlspecialchars($resumo);
+                break;
+                
+            case 'dynamic-imagem':
+                if ($element->nodeName === 'img') {
+                    $imagem = $dados['imagem'] ?? 'https://via.placeholder.com/800x400';
+                    $element->setAttribute('src', $imagem);
+                    $element->setAttribute('alt', htmlspecialchars($dados['titulo'] ?? 'Imagem'));
+                }
+                break;
+                
+            case 'dynamic-data':
+                $data = !empty($dados['data_publicacao']) ? date('d/m/Y', strtotime($dados['data_publicacao'])) : date('d/m/Y');
+                $element->nodeValue = $data;
+                break;
+                
+            case 'dynamic-data-completa':
+                $data = !empty($dados['data_publicacao']) ? date('l, F j, Y', strtotime($dados['data_publicacao'])) : date('l, F j, Y');
+                $element->nodeValue = $data;
+                break;
+                
+            case 'dynamic-autor':
+            case 'dynamic-autor-nome':
+                $autor = getNoticiaAutor($pdo, $dados['autor_id'] ?? null);
+                $element->nodeValue = htmlspecialchars($autor['nome']);
+                break;
+                
+            case 'dynamic-categoria':
+                $categoria = $dados['categoria'] ?? 'Geral';
+                $element->nodeValue = htmlspecialchars($categoria);
+                break;
+                
+            case 'dynamic-views':
+                $views = isset($dados['views']) ? number_format($dados['views']) : '0';
+                $element->nodeValue = $views;
+                break;
+                
+            case 'dynamic-ano':
+                $element->nodeValue = date('Y');
+                break;
+                
+            case 'dynamic-link':
+                if ($element->nodeName === 'a') {
+                    if (isset($dados['id'])) {
+                        // Determinar o tipo para criar link correto
+                        $tipo = $dados['tipo'] ?? getTipoSite($pdo, $website_id);
+                        switch ($tipo) {
+                            case 'blog':
+                                $link = "ver_post.php?website_id=$website_id&post_id=" . $dados['id'];
+                                break;
+                            case 'noticias':
+                                $link = "ver_noticia.php?website_id=$website_id&noticia_id=" . $dados['id'];
+                                break;
+                            case 'classificados':
+                                $link = "ver_anuncio.php?website_id=$website_id&anuncio_id=" . $dados['id'];
+                                break;
+                            default:
+                                $link = "#";
+                        }
+                        $element->setAttribute('href', $link);
+                    }
+                }
+                break;
+                
+            case 'dynamic-preco':
+                if (isset($dados['preco'])) {
+                    $preco = 'R$ ' . number_format($dados['preco'], 2, ',', '.');
+                    $element->nodeValue = $preco;
+                }
+                break;
+                
+            case 'dynamic-contato':
+                $element->nodeValue = htmlspecialchars($dados['contato'] ?? '');
+                break;
+                
+            case 'dynamic-telefone':
+                $element->nodeValue = htmlspecialchars($dados['telefone'] ?? '');
+                break;
+                
+            case 'dynamic-email':
+                if ($element->nodeName === 'a') {
+                    $email = $dados['email'] ?? '';
+                    $element->setAttribute('href', 'mailto:' . $email);
+                    $element->nodeValue = $email;
+                } else {
+                    $element->nodeValue = htmlspecialchars($dados['email'] ?? '');
+                }
+                break;
+        }
+    }
 }
 ?>
