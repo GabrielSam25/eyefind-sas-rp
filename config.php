@@ -203,6 +203,15 @@ function getNoticiaDestaqueSite($pdo, $website_id) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function getNoticiaAutor($pdo, $autor_id) {
+    if (!$autor_id) return ['nome' => 'Redação'];
+    
+    $stmt = $pdo->prepare("SELECT nome FROM usuarios WHERE id = ?");
+    $stmt->execute([$autor_id]);
+    $autor = $stmt->fetch();
+    return $autor ?: ['nome' => 'Redação'];
+}
+
 // Funções para Classificados
 function getClassificadosAnuncios($pdo, $website_id, $categoria = null, $limit = 20) {
     $sql = "SELECT * FROM classificados_anuncios WHERE website_id = ? AND status = 'ativo'";
