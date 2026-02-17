@@ -177,18 +177,21 @@ function getNoticiasArtigos($pdo, $website_id, $categoria = null, $limit = 10) {
     }
     
     $sql .= " ORDER BY destaque DESC, data_publicacao DESC LIMIT ?";
-    // Usar bindValue para o limite
+    
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(1, $website_id, PDO::PARAM_INT);
+    
     if ($categoria) {
         $stmt->bindValue(2, $categoria, PDO::PARAM_STR);
         $stmt->bindValue(3, (int)$limit, PDO::PARAM_INT);
     } else {
         $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
     }
+    
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 function getNoticiaDestaqueSite($pdo, $website_id) {
     $stmt = $pdo->prepare("
