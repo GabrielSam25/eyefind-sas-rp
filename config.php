@@ -121,8 +121,8 @@ function getTipoSite($pdo, $website_id) {
     return $stmt->fetchColumn();
 }
 
-// Funções para Blog
-// Funções para Blog
+// ===== FUNÇÕES PARA BLOG =====
+
 function getBlogPosts($pdo, $website_id, $limit = 10, $offset = 0) {
     $stmt = $pdo->prepare("
         SELECT * FROM blog_posts 
@@ -166,7 +166,8 @@ function criarBlogPost($pdo, $website_id, $dados) {
     ]);
 }
 
-// Funções para Notícias
+// ===== FUNÇÕES PARA NOTÍCIAS (CORRIGIDAS) =====
+
 function getNoticiasArtigos($pdo, $website_id, $categoria = null, $limit = 10) {
     $sql = "SELECT * FROM noticias_artigos WHERE website_id = ? AND status = 'publicado'";
     $params = [$website_id];
@@ -192,7 +193,6 @@ function getNoticiasArtigos($pdo, $website_id, $categoria = null, $limit = 10) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-
 function getNoticiaDestaqueSite($pdo, $website_id) {
     $stmt = $pdo->prepare("
         SELECT * FROM noticias_artigos 
@@ -212,7 +212,8 @@ function getNoticiaAutor($pdo, $autor_id) {
     return $autor ?: ['nome' => 'Redação'];
 }
 
-// Funções para Classificados
+// ===== FUNÇÕES PARA CLASSIFICADOS =====
+
 function getClassificadosAnuncios($pdo, $website_id, $categoria = null, $limit = 20) {
     $sql = "SELECT * FROM classificados_anuncios WHERE website_id = ? AND status = 'ativo'";
     $params = [$website_id];
@@ -236,7 +237,8 @@ function getClassificadosAnuncios($pdo, $website_id, $categoria = null, $limit =
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Função auxiliar para criar slug
+// ===== FUNÇÃO AUXILIAR PARA SLUG =====
+
 function criarSlug($texto) {
     $texto = preg_replace('~[^\pL\d]+~u', '-', $texto);
     $texto = iconv('utf-8', 'us-ascii//TRANSLIT', $texto);
@@ -247,12 +249,13 @@ function criarSlug($texto) {
     return empty($texto) ? 'post-' . time() : $texto;
 }
 
-// Função para renderizar blocos dinâmicos
+// ===== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO =====
+
 function renderDynamicBlocks($html, $website_id, $pdo) {
     // Primeiro processa as classes dinâmicas
     $html = renderDynamicContent($html, $website_id, $pdo);
     
-    // Depois processa os data-dynamic (se ainda quiser manter)
+    // Depois processa os data-dynamic
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
     @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
@@ -305,6 +308,8 @@ function gerarConteudoDinamico($type, $website_id, $pdo, $limit, $class) {
     }
 }
 
+// ===== FUNÇÕES DE RENDERIZAÇÃO PARA BLOG =====
+
 function renderBlogPosts($posts, $class, $website_id) {
     if (empty($posts)) return '<p class="text-gray-500">Nenhum post encontrado.</p>';
     
@@ -339,6 +344,8 @@ function renderBlogPostDestaque($post, $class, $website_id) {
     </div>';
 }
 
+// ===== FUNÇÕES DE RENDERIZAÇÃO PARA NOTÍCIAS (CORRIGIDAS) =====
+
 function renderNoticiasLista($noticias, $class, $website_id) {
     if (empty($noticias)) {
         return '<p class="text-gray-500">Nenhuma notícia encontrada.</p>';
@@ -355,10 +362,10 @@ function renderNoticiasLista($noticias, $class, $website_id) {
         
         $html .= '
         <div class="noticia-item mb-6 border-b pb-4">
-            <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="block">
-                ' . ($noticia['imagem'] ? '<img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full h-48 object-cover rounded-lg mb-3">' : '') . '
+            <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="block group">
+                ' . ($noticia['imagem'] ? '<img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full h-48 object-cover rounded-lg mb-3 group-hover:opacity-90 transition">' : '') . '
                 <span class="text-xs font-semibold text-red-600 uppercase tracking-wider">' . htmlspecialchars($categoria) . '</span>
-                <h3 class="font-bold text-xl mt-1 mb-2 hover:text-red-600">' . htmlspecialchars($noticia['titulo']) . '</h3>
+                <h3 class="font-bold text-xl mt-1 mb-2 group-hover:text-red-600 transition">' . htmlspecialchars($noticia['titulo']) . '</h3>
                 <p class="text-gray-600 text-sm">' . $resumo . '</p>
                 <div class="flex items-center text-xs text-gray-500 mt-2">
                     <span>Por ' . htmlspecialchars($autor['nome']) . '</span>
@@ -402,25 +409,7 @@ function renderNoticiaDestaque($noticia, $class, $website_id) {
     </div>';
 }
 
-function renderNoticiaDestaque($noticia, $class, $website_id) {
-    return '
-    <div class="noticia-destaque ' . htmlspecialchars($class) . ' mb-6 p-6 bg-red-50 rounded-lg shadow-lg border-l-4 border-red-500">
-        <div class="flex flex-col md:flex-row gap-6">
-            ' . ($noticia['imagem'] ? '<img src="' . htmlspecialchars($noticia['imagem']) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full md:w-64 h-48 object-cover rounded-lg">' : '') . '
-            <div class="flex-1">
-                <span class="inline-block bg-red-500 text-white text-xs px-2 py-1 rounded mb-2">DESTAQUE</span>
-                <h2 class="text-2xl font-bold mb-2">
-                    <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="text-red-700 hover:underline">' . htmlspecialchars($noticia['titulo']) . '</a>
-                </h2>
-                <p class="text-gray-700 mb-3">' . htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 200) . '...') . '</p>
-                <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-500">' . date('d/m/Y', strtotime($noticia['data_publicacao'])) . '</span>
-                    <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Leia mais →</a>
-                </div>
-            </div>
-        </div>
-    </div>';
-}
+// ===== FUNÇÕES DE RENDERIZAÇÃO PARA CLASSIFICADOS =====
 
 function renderClassificadosLista($anuncios, $class, $website_id) {
     if (empty($anuncios)) return '<p class="text-gray-500">Nenhum anúncio encontrado.</p>';
@@ -447,22 +436,21 @@ function renderClassificadosLista($anuncios, $class, $website_id) {
     return $html;
 }
 
-// NOVA FUNÇÃO: Renderizar conteúdo com classes dinâmicas
+// ===== FUNÇÃO PARA RENDERIZAR CONTEÚDO COM CLASSES DINÂMICAS =====
+
 function renderDynamicContent($html, $website_id, $pdo) {
-    // Pega o primeiro post publicado (você pode modificar para pegar um específico)
-    $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE website_id = ? AND status = 'publicado' ORDER BY data_publicacao DESC LIMIT 1");
+    // Pega a primeira notícia publicada (você pode modificar para pegar um específico)
+    $stmt = $pdo->prepare("SELECT * FROM noticias_artigos WHERE website_id = ? AND status = 'publicado' ORDER BY data_publicacao DESC LIMIT 1");
     $stmt->execute([$website_id]);
-    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+    $noticia = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if (!$post) {
-        return $html; // Se não tiver post, retorna o HTML original
+    if (!$noticia) {
+        return $html; // Se não tiver notícia, retorna o HTML original
     }
     
-    // Criar autor genérico (você pode pegar do banco de usuários depois)
-    $autor = 'Eyefind User';
-    $categoria = 'Blog';
+    $autor = getNoticiaAutor($pdo, $noticia['autor_id']);
+    $categoria = $noticia['categoria'] ?? 'Geral';
     
-    // Usar DOMDocument para manipular o HTML
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
     @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
@@ -473,19 +461,19 @@ function renderDynamicContent($html, $website_id, $pdo) {
     // 1. SUBSTITUIR TÍTULOS
     $titulos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-titulo ')]");
     foreach ($titulos as $elemento) {
-        $elemento->nodeValue = htmlspecialchars($post['titulo']);
+        $elemento->nodeValue = htmlspecialchars($noticia['titulo']);
     }
     
     // 2. SUBSTITUIR CONTEÚDO
     $conteudos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-conteudo ')]");
     foreach ($conteudos as $elemento) {
-        $elemento->nodeValue = strip_tags($post['conteudo']);
+        $elemento->nodeValue = strip_tags($noticia['conteudo']);
     }
     
     // 3. SUBSTITUIR RESUMO
     $resumos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-resumo ')]");
     foreach ($resumos as $elemento) {
-        $resumo = $post['resumo'] ?? substr(strip_tags($post['conteudo']), 0, 150) . '...';
+        $resumo = $noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 150) . '...';
         $elemento->nodeValue = htmlspecialchars($resumo);
     }
     
@@ -493,7 +481,7 @@ function renderDynamicContent($html, $website_id, $pdo) {
     $imagens = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-imagem ')]");
     foreach ($imagens as $elemento) {
         if ($elemento->nodeName === 'img') {
-            $imagem = $post['imagem'] ?? 'https://via.placeholder.com/800x400';
+            $imagem = $noticia['imagem'] ?? 'https://via.placeholder.com/800x400';
             $elemento->setAttribute('src', $imagem);
         }
     }
@@ -501,33 +489,46 @@ function renderDynamicContent($html, $website_id, $pdo) {
     // 5. SUBSTITUIR DATAS
     $datas = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-data ')]");
     foreach ($datas as $elemento) {
-        $data = date('d/m/Y', strtotime($post['data_publicacao']));
+        $data = date('d/m/Y', strtotime($noticia['data_publicacao']));
         $elemento->nodeValue = $data;
     }
     
-    // 6. SUBSTITUIR AUTOR
-    $autores = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-autor ')]");
-    foreach ($autores as $elemento) {
-        $elemento->nodeValue = $autor;
+    // 6. SUBSTITUIR DATA COMPLETA
+    $datas_completas = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-data-completa ')]");
+    foreach ($datas_completas as $elemento) {
+        $data = date('l, F j, Y', strtotime($noticia['data_publicacao']));
+        $elemento->nodeValue = $data;
     }
     
-    // 7. SUBSTITUIR CATEGORIA
+    // 7. SUBSTITUIR AUTOR
+    $autores = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-autor-nome ')]");
+    foreach ($autores as $elemento) {
+        $elemento->nodeValue = $autor['nome'];
+    }
+    
+    // 8. SUBSTITUIR CATEGORIA
     $categorias = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-categoria ')]");
     foreach ($categorias as $elemento) {
         $elemento->nodeValue = $categoria;
     }
     
-    // 8. SUBSTITUIR VIEWS
+    // 9. SUBSTITUIR VIEWS
     $views = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-views ')]");
     foreach ($views as $elemento) {
-        $elemento->nodeValue = number_format($post['views']);
+        $elemento->nodeValue = number_format($noticia['views']);
     }
     
-    // 9. SUBSTITUIR LINKS
+    // 10. SUBSTITUIR ANO
+    $anos = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-ano ')]");
+    foreach ($anos as $elemento) {
+        $elemento->nodeValue = date('Y');
+    }
+    
+    // 11. SUBSTITUIR LINKS
     $links = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' dynamic-link ')]");
     foreach ($links as $elemento) {
         if ($elemento->nodeName === 'a') {
-            $elemento->setAttribute('href', 'ver_post.php?website_id=' . $website_id . '&post_id=' . $post['id']);
+            $elemento->setAttribute('href', 'ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id']);
         }
     }
     
