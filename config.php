@@ -400,27 +400,40 @@ function renderNoticiasLista($noticias, $class, $website_id) {
 }
 
 function renderNoticiaDestaque($noticia, $class, $website_id) {
-    $autor = getNoticiaAutor($GLOBALS['pdo'], $noticia['autor_id']);
-    $data = date('d/m/Y', strtotime($noticia['data_publicacao']));
-    $resumo = htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 200) . '...');
-    $imagem = $noticia['imagem'] ?? 'https://via.placeholder.com/1200x600?text=Sem+Imagem';
+    if (!$noticia) {
+        return '<div class="p-8 bg-gray-100 rounded-lg text-center">
+                    <p class="text-gray-500">Nenhuma notícia em destaque.</p>
+                </div>';
+    }
+    
+    // Garantir que todos os campos existam
+    $titulo = $noticia['titulo'] ?? 'Sem título';
+    $conteudo = $noticia['conteudo'] ?? '';
+    $resumo = !empty($noticia['resumo']) ? $noticia['resumo'] : (substr(strip_tags($conteudo), 0, 200) . '...');
+    $imagem = !empty($noticia['imagem']) ? $noticia['imagem'] : 'https://via.placeholder.com/1200x600?text=Sem+Imagem';
+    $data = !empty($noticia['data_publicacao']) ? date('d/m/Y', strtotime($noticia['data_publicacao'])) : date('d/m/Y');
+    $views = isset($noticia['views']) ? number_format($noticia['views']) : '0';
+    
+    // Autor com fallback
+    $autor = getNoticiaAutor($GLOBALS['pdo'], $noticia['autor_id'] ?? null);
+    $autor_nome = $autor['nome'] ?? 'Redação';
     
     return '
     <div class="noticia-destaque ' . htmlspecialchars($class) . ' relative rounded-xl overflow-hidden">
-        <img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full h-[400px] object-cover">
+        <img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($titulo) . '" class="w-full h-[400px] object-cover">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
         <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
             <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 inline-block">DESTAQUE</span>
             <h2 class="text-4xl font-bold mb-3">
-                <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="hover:underline">' . htmlspecialchars($noticia['titulo']) . '</a>
+                <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="hover:underline">' . htmlspecialchars($titulo) . '</a>
             </h2>
-            <p class="text-lg mb-4 text-gray-200">' . $resumo . '</p>
+            <p class="text-lg mb-4 text-gray-200">' . htmlspecialchars($resumo) . '</p>
             <div class="flex items-center text-sm text-gray-300">
-                <span>Por ' . htmlspecialchars($autor['nome']) . '</span>
+                <span>Por ' . htmlspecialchars($autor_nome) . '</span>
                 <span class="mx-2">•</span>
                 <span>' . $data . '</span>
                 <span class="mx-2">•</span>
-                <span>' . number_format($noticia['views']) . ' visualizações</span>
+                <span>' . $views . ' visualizações</span>
             </div>
         </div>
     </div>';
