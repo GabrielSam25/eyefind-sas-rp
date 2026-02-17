@@ -433,13 +433,22 @@ if ($weatherId == 800 && $isDayTime) {
         function updateTime() {
             const now = new Date();
             const timeElement = document.getElementById('current-time');
-            timeElement.textContent = now.toLocaleTimeString('pt-BR', {
-                hour: '1-digit',
-                minute: '2-digit'
-            });
+
+            if (timeElement) {
+                timeElement.textContent = now.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
         }
 
-        setInterval(updateTime, 0);
+        // Atualiza imediatamente ao carregar
+        updateTime();
+
+        // Atualiza a cada 1 segundo
+        setInterval(updateTime, 1000);
+
 
         const dropdownContainer = document.getElementById('dropdown-container');
         const dropdownMenu = document.getElementById('dropdown-menu');
