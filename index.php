@@ -275,7 +275,6 @@ if ($weatherId == 800 && $isDayTime) {
                 <?php if ($noticiaDestaque): ?>
                     <div class="border-b-2 border-eyefind-blue pb-4 mb-4">
                         <div class="flex items-center gap-4 mb-4">
-                            <img src="<?php echo $noticiaDestaque["imagem"]; ?>" alt="<?php echo $noticiaDestaque["fonte"]; ?>" class="w-16">
                             <h2 class="text-xl font-bold text-eyefind-blue">ULTIMAS NOTICIAS</h2>
                         </div>
                         <h3 class="text-lg font-bold text-eyefind-dark mb-2"><?php echo $noticiaDestaque["titulo"]; ?></h3>
