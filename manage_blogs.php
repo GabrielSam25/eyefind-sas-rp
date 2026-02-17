@@ -142,11 +142,11 @@ if (isset($_GET['excluir'])) {
                                            class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200 transition">
                                             <i class="fas fa-pen mr-1"></i>Posts
                                         </a>
-                                            <?php if ($site['tipo'] == 'noticias'): ?>
-                                                <a href="gerenciar_noticias.php?website_id=<?php echo $site['id']; ?>" 
-                                                class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200 transition">
-                                                    <i class="fas fa-newspaper mr-1"></i>Notícias
-                                            </a>
+                                    <?php elseif ($site['tipo'] == 'noticias'): ?>
+                                        <a href="gerenciar_noticias.php?website_id=<?php echo $site['id']; ?>" 
+                                           class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200 transition">
+                                            <i class="fas fa-newspaper mr-1"></i>Notícias
+                                        </a>
                                     <?php elseif ($site['tipo'] == 'classificados'): ?>
                                         <a href="gerenciar_anuncios.php?website_id=<?php echo $site['id']; ?>" 
                                            class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200 transition">
