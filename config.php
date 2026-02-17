@@ -193,13 +193,27 @@ function getNoticiasArtigos($pdo, $website_id, $categoria = null, $limit = 10) {
 }
 
 function getNoticiaDestaqueSite($pdo, $website_id) {
+    // Primeiro tenta buscar uma notícia com destaque = 1
     $stmt = $pdo->prepare("
         SELECT * FROM noticias_artigos 
         WHERE website_id = ? AND status = 'publicado' AND destaque = 1 
         ORDER BY data_publicacao DESC LIMIT 1
     ");
     $stmt->execute([$website_id]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    $noticia = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Se não encontrar com destaque, pega a mais recente
+    if (!$noticia) {
+        $stmt = $pdo->prepare("
+            SELECT * FROM noticias_artigos 
+            WHERE website_id = ? AND status = 'publicado' 
+            ORDER BY data_publicacao DESC LIMIT 1
+        ");
+        $stmt->execute([$website_id]);
+        $noticia = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    return $noticia;
 }
 
 function getNoticiaAutor($pdo, $autor_id) {
