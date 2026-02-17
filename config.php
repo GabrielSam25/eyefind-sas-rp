@@ -204,12 +204,19 @@ function getNoticiaDestaqueSite($pdo, $website_id) {
 }
 
 function getNoticiaAutor($pdo, $autor_id) {
-    if (!$autor_id) return ['nome' => 'Redação'];
+    if (!$autor_id || $autor_id === 'NULL' || $autor_id === null) {
+        return ['nome' => 'Redação'];
+    }
     
     $stmt = $pdo->prepare("SELECT nome FROM usuarios WHERE id = ?");
     $stmt->execute([$autor_id]);
-    $autor = $stmt->fetch();
-    return $autor ?: ['nome' => 'Redação'];
+    $autor = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($autor && isset($autor['nome'])) {
+        return $autor;
+    }
+    
+    return ['nome' => 'Redação'];
 }
 
 // ===== FUNÇÕES PARA CLASSIFICADOS =====
