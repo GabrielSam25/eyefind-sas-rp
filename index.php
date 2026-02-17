@@ -447,7 +447,7 @@ if ($weatherId == 800 && $isDayTime) {
             });
         }
 
-        setInterval(updateTime, 1000);
+        setInterval(updateTime, 0);
 
         const dropdownContainer = document.getElementById('dropdown-container');
         const dropdownMenu = document.getElementById('dropdown-menu');
