@@ -474,6 +474,26 @@ if ($weatherId == 800 && $isDayTime) {
                 dropdownMenu.classList.add('hidden');
             }, 300);
         });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const button = document.getElementById("dropdown-button");
+        const menu = document.getElementById("dropdown-menu");
+        const container = document.getElementById("dropdown-container");
+
+        // Abrir / fechar ao clicar no botão
+        button.addEventListener("click", function (e) {
+            e.stopPropagation();
+            menu.classList.toggle("hidden");
+        });
+
+        // Fechar se clicar fora
+        document.addEventListener("click", function (e) {
+            if (!container.contains(e.target)) {
+                menu.classList.add("hidden");
+            }
+        });
+    });
+
     </script>
 </body>
 
