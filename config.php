@@ -403,20 +403,27 @@ function renderNoticiaDestaque($noticia, $class, $website_id) {
 }
 
 function renderNoticiaDestaque($noticia, $class, $website_id) {
+    $autor = getNoticiaAutor($GLOBALS['pdo'], $noticia['autor_id']);
+    $data = date('d/m/Y', strtotime($noticia['data_publicacao']));
+    $resumo = htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 200) . '...');
+    $imagem = $noticia['imagem'] ?? 'https://via.placeholder.com/1200x600?text=Sem+Imagem';
+    
     return '
-    <div class="noticia-destaque ' . htmlspecialchars($class) . ' mb-6 p-6 bg-red-50 rounded-lg shadow-lg border-l-4 border-red-500">
-        <div class="flex flex-col md:flex-row gap-6">
-            ' . ($noticia['imagem'] ? '<img src="' . htmlspecialchars($noticia['imagem']) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full md:w-64 h-48 object-cover rounded-lg">' : '') . '
-            <div class="flex-1">
-                <span class="inline-block bg-red-500 text-white text-xs px-2 py-1 rounded mb-2">DESTAQUE</span>
-                <h2 class="text-2xl font-bold mb-2">
-                    <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="text-red-700 hover:underline">' . htmlspecialchars($noticia['titulo']) . '</a>
-                </h2>
-                <p class="text-gray-700 mb-3">' . htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 200) . '...') . '</p>
-                <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-500">' . date('d/m/Y', strtotime($noticia['data_publicacao'])) . '</span>
-                    <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Leia mais →</a>
-                </div>
+    <div class="noticia-destaque ' . htmlspecialchars($class) . ' relative rounded-xl overflow-hidden">
+        <img src="' . htmlspecialchars($imagem) . '" alt="' . htmlspecialchars($noticia['titulo']) . '" class="w-full h-[400px] object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+            <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 inline-block">DESTAQUE</span>
+            <h2 class="text-4xl font-bold mb-3">
+                <a href="ver_noticia.php?website_id=' . $website_id . '&noticia_id=' . $noticia['id'] . '" class="hover:underline">' . htmlspecialchars($noticia['titulo']) . '</a>
+            </h2>
+            <p class="text-lg mb-4 text-gray-200">' . $resumo . '</p>
+            <div class="flex items-center text-sm text-gray-300">
+                <span>Por ' . htmlspecialchars($autor['nome']) . '</span>
+                <span class="mx-2">•</span>
+                <span>' . $data . '</span>
+                <span class="mx-2">•</span>
+                <span>' . number_format($noticia['views']) . ' visualizações</span>
             </div>
         </div>
     </div>';
