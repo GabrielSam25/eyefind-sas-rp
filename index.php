@@ -200,75 +200,77 @@ if ($weatherId == 800 && $isDayTime) {
                     </div>
                 </div>
 
-                <div class="flex items-center gap-6 mt-4 md:mt-0">
+<div class="flex items-center gap-6 mt-4 md:mt-0">
 
-                <?php if (!isLogado()): ?>
-                    <a href="login.php" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
-                        Entrar
-                    </a>
-                <?php else: ?>
-                    <?php
-                    $usuario = getUsuarioAtual($pdo);
-                    $is_admin = isset($usuario['is_admin']) && $usuario['is_admin'] == 1;
-                    ?>
+<?php if (!isLogado()): ?>
+    <a href="login.php" class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
+        Entrar
+    </a>
+<?php else: ?>
+    <?php
+    $usuario = getUsuarioAtual($pdo);
+    $is_admin = isset($usuario['is_admin']) && $usuario['is_admin'] == 1;
+    ?>
 
-                    <!-- Criar Blog -->
-                    <div class="relative group">
-                        <a href="new_blog.php" class="p-2 hover:scale-110 transition duration-200">
-                            <img src="icon/blog.png" class="w-6 h-6" alt="Criar Blog">
-                        </a>
+    <!-- Criar Blog -->
+    <div class="relative group">
+        <a href="new_blog.php" class="p-3 hover:scale-110 transition duration-200">
+            <img src="icon/blog.png" class="w-8 h-8" alt="Criar Blog">
+        </a>
 
-                        <div class="absolute -bottom-9 left-1/2 -translate-x-1/2 
-                                    bg-black text-white text-xs px-3 py-1 rounded
-                                    opacity-0 group-hover:opacity-100 transition
-                                    pointer-events-none whitespace-nowrap">
-                            Criar Blog
-                        </div>
-                    </div>
+        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                    bg-black text-white text-xs px-3 py-1 rounded
+                    opacity-0 group-hover:opacity-100 transition
+                    pointer-events-none whitespace-nowrap">
+            Criar Blog
+        </div>
+    </div>
 
-                    <!-- Gerenciar Blogs -->
-                    <div class="relative group">
-                        <a href="manage_blogs.php" class="p-2 hover:scale-110 transition duration-200">
-                            <img src="icon/gerenciarblog.png" class="w-6 h-6" alt="Gerenciar Blogs">
-                        </a>
+    <!-- Gerenciar Blogs -->
+    <div class="relative group">
+        <a href="manage_blogs.php" class="p-3 hover:scale-110 transition duration-200">
+            <img src="icon/gerenciarblog.png" class="w-8 h-8" alt="Gerenciar Blogs">
+        </a>
 
-                        <div class="absolute -bottom-9 left-1/2 -translate-x-1/2 
-                                    bg-black text-white text-xs px-3 py-1 rounded
-                                    opacity-0 group-hover:opacity-100 transition
-                                    pointer-events-none whitespace-nowrap">
-                            Gerenciar Blogs
-                        </div>
-                    </div>
+        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                    bg-black text-white text-xs px-3 py-1 rounded
+                    opacity-0 group-hover:opacity-100 transition
+                    pointer-events-none whitespace-nowrap">
+            Gerenciar Blogs
+        </div>
+    </div>
 
-                    <!-- Mais Opções -->
-                    <div class="relative group" id="dropdown-container">
-                        <button class="p-2 hover:scale-110 transition duration-200" id="dropdown-button">
-                            <img src="icon/maisopcoes.png" class="w-6 h-6" alt="Mais opções">
-                        </button>
+    <!-- Mais Opções -->
+    <div class="relative group" id="dropdown-container">
+        <button class="p-3 hover:scale-110 transition duration-200" id="dropdown-button">
+            <img src="icon/maisopcoes.png" class="w-8 h-8" alt="Mais opções">
+        </button>
 
-                        <div class="absolute -bottom-9 left-1/2 -translate-x-1/2 
-                                    bg-black text-white text-xs px-3 py-1 rounded
-                                    opacity-0 group-hover:opacity-100 transition
-                                    pointer-events-none whitespace-nowrap">
-                            Mais opções
-                        </div>
+        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                    bg-black text-white text-xs px-3 py-1 rounded
+                    opacity-0 group-hover:opacity-100 transition
+                    pointer-events-none whitespace-nowrap">
+            Mais opções
+        </div>
 
-                        <!-- Dropdown menu -->
-                        <div class="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg hidden" id="dropdown-menu">
-                            <?php if ($is_admin): ?>
-                                <a href="admin.php" class="block px-4 py-2 text-gray-800 hover:bg-purple-100 font-bold">
-                                    Admin
-                                </a>
-                            <?php endif; ?>
+        <!-- Dropdown -->
+        <div class="absolute right-0 mt-2 w-48 bg-white rounded shadow-lg hidden" id="dropdown-menu">
+            <?php if ($is_admin): ?>
+                <a href="admin.php" class="block px-4 py-2 text-gray-800 hover:bg-purple-100 font-bold">
+                    Admin
+                </a>
+            <?php endif; ?>
 
-                            <a href="logout.php" class="block px-4 py-2 text-gray-800 hover:bg-red-100 font-bold">
-                                Logout
-                            </a>
-                        </div>
-                    </div>
+            <a href="logout.php" class="block px-4 py-2 text-gray-800 hover:bg-red-100 font-bold">
+                Logout
+            </a>
+        </div>
+    </div>
 
-                <?php endif; ?>
-                </div>
+<?php endif; ?>
+</div>
+
+
             </div>
         </div>
     </section>
