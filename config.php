@@ -455,7 +455,7 @@ function preencherElementoComDados($elemento, $dados, $pdo, $website_id) {
                 
             case 'dynamic-preco':
                 if (isset($dados['preco'])) {
-                    $preco = 'R$ ' . number_format($dados['preco'], 2, ',', '.');
+                    $preco = 'US ' . number_format($dados['preco'], 2, ',', '.');
                     $elemento->nodeValue = $preco;
                 }
                 break;
