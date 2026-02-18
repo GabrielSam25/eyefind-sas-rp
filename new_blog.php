@@ -541,7 +541,7 @@ function minifyCss($css)
                 <div class="w-64">
                     <img src="imagens/eyefind-logo.png" alt="Eyefind.info Logo" class="w-full">
                 </div>
-
+            </div>
 
 <div class="flex items-center gap-6 mt-4 md:mt-0">
 
