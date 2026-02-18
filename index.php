@@ -8,28 +8,22 @@ $bleets = getBleets($pdo);
 $publicidade = getPublicidadeAtiva($pdo);
 $websitesSugeridos = getWebsites($pdo, null, 4);
 
-function getUltimasNoticiasGlobais($pdo, $limit = 5) {
-    $stmt = $pdo->prepare("
-        SELECT 
-            n.*,
-            w.nome as site_nome,
-            w.id as site_id,
-            u.nome as autor_nome
-        FROM noticias_artigos n
-        JOIN websites w ON n.website_id = w.id
-        LEFT JOIN usuarios u ON n.autor_id = u.id
-        WHERE n.status = 'publicado' 
-        AND w.status = 'approved'
-        ORDER BY n.data_publicacao DESC 
-        LIMIT ?
-    ");
-    $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-// Buscar as últimas 5 notícias
-$ultimasNoticias = getUltimasNoticiasGlobais($pdo, 5);
+$stmt = $pdo->prepare("
+    SELECT 
+        n.*,
+        w.nome as site_nome,
+        w.id as site_id,
+        u.nome as autor_nome
+    FROM noticias_artigos n
+    JOIN websites w ON n.website_id = w.id
+    LEFT JOIN usuarios u ON n.autor_id = u.id
+    WHERE n.status = 'publicado' 
+    AND w.status = 'approved'
+    ORDER BY n.data_publicacao DESC 
+    LIMIT 1
+");
+$stmt->execute();
+$ultimaNoticia = $stmt->fetch(PDO::FETCH_ASSOC);
 
 function getWeatherData()
 {
