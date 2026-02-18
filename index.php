@@ -7,6 +7,7 @@ $noticiaDestaque = getNoticiaDestaque($pdo);
 $bleets = getBleets($pdo);
 $publicidade = getPublicidadeAtiva($pdo);
 $websitesSugeridos = getWebsites($pdo, null, 4);
+$ultimasNoticias = getUltimasNoticiasGlobais($pdo, 10);
 
 function getWeatherData()
 {
