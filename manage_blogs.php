@@ -56,19 +56,22 @@ if (isset($_GET['excluir'])) {
             </div>
         <div class="flex items-center gap-6 mt-4 md:mt-0">
 
-            <!-- Voltar (ícone) -->
-            <div class="relative group">
-                <a href="index.php" class="p-3 hover:scale-110 transition duration-200">
-                    <img src="icon/voltar1.png" class="w-8 h-8" alt="Voltar">
-                </a>
+        <!-- Voltar (ícone) -->
+        <div class="relative group">
+            <a href="index.php" class="p-3 w-12 h-12 flex items-center justify-center hover:scale-110 transition duration-200">
+                <img src="icon/voltar1.png" 
+                    class="w-8 h-8 object-contain" 
+                    alt="Voltar">
+            </a>
 
-                <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
-                            bg-black text-white text-xs px-3 py-1 rounded
-                            opacity-0 group-hover:opacity-100 transition
-                            pointer-events-none whitespace-nowrap">
-                    Voltar
-                </div>
+            <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                        bg-black text-white text-xs px-3 py-1 rounded
+                        opacity-0 group-hover:opacity-100 transition
+                        pointer-events-none whitespace-nowrap">
+                Voltar
             </div>
+        </div>
+
 
             <!-- Logout (ícone) -->
             <div class="relative group">
