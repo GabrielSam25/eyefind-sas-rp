@@ -497,6 +497,19 @@ function minifyCss($css)
                 }
             });
 
+            editor.BlockManager.add('iframe-site', {
+                label: 'Site Externo',
+                content: {
+                    type: 'default',
+                    components: `
+                    <iframe 
+                        src="https://exemplo.com" 
+                        style="width:100%; height:600px; border:none;">
+                    </iframe>
+                    `
+                }
+                });
+
             // Comandos para dispositivos
             editor.Commands.add('set-device-desktop', {
                 run: editor => editor.setDevice('Desktop')
