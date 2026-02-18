@@ -526,8 +526,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'grapesjs-templates-manager',
             'grapesjs-plugin-toolbox',
             'grapesjs-symbols',
-            'grapesjs-blocks-bootstrap5',
-            'grapesjs-plugin-absolute'
         ],
         
         pluginsOpts: {
