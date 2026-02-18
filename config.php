@@ -211,7 +211,7 @@ function getNoticiaDestaqueSite($pdo, $website_id) {
         ");
         $stmt->execute([$website_id]);
         $noticia = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    }   
     
     return $noticia;
 }
