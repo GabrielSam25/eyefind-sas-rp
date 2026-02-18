@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynasty 8 - Imóveis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+<!-- HEADER -->
+<header class="bg-gradient-to-r from-green-700 to-green-600">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+    
+    <!-- Logo -->
+    <div class="flex items-center gap-3">
+      <img src="https://i.imgur.com/mAR0kZ4.png" class="h-10">
+    </div>
+
+  </div>
+
+  <!-- Categorias -->
+  <div class="bg-yellow-400">
+    <div class="max-w-7xl mx-auto flex gap-6 px-6 py-2 font-bold text-sm">
+      <button class="bg-green-700 text-white px-4 py-1 rounded">TODAS</button>
+      <button class="hover:text-green-800">ALTO PADRÃO</button>
+      <button class="hover:text-green-800">MÉDIAS</button>
+      <button class="hover:text-green-800">POPULARES</button>
+      <button class="hover:text-green-800">NOVAS</button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-green-700 text-white text-sm">
+    <div class="max-w-7xl mx-auto flex gap-6 px-6 py-2">
+      <span class="font-bold">PREÇO</span>
+      <span>MAIOR PREÇO</span>
+      <span>LOCALIZAÇÃO</span>
+      <span>CENTRO</span>
+      <span>EAST LS</span>
+      <span>WEST LS</span>
+      <span>NORTH LS</span>
+      <span>SOUTH LS</span>
+    </div>
+  </div>
+</header>
+
+<!-- CONTEÚDO -->
+<div class="max-w-7xl mx-auto mt-6 px-6 grid grid-cols-3 gap-6">
+
+  <!-- LISTA DE PROPRIEDADES -->
+  <div class="col-span-1 space-y-4">
+
+    <!-- Card 1 -->
+    <div class="bg-white shadow-md border border-gray-200">
+      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" class="h-40 w-full object-cover">
+      <div class="bg-yellow-400 text-black font-bold text-center py-1 text-sm">
+        INTERIOR REMODELADO
+      </div>
+      <div class="p-4">
+        <h3 class="font-bold text-lg">Eclipse Towers, Apto 3</h3>
+        <p class="text-2xl font-bold text-gray-800">$500,000</p>
+        <p class="text-sm text-gray-500 mb-3">Área norte de Los Santos</p>
+        <button class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
+          COMPRAR
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="bg-white shadow-md border border-gray-200">
+      <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c" class="h-40 w-full object-cover">
+      <div class="bg-yellow-400 text-black font-bold text-center py-1 text-sm">
+        INTERIOR REMODELADO
+      </div>
+      <div class="p-4">
+        <h3 class="font-bold text-lg">Tinsel Towers, Apto 42</h3>
+        <p class="text-2xl font-bold text-gray-800">$492,000</p>
+        <p class="text-sm text-gray-500 mb-3">Área norte de Los Santos</p>
+        <button class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
+          COMPRAR
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- IMAGEM PRINCIPAL (SUBSTITUI MAPA) -->
+  <div class="col-span-2 bg-white shadow-md border border-gray-200 p-4">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">IMAGEM DO IMÓVEL</h2>
+    <div class="w-full h-[500px] bg-gray-200 flex items-center justify-center overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1600607687644-c7171b42498a"
+           class="w-full h-full object-cover">
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
