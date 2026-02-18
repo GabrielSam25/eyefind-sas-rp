@@ -1090,75 +1090,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="w-full h-2 bg-yellow-400"></div>
 
 
-<section class="mt-6 bg-white p-10 rounded-2xl shadow-xl max-w-7xl mx-auto">
+<section class="mt-6 bg-white p-10 rounded-2xl shadow-xl max-w-[1600px] mx-auto">
     <h2 class="text-3xl font-bold text-eyefind-blue mb-8">Editar Blog</h2>
 
     <form action="edit_blog.php?id=<?php echo $blog['id']; ?>" method="POST">
-
-        <!-- Nome -->
-        <div class="mb-6">
-            <label for="nome" class="block text-sm font-semibold text-gray-700 mb-2">
-                Nome do Blog
-            </label>
-            <input type="text"
-                   name="nome"
-                   id="nome"
-                   class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eyefind-blue focus:border-transparent transition"
-                   value="<?php echo htmlspecialchars($blog['nome']); ?>"
-                   required>
-        </div>
-
-        <!-- Descrição -->
-        <div class="mb-6">
-            <label for="descricao" class="block text-sm font-semibold text-gray-700 mb-2">
-                Descrição
-            </label>
-            <textarea name="descricao"
-                      id="descricao"
-                      rows="4"
-                      class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eyefind-blue focus:border-transparent transition"
-                      required><?php echo htmlspecialchars($blog['descricao']); ?></textarea>
-        </div>
-
-        <!-- Imagem -->
-        <div class="mb-8">
-            <label for="imagem_url" class="block text-sm font-semibold text-gray-700 mb-2">
-                URL da Imagem do Blog
-            </label>
-            <input type="url"
-                   name="imagem_url"
-                   id="imagem_url"
-                   class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eyefind-blue focus:border-transparent transition"
-                   value="<?php echo htmlspecialchars($blog['imagem']); ?>"
-                   oninput="previewImage()"
-                   required>
-
-            <div id="image-preview" class="mt-4">
-                <?php if ($blog['imagem']): ?>
-                    <img src="<?php echo htmlspecialchars($blog['imagem']); ?>"
-                         alt="Pré-visualização da imagem"
-                         class="w-full h-56 object-cover rounded-xl shadow-sm">
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Categoria -->
-        <div class="mb-10">
-            <label for="categoria_id" class="block text-sm font-semibold text-gray-700 mb-2">
-                Categoria
-            </label>
-            <select name="categoria_id"
-                    id="categoria_id"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-eyefind-blue focus:border-transparent transition"
-                    required>
-                <?php foreach ($categorias as $categoria): ?>
-                    <option value="<?php echo $categoria['id']; ?>"
-                        <?php echo $categoria['id'] == $blog['categoria_id'] ? 'selected' : ''; ?>>
-                        <?php echo $categoria['nome']; ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
 
         <!-- Editor Completo -->
         <div class="mb-10">
@@ -1166,42 +1101,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 Conteúdo do Blog
             </label>
 
-            <div class="grid grid-cols-1 xl:grid-cols-5 gap-8">
+            <div class="grid grid-cols-1 xl:grid-cols-6 gap-6">
 
-                <!-- Painel Esquerdo -->
+                <!-- Painel Esquerdo (menor) -->
                 <div class="xl:col-span-1 space-y-6">
-                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
                             Elementos
                         </h3>
-                        <div id="blocks-container" class="space-y-2 max-h-[650px] overflow-y-auto"></div>
+                        <div id="blocks-container" class="space-y-2 max-h-[750px] overflow-y-auto"></div>
                     </div>
 
-                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
                             Camadas
                         </h3>
                         <div id="layers-container" class="max-h-[300px] overflow-y-auto"></div>
                     </div>
                 </div>
 
-                <!-- Editor Central (MAIOR) -->
-                <div class="xl:col-span-3">
+                <!-- EDITOR CENTRAL (bem maior agora) -->
+                <div class="xl:col-span-4">
                     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                         <div class="panel__basic-actions border-b border-gray-100 px-4 py-3 flex gap-3 bg-gray-50"></div>
                         <div class="panel__devices border-b border-gray-100 px-4 py-3 flex gap-3 bg-gray-50"></div>
 
-                        <div id="grapesjs-editor" style="height: 800px;"></div>
+                        <div id="grapesjs-editor" style="height: 900px;"></div>
                     </div>
                 </div>
 
-                <!-- Painel Direito -->
+                <!-- Painel Direito (menor) -->
                 <div class="xl:col-span-1">
-                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
                             Estilos
                         </h3>
-                        <div id="styles-container" class="max-h-[800px] overflow-y-auto"></div>
+                        <div id="styles-container" class="max-h-[900px] overflow-y-auto"></div>
                     </div>
                 </div>
 
@@ -1219,7 +1154,6 @@ document.addEventListener('DOMContentLoaded', function() {
                    value="<?php echo htmlspecialchars($blog['css']); ?>">
         </div>
 
-        <!-- Botão -->
         <div class="flex justify-end pt-4 border-t border-gray-100">
             <button type="submit"
                     class="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition shadow-md">
@@ -1229,6 +1163,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     </form>
 </section>
+
 
 
 </html>
