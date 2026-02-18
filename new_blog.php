@@ -555,16 +555,45 @@ function minifyCss($css)
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 mt-4 md:mt-0">
-                <a href="index.php" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 transition">
-                    Voltar
-                </a>
-                <a href="logout.php" class="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition">
-                    Logout
-                </a>
+<div class="flex items-center gap-6 mt-4 md:mt-0">
+
+    <!-- Voltar -->
+    <div class="relative group">
+        <a href="index.php"
+           class="p-3 w-12 h-12 flex items-center justify-center hover:scale-110 transition duration-200">
+            <img src="icon/voltar1.png"
+                 class="w-8 h-8 object-contain"
+                 alt="Voltar">
+        </a>
+
+        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                    bg-black text-white text-xs px-3 py-1 rounded
+                    opacity-0 group-hover:opacity-100 transition
+                    pointer-events-none whitespace-nowrap">
+            Voltar
+        </div>
+    </div>
+
+        <div class="relative group">
+            <a href="logout.php"
+            class="p-3 w-12 h-12 flex items-center justify-center hover:scale-110 transition duration-200">
+                <img src="icon/logout1.png"
+                    class="w-8 h-8 object-contain"
+                    alt="Logout">
+            </a>
+
+            <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                        bg-black text-white text-xs px-3 py-1 rounded
+                        opacity-0 group-hover:opacity-100 transition
+                        pointer-events-none whitespace-nowrap">
+                Logout
             </div>
         </div>
+
+        </div>
+    </div>
     </section>
+
 
     <div class="w-full h-2 bg-yellow-400"></div>
 
