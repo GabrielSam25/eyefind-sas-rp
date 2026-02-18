@@ -8,22 +8,28 @@ $bleets = getBleets($pdo);
 $publicidade = getPublicidadeAtiva($pdo);
 $websitesSugeridos = getWebsites($pdo, null, 4);
 
-$stmt = $pdo->prepare("
-    SELECT 
-        n.*,
-        w.nome as site_nome,
-        w.id as site_id,
-        u.nome as autor_nome
-    FROM noticias_artigos n
-    JOIN websites w ON n.website_id = w.id
-    LEFT JOIN usuarios u ON n.autor_id = u.id
-    WHERE n.status = 'publicado' 
-    AND w.status = 'approved'
-    ORDER BY n.data_publicacao DESC 
-    LIMIT 1
-");
-$stmt->execute();
-$ultimaNoticia = $stmt->fetch(PDO::FETCH_ASSOC);
+function getUltimasNoticiasGlobais($pdo, $limit = 5) {
+    $stmt = $pdo->prepare("
+        SELECT 
+            n.*,
+            w.nome as site_nome,
+            w.id as site_id,
+            u.nome as autor_nome
+        FROM noticias_artigos n
+        JOIN websites w ON n.website_id = w.id
+        LEFT JOIN usuarios u ON n.autor_id = u.id
+        WHERE n.status = 'publicado' 
+        AND w.status = 'approved'
+        ORDER BY n.data_publicacao DESC 
+        LIMIT ?
+    ");
+    $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Buscar as últimas 5 notícias
+$ultimasNoticias = getUltimasNoticiasGlobais($pdo, 5);
 
 function getWeatherData()
 {
@@ -316,21 +322,16 @@ if ($weatherId == 800 && $isDayTime) {
 
 
 
-
 <div class="max-w-6xl mx-auto">
     <div class="grid md:grid-cols-3 gap-1 mt-1">
         <div class="col-span-2 bg-gray-100 p-3 shadow-md">
             <?php if ($ultimaNoticia): ?>
                 <div class="border-b-2 border-eyefind-blue pb-4 mb-4">
                     <div class="flex items-center gap-4 mb-4">
-                        <h2 class="text-xl font-bold text-eyefind-blue">ÚLTIMA NOTÍCIA</h2>
-                        <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                            <i class="fas fa-clock mr-1"></i>
-                            <?php echo date('d/m/Y H:i', strtotime($ultimaNoticia['data_publicacao'])); ?>
-                        </span>
+                        <h2 class="text-xl font-bold text-eyefind-blue">ÚLTIMAS NOTÍCIAS</h2>
                     </div>
                     
-                    <!-- Nome do Site e Autor -->
+                    <!-- Cabeçalho com site e autor -->
                     <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
                         <span class="bg-eyefind-blue text-white px-2 py-1 rounded-full text-xs font-bold">
                             <?php echo htmlspecialchars($ultimaNoticia['site_nome']); ?>
@@ -350,49 +351,23 @@ if ($weatherId == 800 && $isDayTime) {
                     </div>
                     
                     <!-- Título -->
-                    <h3 class="text-2xl font-bold text-eyefind-dark mb-3">
+                    <h3 class="text-lg font-bold text-eyefind-dark mb-3">
                         <a href="ver_noticia.php?website_id=<?php echo $ultimaNoticia['site_id']; ?>&noticia_id=<?php echo $ultimaNoticia['id']; ?>" 
                            class="hover:text-eyefind-blue transition">
                             <?php echo htmlspecialchars($ultimaNoticia['titulo']); ?>
                         </a>
                     </h3>
                     
-                    <!-- Imagem (se houver) -->
-                    <?php if ($ultimaNoticia['imagem']): ?>
-                        <div class="mb-4">
-                            <img src="<?php echo htmlspecialchars($ultimaNoticia['imagem']); ?>" 
-                                 alt="<?php echo htmlspecialchars($ultimaNoticia['titulo']); ?>"
-                                 class="w-full h-64 object-cover rounded-lg shadow-md">
-                        </div>
-                    <?php endif; ?>
-                    
                     <!-- Resumo -->
-                    <p class="text-gray-700 mb-4">
-                        <?php echo htmlspecialchars($ultimaNoticia['resumo'] ?? substr(strip_tags($ultimaNoticia['conteudo']), 0, 200) . '...'); ?>
+                    <p class="text-gray-700 mb-3">
+                        <?php echo htmlspecialchars($ultimaNoticia['resumo'] ?? substr(strip_tags($ultimaNoticia['conteudo']), 0, 150) . '...'); ?>
                     </p>
                     
-                    <!-- Views e Link -->
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-500">
-                            <i class="fas fa-eye mr-1"></i>
-                            <?php echo number_format($ultimaNoticia['views']); ?> visualizações
-                        </span>
-                        
-                        <a href="ver_noticia.php?website_id=<?php echo $ultimaNoticia['site_id']; ?>&noticia_id=<?php echo $ultimaNoticia['id']; ?>" 
-                           class="inline-flex items-center bg-eyefind-blue text-white px-6 py-3 rounded-lg hover:bg-eyefind-dark transition font-bold">
-                            LEIA O ARTIGO COMPLETO 
-                            <i class="fas fa-arrow-right ml-2"></i>
-                        </a>
-                    </div>
-                    
-                    <!-- Badge para notícias recentes (última hora) -->
-                    <?php if (time() - strtotime($ultimaNoticia['data_publicacao']) < 3600): ?>
-                        <div class="mt-3">
-                            <span class="inline-block bg-red-500 text-white px-3 py-1 rounded-full text-sm animate-pulse">
-                                <i class="fas fa-bolt mr-1"></i>RECÉM-PUBLICADO
-                            </span>
-                        </div>
-                    <?php endif; ?>
+                    <!-- Link para ler mais -->
+                    <a href="ver_noticia.php?website_id=<?php echo $ultimaNoticia['site_id']; ?>&noticia_id=<?php echo $ultimaNoticia['id']; ?>" 
+                       class="inline-flex items-center text-eyefind-blue hover:text-eyefind-dark font-bold transition text-sm">
+                        LEIA O ARTIGO COMPLETO →
+                    </a>
                 </div>
             <?php else: ?>
                 <div class="text-center py-8">
