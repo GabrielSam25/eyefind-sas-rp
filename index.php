@@ -300,26 +300,90 @@ if ($weatherId == 800 && $isDayTime) {
 
 
 
-    <div class="max-w-6xl mx-auto">
-        <div class="grid md:grid-cols-3 gap-1 mt-1">
-            <div class="col-span-2 bg-gray-100 p-3 shadow-md">
-                <?php if ($noticiaDestaque): ?>
-                    <div class="border-b-2 border-eyefind-blue pb-4 mb-4">
-                        <div class="flex items-center gap-4 mb-4">
-                            <h2 class="text-xl font-bold text-eyefind-blue">ULTIMAS NOTICIAS</h2>
+<!-- Seção de Últimas Notícias -->
+<div class="max-w-6xl mx-auto mt-8">
+    <div class="bg-white p-6 shadow-md rounded-lg">
+        <div class="flex items-center justify-between mb-6 border-b-2 border-eyefind-blue pb-2">
+            <h2 class="text-2xl font-bold text-eyefind-blue">
+                <i class="fas fa-newspaper mr-2"></i>ÚLTIMAS NOTÍCIAS
+            </h2>
+            <span class="bg-eyefind-blue text-white px-3 py-1 rounded-full text-sm">
+                <?php echo count($ultimasNoticias); ?> notícias
+            </span>
+        </div>
+        
+        <?php if (empty($ultimasNoticias)): ?>
+            <p class="text-gray-500 text-center py-8">Nenhuma notícia publicada ainda.</p>
+        <?php else: ?>
+            <div class="space-y-6">
+                <?php foreach ($ultimasNoticias as $index => $noticia): ?>
+                    <div class="<?php echo $index < count($ultimasNoticias) - 1 ? 'border-b border-gray-200 pb-6' : ''; ?>">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <?php if ($noticia['imagem']): ?>
+                                <div class="md:w-48 flex-shrink-0">
+                                    <img src="<?php echo htmlspecialchars($noticia['imagem']); ?>" 
+                                         alt="<?php echo htmlspecialchars($noticia['titulo']); ?>"
+                                         class="w-full h-32 object-cover rounded-lg hover:opacity-90 transition">
+                                </div>
+                            <?php endif; ?>
+                            
+                            <div class="flex-1">
+                                <!-- Cabeçalho com site, data e categoria -->
+                                <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-2">
+                                    <span class="bg-eyefind-blue text-white px-2 py-1 rounded-full text-xs font-bold">
+                                        <?php echo htmlspecialchars($noticia['site_nome']); ?>
+                                    </span>
+                                    <span>•</span>
+                                    <span>
+                                        <i class="far fa-clock mr-1"></i>
+                                        <?php echo date('d/m/Y H:i', strtotime($noticia['data_publicacao'])); ?>
+                                    </span>
+                                    <?php if ($noticia['categoria']): ?>
+                                        <span>•</span>
+                                        <span class="text-eyefind-blue font-medium">
+                                            <i class="far fa-folder mr-1"></i>
+                                            <?php echo htmlspecialchars($noticia['categoria']); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <!-- Título -->
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                    <a href="ver_noticia.php?website_id=<?php echo $noticia['site_id']; ?>&noticia_id=<?php echo $noticia['id']; ?>" 
+                                       class="hover:text-eyefind-blue transition">
+                                        <?php echo htmlspecialchars($noticia['titulo']); ?>
+                                    </a>
+                                </h3>
+                                
+                                <!-- Resumo -->
+                                <p class="text-gray-600 mb-3">
+                                    <?php echo htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 150) . '...'); ?>
+                                </p>
+                                
+                                <!-- Rodapé com autor, views e link -->
+                                <div class="flex flex-wrap items-center justify-between">
+                                    <div class="flex items-center gap-4 text-sm">
+                                        <span class="text-gray-500">
+                                            <i class="fas fa-user mr-1"></i>
+                                            <?php echo htmlspecialchars($noticia['autor_nome'] ?? 'Redação'); ?>
+                                        </span>
+                                        <span class="text-gray-500">
+                                            <i class="fas fa-eye mr-1"></i>
+                                            <?php echo number_format($noticia['views']); ?> visualizações
+                                        </span>
+                                    </div>
+                                    
+                                    <a href="ver_noticia.php?website_id=<?php echo $noticia['site_id']; ?>&noticia_id=<?php echo $noticia['id']; ?>" 
+                                       class="inline-flex items-center text-eyefind-blue hover:text-eyefind-dark font-bold transition group">
+                                        Ler matéria completa
+                                        <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <h3 class="text-lg font-bold text-eyefind-dark mb-2"><?php echo $noticiaDestaque["titulo"]; ?></h3>
-                        <p class="text-eyefind-dark font-bold">
-                            <?php echo $noticiaDestaque["autor"]; ?> -
-                            <?php echo $noticiaDestaque["fonte"]; ?>
-                        </p>
-                        <p class="mt-2 text-gray-700">
-                            <?php echo substr($noticiaDestaque["conteudo"], 0, 150); ?>...</p>
-                        <a href="noticia.php?id=<?php echo $noticiaDestaque["id"]; ?>" class="mt-4 text-eyefind-blue hover:text-eyefind-dark font-bold transition">
-                            LEIA O ARTIGO COMPLETO →
-                        </a>
                     </div>
-                <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
 
                 <?php if ($websiteDoMinuto): ?>
                     <div>
