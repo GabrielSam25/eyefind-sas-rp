@@ -1,24 +1,46 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Editor Responsivo - GrapesJS</title>
+<meta charset="UTF-8">
+<title>GrapesJS Responsivo</title>
 
-  <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet"/>
-  <script src="https://unpkg.com/grapesjs"></script>
+<link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet"/>
+<script src="https://unpkg.com/grapesjs"></script>
 
-  <style>
-    body { margin: 0; }
-  </style>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  #gjs {
+    height: 100%;
+  }
+
+  .export-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #111;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    z-index: 9999;
+  }
+</style>
 </head>
+
 <body>
 
 <div id="gjs"></div>
+<button class="export-btn">Exportar HTML</button>
 
 <script>
 const editor = grapesjs.init({
   container: '#gjs',
-  height: '100vh',
+  height: '100%',
+  fromElement: false,
   storageManager: false,
 
   deviceManager: {
@@ -30,12 +52,12 @@ const editor = grapesjs.init({
   },
 
   blockManager: {
+    appendTo: '.gjs-blocks-c',
     blocks: [
 
-      // SEÇÃO FLEX
       {
         id: 'section',
-        label: 'Seção',
+        label: 'Seção Flex',
         category: 'Layout',
         content: `
           <section style="
@@ -49,7 +71,6 @@ const editor = grapesjs.init({
         `
       },
 
-      // COLUNA FLEX
       {
         id: 'column',
         label: 'Coluna',
@@ -67,23 +88,21 @@ const editor = grapesjs.init({
         `
       },
 
-      // TÍTULO
       {
         id: 'title',
         label: 'Título',
         category: 'Texto',
         content: `
           <h2 style="
-            font-size:32px;
-            text-align:center;
+            font-size:28px;
             width:100%;
+            text-align:center;
           ">
-            Seu título aqui
+            Título aqui
           </h2>
         `
       },
 
-      // BOTÃO
       {
         id: 'button',
         label: 'Botão',
@@ -96,7 +115,6 @@ const editor = grapesjs.init({
             color:white;
             text-decoration:none;
             border-radius:8px;
-            font-weight:bold;
           ">
             Clique Aqui
           </a>
@@ -107,39 +125,29 @@ const editor = grapesjs.init({
   }
 });
 
-// BOTÃO EXPORTAR
-const btn = document.createElement("button");
-btn.innerText = "Exportar HTML";
-btn.style.position = "fixed";
-btn.style.bottom = "20px";
-btn.style.right = "20px";
-btn.style.padding = "10px 20px";
-btn.style.background = "#111";
-btn.style.color = "white";
-btn.style.border = "none";
-btn.style.cursor = "pointer";
-btn.style.zIndex = "9999";
-
-btn.onclick = () => {
+// EXPORTAR
+document.querySelector('.export-btn').onclick = () => {
   const html = editor.getHtml();
   const css = editor.getCss();
+
   const finalCode = `
 <!DOCTYPE html>
 <html>
 <head>
-<style>${css}</style>
+<meta charset="UTF-8">
+<style>
+${css}
+</style>
 </head>
 <body>
 ${html}
 </body>
 </html>
   `;
+
   console.log(finalCode);
-  alert("Código exportado no console!");
+  alert("Código exportado no console (F12).");
 };
-
-document.body.appendChild(btn);
-
 </script>
 
 </body>
