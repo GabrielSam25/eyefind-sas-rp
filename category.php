@@ -155,13 +155,20 @@ $websitesDaCategoria = getWebsitesByCategoria($pdo, $categoria_id);
                     </div>
                 </div>
 
-                <!-- Logout -->
-                <a href="logout.php" 
-                class="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition">
-                    Logout
-                </a>
+                <div class="relative group">
+                    <a href="logout.php" class="p-3 hover:scale-110 transition duration-200">
+                        <img src="icon/logout1.png" class="w-8 h-8" alt="Logout">
+                    </a>
 
-            <?php endif; ?>
+                    <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                                bg-black text-white text-xs px-3 py-1 rounded
+                                opacity-0 group-hover:opacity-100 transition
+                                pointer-events-none whitespace-nowrap">
+                        Logout
+                    </div>
+                </div>
+
+                <?php endif; ?>
 
                 </div>
             </div>
