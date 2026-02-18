@@ -98,7 +98,7 @@ $websitesDaCategoria = getWebsitesByCategoria($pdo, $categoria_id);
                 <!-- Voltar (ícone) -->
                 <div class="relative group">
                     <a href="index.php" class="p-3 hover:scale-110 transition duration-200">
-                        <img src="icon/voltar.png" class="w-8 h-8" alt="Voltar">
+                        <img src="icon/home.png" class="w-8 h-8" alt="Voltar">
                     </a>
 
                     <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
