@@ -7,41 +7,53 @@
 </head>
 <body class="bg-gray-100 font-sans">
 
-<!-- HEADER -->
-<header class="bg-gradient-to-r from-green-700 to-green-600">
-  <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-    
-    <!-- Logo -->
-    <div class="flex items-center gap-3">
-      <img src="https://media.discordapp.net/attachments/1409263056197783623/1473803760575709277/latest.png?ex=69978a36&is=699638b6&hm=166b2f5a6f913eb2bd9b4503b7c831debb0bcea2317aa86e1fe376c3f0cbd4f2&=&format=webp&quality=lossless" class="h-10">
+<!-- HERO / HEADER -->
+<header class="relative">
+
+  <!-- Fundo GTA -->
+  <div class="absolute inset-0">
+    <img src="https://www.gta5.com.br/wp-content/uploads/2013/09/Screenshot-GTA-V-188.jpg"
+         class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-green-900/40"></div>
+  </div>
+
+  <!-- Conteúdo central -->
+  <div class="relative z-10 py-10">
+
+    <!-- Logo centralizada -->
+    <div class="flex justify-center mb-6">
+      <img src="https://media.discordapp.net/attachments/1409263056197783623/1473803760575709277/latest.png"
+           class="h-20">
+    </div>
+
+    <!-- Categorias -->
+    <div class="flex justify-center mb-3">
+      <div class="flex bg-yellow-400 font-bold text-sm shadow-md">
+        <button class="bg-green-700 text-white px-6 py-2">TODAS</button>
+        <button class="px-6 py-2 hover:bg-yellow-300">ALTO PADRÃO</button>
+        <button class="px-6 py-2 hover:bg-yellow-300">MÉDIAS</button>
+        <button class="px-6 py-2 hover:bg-yellow-300">POPULARES</button>
+        <button class="px-6 py-2 hover:bg-yellow-300">NOVAS</button>
+      </div>
+    </div>
+
+    <!-- Faixa verde filtros -->
+    <div class="flex justify-center">
+      <div class="bg-green-700 text-white text-xs px-6 py-2 flex gap-6 font-semibold">
+        <span class="opacity-80">PREÇO</span>
+        <span>MAIOR PREÇO</span>
+        <span class="opacity-80">LOCALIZAÇÃO</span>
+        <span>CENTRO</span>
+        <span>EAST LS</span>
+        <span>WEST LS</span>
+        <span>NORTH LS</span>
+        <span>SOUTH LS</span>
+        <span>BLAINE COUNTY</span>
+      </div>
     </div>
 
   </div>
 
-  <!-- Categorias -->
-  <div class="bg-yellow-400">
-    <div class="max-w-7xl mx-auto flex gap-6 px-6 py-2 font-bold text-sm">
-      <button class="bg-green-700 text-white px-4 py-1 rounded">TODAS</button>
-      <button class="hover:text-green-800">ALTO PADRÃO</button>
-      <button class="hover:text-green-800">MÉDIAS</button>
-      <button class="hover:text-green-800">POPULARES</button>
-      <button class="hover:text-green-800">NOVAS</button>
-    </div>
-  </div>
-
-  <!-- Filtros -->
-  <div class="bg-green-700 text-white text-sm">
-    <div class="max-w-7xl mx-auto flex gap-6 px-6 py-2">
-      <span class="font-bold">PREÇO</span>
-      <span>MAIOR PREÇO</span>
-      <span>LOCALIZAÇÃO</span>
-      <span>CENTRO</span>
-      <span>EAST LS</span>
-      <span>WEST LS</span>
-      <span>NORTH LS</span>
-      <span>SOUTH LS</span>
-    </div>
-  </div>
 </header>
 
 <!-- CONTEÚDO -->
@@ -50,9 +62,9 @@
   <!-- LISTA DE PROPRIEDADES -->
   <div class="col-span-1 space-y-4">
 
-    <!-- Card 1 -->
     <div class="bg-white shadow-md border border-gray-200">
-      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c" class="h-40 w-full object-cover">
+      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+           class="h-40 w-full object-cover">
       <div class="bg-yellow-400 text-black font-bold text-center py-1 text-sm">
         INTERIOR REMODELADO
       </div>
@@ -66,9 +78,9 @@
       </div>
     </div>
 
-    <!-- Card 2 -->
     <div class="bg-white shadow-md border border-gray-200">
-      <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c" class="h-40 w-full object-cover">
+      <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c"
+           class="h-40 w-full object-cover">
       <div class="bg-yellow-400 text-black font-bold text-center py-1 text-sm">
         INTERIOR REMODELADO
       </div>
@@ -84,10 +96,10 @@
 
   </div>
 
-  <!-- IMAGEM PRINCIPAL (SUBSTITUI MAPA) -->
+  <!-- IMAGEM PRINCIPAL -->
   <div class="col-span-2 bg-white shadow-md border border-gray-200 p-4">
     <h2 class="text-xl font-bold text-gray-800 mb-4">IMAGEM DO IMÓVEL</h2>
-    <div class="w-full h-[500px] bg-gray-200 flex items-center justify-center overflow-hidden">
+    <div class="w-full h-[500px] overflow-hidden">
       <img src="https://images.unsplash.com/photo-1600607687644-c7171b42498a"
            class="w-full h-full object-cover">
     </div>
