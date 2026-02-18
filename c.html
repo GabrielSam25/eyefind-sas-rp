@@ -37,36 +37,38 @@
       </div>
     </div>
 
-    <!-- Faixa Verde + Filtros + Serrilhado -->
-    <div class="bg-green-800 text-white text-xs font-semibold mt-0">
+<!-- Faixa Verde + Filtros + Serrilhado -->
+<div class="bg-green-800 text-white text-xs font-semibold mt-0">
 
-      <!-- Filtros -->
-      <div class="max-w-7xl mx-auto flex justify-center gap-6 py-2">
-        <span class="opacity-80">PREÇO</span>
-        <span>MAIOR PREÇO</span>
-        <span class="opacity-80">LOCALIZAÇÃO</span>
-        <span>CENTRO</span>
-        <span>EAST LS</span>
-        <span>WEST LS</span>
-        <span>NORTH LS</span>
-        <span>SOUTH LS</span>
-        <span>BLAINE COUNTY</span>
-      </div>
+  <!-- Filtros -->
+  <div class="max-w-7xl mx-auto flex justify-center gap-6 py-2">
+    <span class="opacity-80">PREÇO</span>
+    <span>MAIOR PREÇO</span>
+    <span class="opacity-80">LOCALIZAÇÃO</span>
+    <span>CENTRO</span>
+    <span>EAST LS</span>
+    <span>WEST LS</span>
+    <span>NORTH LS</span>
+    <span>SOUTH LS</span>
+    <span>BLAINE COUNTY</span>
+  </div>
 
-      <!-- Serrilhado agora dentro da faixa verde -->
-      <div class="h-2 bg-green-800 relative overflow-hidden">
-        <div class="absolute inset-0 bg-white"
-          style="clip-path: polygon(
-            0 0, 2% 100%, 4% 0, 6% 100%, 8% 0, 10% 100%, 
-            12% 0, 14% 100%, 16% 0, 18% 100%, 20% 0,
-            22% 100%, 24% 0, 26% 100%, 28% 0, 30% 100%,
-            100% 100%, 0 100%
-          );">
-        </div>
-      </div>
+  <!-- Serrilhado corrigido (100% largura e menor) -->
+  <div class="h-2 w-full"
+       style="
+         background:
+         repeating-linear-gradient(
+           -45deg,
+           white 0px,
+           white 6px,
+           transparent 6px,
+           transparent 12px
+         );
+       ">
+  </div>
 
-    </div>
-<header>
+</div>
+
 
 
 <!-- ÁREA BRANCA -->
