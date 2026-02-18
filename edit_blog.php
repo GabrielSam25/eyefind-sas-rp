@@ -1121,14 +1121,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
 
                 <!-- EDITOR CENTRAL (bem maior agora) -->
-                <div class="xl:col-span-4">
-                    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                        <div class="panel__basic-actions border-b border-gray-100 px-4 py-3 flex gap-3 bg-gray-50"></div>
-                        <div class="panel__devices border-b border-gray-100 px-4 py-3 flex gap-3 bg-gray-50"></div>
+            <div class="xl:col-span-5">
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden">
 
-                        <div id="grapesjs-editor" style="height: 900px;"></div>
-                    </div>
+                    <!-- Toolbar compacta -->
+                    <div class="panel__basic-actions border-b border-gray-100 px-4 py-2 flex gap-3 bg-gray-50"></div>
+                    <div class="panel__devices border-b border-gray-100 px-4 py-2 flex gap-3 bg-gray-50"></div>
+
+                    <!-- Editor maior -->
+                    <div id="grapesjs-editor" style="height: 1000px;"></div>
+
                 </div>
+            </div>
+
 
                 <!-- Painel Direito (menor) -->
                 <div class="xl:col-span-1">
