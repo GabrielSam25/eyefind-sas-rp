@@ -1,126 +1,29 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrapesJS Editor Corrigido</title>
-
+    <title>GrapesJS Example</title>
     <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        #gjs { height: 100vh; border: 3px solid #444; }
+        .gjs-cv-canvas { top: 0; width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+    <div id="gjs">
+        <h1>Hello World Component!</h1>
+    </div>
     <script src="https://unpkg.com/grapesjs"></script>
-
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        #gjs {
-            height: 100%;
-        }
-
-        .export-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #4f46e5;
-            color: #fff;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            z-index: 9999;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-
-        .export-btn:hover {
-            background: #4338ca;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div id="gjs"></div>
-    <button class="export-btn" id="download-btn">Baixar HTML Final</button>
-
-    <script>
-        // 1. Inicialização do Editor
-        const editor = grapesjs.init({
-            container: "#gjs",
-            height: "100%",
+    <script type="text/javascript">
+        var editor = grapesjs.init({
+            container: '#gjs',
+            fromElement: true,
+            height: '300px',
+            width: 'auto',
             storageManager: false,
-            fromElement: false,
-            deviceManager: {
-                devices: [
-                    { name: 'Desktop', width: '' },
-                    { name: 'Mobile', width: '320px', widthMedia: '480px' }
-                ]
-            }
+            panels: { defaults: [] },
         });
-
-        // 2. Adição dos Blocos
-        const bm = editor.BlockManager;
-
-        bm.add("section", {
-            label: "Seção",
-            category: 'Layout',
-            content: '<section style="display:flex;flex-wrap:wrap;padding:40px;gap:20px;background:#f9f9f9;min-height:100px;"></section>'
-        });
-
-        bm.add("column", {
-            label: "Coluna",
-            category: 'Layout',
-            content: '<div style="flex:1 1 300px;min-height:150px;padding:20px;background:#e5e5e5;border-radius:8px;">Conteúdo da Coluna</div>'
-        });
-
-        bm.add("title", {
-            label: "Título",
-            category: 'Básico',
-            content: '<h2 style="width:100%;text-align:center;font-size:28px;margin-bottom:20px;">Título da Página</h2>'
-        });
-
-        bm.add("button", {
-            label: "Botão",
-            category: 'Básico',
-            content: '<a href="#" style="display:inline-block;padding:12px 24px;background:#4f46e5;color:white;text-decoration:none;border-radius:6px;font-weight:500;">Clique Aqui</a>'
-        });
-
-        // 3. Função de Exportar e Baixar
-        document.getElementById("download-btn").onclick = function() {
-            const html = editor.getHtml();
-            const css = editor.getCss();
-
-            // Montagem do arquivo final
-            const finalCode = `<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        ${css}
-    </style>
-</head>
-<body>
-    ${html}
-</body>
-</html>`;
-
-            // Lógica de download
-            const blob = new Blob([finalCode], { type: 'text/html' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            a.href = url;
-            a.download = 'minha-pagina.html';
-            document.body.appendChild(a);
-            a.click();
-            
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        };
     </script>
-
 </body>
 </html>
