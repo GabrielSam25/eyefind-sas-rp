@@ -844,6 +844,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    editor.on('load', () => {
+
+    // Captura todos os keydowns dentro do editor
+    editor.getContainer().addEventListener('keydown', function (e) {
+
+        // Verifica se é Enter
+        if (e.key === 'Enter') {
+
+        // Verifica se está dentro do campo de classe
+        const isClassInput = e.target.closest('.gjs-sm-field, .gjs-clm-field');
+
+        if (isClassInput) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        }
+
+    }, true);
+
+    });
+
+
     <?php 
         $tipo = $blog['tipo'] ?? 'empresa';
         ?>
