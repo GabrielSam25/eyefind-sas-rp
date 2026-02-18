@@ -1034,13 +1034,19 @@ document.addEventListener('DOMContentLoaded', function() {
 </head>
 
 <body class="bg-eyefind-light">
-    <div class="max-w-7xl mx-auto">
-        <section class="bg-[#488BC2] shadow-md">
-            <div class="p-4 flex flex-col md:flex-row justify-between items-center">
-                <div class="flex flex-col md:flex-row items-center gap-6">
+
+    <!-- HEADER FULL WIDTH -->
+    <section class="bg-[#488BC2] shadow-md w-full">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="py-4 flex flex-col md:flex-row justify-between items-center">
+
+                <!-- Logo + Busca -->
+                <div class="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
+
                     <div class="w-64">
                         <img src="imagens/eyefind-logo.png" alt="Eyefind.info Logo" class="w-full">
                     </div>
+
                     <div class="w-full md:w-96">
                         <form action="busca.php" method="GET">
                             <div class="relative">
@@ -1053,18 +1059,52 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                         </form>
                     </div>
+
                 </div>
 
-                <div class="flex items-center gap-4 mt-4 md:mt-0">
-                    <a href="manage_blogs.php" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 transition">
-                        Voltar
-                    </a>
-                    <a href="logout.php" class="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition">
-                        Logout
-                    </a>
+                <!-- Ícones -->
+                <div class="flex items-center gap-6 mt-4 md:mt-0">
+
+                    <!-- Voltar -->
+                    <div class="relative group">
+                        <a href="manage_blogs.php"
+                           class="p-3 w-12 h-12 flex items-center justify-center hover:scale-110 transition duration-200">
+                            <img src="icon/voltar1.png"
+                                 class="w-8 h-8 object-contain"
+                                 alt="Voltar">
+                        </a>
+
+                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                                    bg-black text-white text-xs px-3 py-1 rounded
+                                    opacity-0 group-hover:opacity-100 transition
+                                    pointer-events-none whitespace-nowrap">
+                            Voltar
+                        </div>
+                    </div>
+
+                    <!-- Logout -->
+                    <div class="relative group">
+                        <a href="logout.php"
+                           class="p-3 w-12 h-12 flex items-center justify-center hover:scale-110 transition duration-200">
+                            <img src="icon/logout1.png"
+                                 class="w-8 h-8 object-contain"
+                                 alt="Logout">
+                        </a>
+
+                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 
+                                    bg-black text-white text-xs px-3 py-1 rounded
+                                    opacity-0 group-hover:opacity-100 transition
+                                    pointer-events-none whitespace-nowrap">
+                            Logout
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
-        </section>
+        </div>
+    </section>
+
 
         <div class="w-full h-2 bg-yellow-400"></div>
 
