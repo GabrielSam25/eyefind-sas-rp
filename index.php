@@ -312,112 +312,125 @@ if ($weatherId == 800 && $isDayTime) {
         </div>
     </div>
 
-
-
-
-
-        <div class="max-w-6xl mx-auto">
-            <div class="grid md:grid-cols-3 gap-1 mt-1">
-                <!-- Coluna Principal com Lista de Notícias -->
-                <div class="col-span-2 bg-gray-100 p-3 shadow-md">
-                    <div class="border-b-2 border-eyefind-blue pb-4 mb-4">
-                        <div class="flex items-center gap-4 mb-4">
-                            <h2 class="text-xl font-bold text-eyefind-blue">ÚLTIMAS NOTÍCIAS</h2>
-                        </div>
-                    </div>
-                    
-                    <?php if (empty($ultimasNoticias)): ?>
-                        <p class="text-gray-500 text-center py-4">Nenhuma notícia publicada ainda.</p>
-                    <?php else: ?>
-                        <div class="space-y-6">
-                            <?php foreach ($ultimasNoticias as $noticia): ?>
-                                <div class="border-b border-gray-300 pb-4 last:border-0">
-                                    <!-- Título da Notícia -->
-                                    <h3 class="text-lg font-bold text-eyefind-dark mb-2">
-                                        <a href="ver_noticia.php?website_id=<?php echo $noticia['site_id']; ?>&noticia_id=<?php echo $noticia['id']; ?>" 
-                                        class="hover:text-eyefind-blue transition">
-                                            <?php echo htmlspecialchars($noticia['titulo']); ?>
-                                        </a>
-                                    </h3>
-                                    
-                                    <!-- Metadados (site, autor, data, visualizações) -->
-                                    <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-2">
-                                        <span class="bg-eyefind-blue text-white px-2 py-0.5 rounded-full text-xs">
-                                            <?php echo htmlspecialchars($noticia['site_nome']); ?>
-                                        </span>
-                                        <span>•</span>
-                                        <span>
-                                            <i class="fas fa-user mr-1"></i>
-                                            <?php echo htmlspecialchars($noticia['autor_nome'] ?? 'Redação'); ?>
-                                        </span>
-                                        <span>•</span>
-                                        <span>
-                                            <i class="far fa-clock mr-1"></i>
-                                            <?php echo date('d/m/Y', strtotime($noticia['data_publicacao'])); ?>
-                                        </span>
-                                        <span>•</span>
-                                        <span>
-                                            <i class="fas fa-eye mr-1"></i>
-                                            <?php echo number_format($noticia['views']); ?>
-                                        </span>
-                                        <?php if ($noticia['categoria']): ?>
-                                            <span>•</span>
-                                            <span class="text-eyefind-blue">
-                                                <i class="far fa-folder mr-1"></i>
-                                                <?php echo htmlspecialchars($noticia['categoria']); ?>
-                                            </span>
-                                        <?php endif; ?>
-                                    </div>
-                                    
-                                    <!-- Resumo da Notícia -->
-                                    <p class="text-gray-700 mb-3">
-                                        <?php echo htmlspecialchars($noticia['resumo'] ?? substr(strip_tags($noticia['conteudo']), 0, 150) . '...'); ?>
-                                    </p>
-                                    
-                                    <!-- Link para ler mais -->
-                                    <a href="ver_noticia.php?website_id=<?php echo $noticia['site_id']; ?>&noticia_id=<?php echo $noticia['id']; ?>" 
-                                    class="inline-flex items-center text-eyefind-blue hover:text-eyefind-dark font-bold transition text-sm">
-                                        LEIA O ARTIGO COMPLETO 
-                                        <i class="fas fa-arrow-right ml-2"></i>
-                                    </a>
-                                </div>
-                            <?php endforeach; ?>
+            <div class="max-w-6xl mx-auto">
+                <div class="grid md:grid-cols-3 gap-1 mt-1">
+                    <!-- Coluna Principal com a ÚLTIMA NOTÍCIA (apenas 1) -->
+                    <div class="col-span-2 bg-gray-100 p-3 shadow-md">
+                        <div class="border-b-2 border-eyefind-blue pb-4 mb-4">
+                            <div class="flex items-center gap-4 mb-4">
+                                <h2 class="text-xl font-bold text-eyefind-blue">ÚLTIMA NOTÍCIA</h2>
+                                <?php if ($ultimaNoticia): ?>
+                                    <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        <?php echo date('d/m/Y H:i', strtotime($ultimaNoticia['data_publicacao'])); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         
-                        <!-- Link para ver todas -->
-                        <div class="text-center mt-6">
-                            <a href="todas_noticias.php" 
-                            class="inline-block bg-eyefind-blue text-white px-4 py-2 rounded hover:bg-eyefind-dark transition text-sm font-bold">
-                                VER TODAS AS NOTÍCIAS
-                                <i class="fas fa-chevron-right ml-2"></i>
+                        <?php if (!$ultimaNoticia): ?>
+                            <p class="text-gray-500 text-center py-4">Nenhuma notícia publicada ainda.</p>
+                        <?php else: ?>
+                            <div class="space-y-4">
+                                <!-- Título da Notícia -->
+                                <h3 class="text-2xl font-bold text-eyefind-dark mb-3">
+                                    <a href="ver_noticia.php?website_id=<?php echo $ultimaNoticia['site_id']; ?>&noticia_id=<?php echo $ultimaNoticia['id']; ?>" 
+                                    class="hover:text-eyefind-blue transition">
+                                        <?php echo htmlspecialchars($ultimaNoticia['titulo']); ?>
+                                    </a>
+                                </h3>
+                                
+                                <!-- Metadados (site, autor, data, visualizações) -->
+                                <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-3">
+                                    <span class="bg-eyefind-blue text-white px-2 py-1 rounded-full text-xs font-bold">
+                                        <?php echo htmlspecialchars($ultimaNoticia['site_nome']); ?>
+                                    </span>
+                                    <span>•</span>
+                                    <span>
+                                        <i class="fas fa-user mr-1"></i>
+                                        <?php echo htmlspecialchars($ultimaNoticia['autor_nome'] ?? 'Redação'); ?>
+                                    </span>
+                                    <span>•</span>
+                                    <span>
+                                        <i class="fas fa-eye mr-1"></i>
+                                        <?php echo number_format($ultimaNoticia['views']); ?> visualizações
+                                    </span>
+                                    <?php if ($ultimaNoticia['categoria']): ?>
+                                        <span>•</span>
+                                        <span class="text-eyefind-blue">
+                                            <i class="far fa-folder mr-1"></i>
+                                            <?php echo htmlspecialchars($ultimaNoticia['categoria']); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <!-- Imagem (se houver) -->
+                                <?php if ($ultimaNoticia['imagem']): ?>
+                                    <div class="mb-4">
+                                        <img src="<?php echo htmlspecialchars($ultimaNoticia['imagem']); ?>" 
+                                            alt="<?php echo htmlspecialchars($ultimaNoticia['titulo']); ?>"
+                                            class="w-full h-64 object-cover rounded-lg shadow-md">
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <!-- Resumo da Notícia -->
+                                <p class="text-gray-700 mb-4 text-lg leading-relaxed">
+                                    <?php echo htmlspecialchars($ultimaNoticia['resumo'] ?? substr(strip_tags($ultimaNoticia['conteudo']), 0, 250) . '...'); ?>
+                                </p>
+                                
+                                <!-- Link para ler mais -->
+                                <a href="ver_noticia.php?website_id=<?php echo $ultimaNoticia['site_id']; ?>&noticia_id=<?php echo $ultimaNoticia['id']; ?>" 
+                                class="inline-flex items-center bg-eyefind-blue text-white px-6 py-3 rounded-lg hover:bg-eyefind-dark transition font-bold">
+                                    LEIA O ARTIGO COMPLETO 
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                                
+                                <!-- Badge para notícias muito recentes (última hora) -->
+                                <?php if (time() - strtotime($ultimaNoticia['data_publicacao']) < 3600): ?>
+                                    <span class="ml-3 inline-block bg-red-500 text-white px-3 py-2 rounded-full text-sm animate-pulse">
+                                        <i class="fas fa-bolt mr-1"></i>RECÉM-PUBLICADO
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <!-- Link para ver todas (opcional) -->
+                            <div class="text-center mt-8 pt-4 border-t border-gray-300">
+                                <a href="todas_noticias.php" 
+                                class="inline-block text-eyefind-blue hover:text-eyefind-dark font-bold transition">
+                                    VER TODAS AS NOTÍCIAS
+                                    <i class="fas fa-chevron-right ml-2"></i>
+                                </a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Coluna Direita - Website do Minuto (mantido igual) -->
+                    <?php if ($websiteDoMinuto): ?>
+                        <div class="bg-gray-100 p-3 shadow-md">
+                            <h3 class="text-lg font-bold text-eyefind-blue mb-4">WEBSITE DO MINUTO</h3>
+                            <a href="website.php?id=<?php echo $websiteDoMinuto['id']; ?>" class="block">
+                                <div class="flex flex-col items-center gap-4 bg-gray-200 p-4 rounded cursor-pointer hover:bg-gray-300 transition">
+                                    <?php if ($websiteDoMinuto['imagem']): ?>
+                                        <div class="w-full aspect-video flex-shrink-0">
+                                            <img
+                                                src="<?php echo $websiteDoMinuto['imagem']; ?>"
+                                                alt="<?php echo $websiteDoMinuto['nome']; ?>"
+                                                class="w-full h-full object-cover rounded">
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="flex-1 text-center">
+                                        <p class="text-eyefind-blue font-bold text-xl">
+                                            <?php echo $websiteDoMinuto['nome']; ?>
+                                        </p>
+                                        <p class="text-eyefind-dark text-sm mt-2">
+                                            <?php echo $websiteDoMinuto['descricao']; ?>
+                                        </p>
+                                    </div>
+                                </div>
                             </a>
                         </div>
                     <?php endif; ?>
                 </div>
-
-                <?php if ($websiteDoMinuto): ?>
-                    <div>
-                        <h3 class="text-lg font-bold text-eyefind-blue mb-4">WEBSITE DO MINUTO</h3>
-                        <a href="website.php?id=<?php echo $websiteDoMinuto['id']; ?>" class="block">
-                            <div class="flex flex-col md:flex-row items-center gap-4 bg-gray-200 p-4 rounded cursor-pointer hover:bg-eyefind-light-hover transition">
-                                <div class="w-full md:w-64 aspect-video flex-shrink-0">
-                                    <img
-                                        src="<?php echo $websiteDoMinuto['imagem']; ?>"
-                                        alt="<?php echo $websiteDoMinuto['nome']; ?>"
-                                        class="w-full h-full object-cover rounded">
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-eyefind-blue font-bold text-xl">
-                                        <?php echo $websiteDoMinuto['nome']; ?>
-                                    </p>
-                                    <p class="text-eyefind-dark">
-                                        <?php echo $websiteDoMinuto['descricao']; ?>
-                                    </p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                <?php endif; ?>
             </div>
 
             <div class="space-y-1">
