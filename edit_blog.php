@@ -1035,12 +1035,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <body class="bg-eyefind-light">
 
-    <!-- HEADER FULL WIDTH -->
     <section class="bg-[#488BC2] shadow-md w-full">
         <div class="max-w-7xl mx-auto px-4">
             <div class="py-4 flex flex-col md:flex-row justify-between items-center">
 
-                <!-- Logo + Busca -->
                 <div class="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
 
                     <div class="w-64">
@@ -1062,10 +1060,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 </div>
 
-                <!-- Ícones -->
                 <div class="flex items-center gap-6 mt-4 md:mt-0">
 
-                    <!-- Voltar -->
                     <div class="relative group">
                         <a href="manage_blogs.php"
                            class="p-3 w-12 h-12 flex items-center justify-center hover:scale-110 transition duration-200">
@@ -1082,7 +1078,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
 
-                    <!-- Logout -->
                     <div class="relative group">
                         <a href="logout.php"
                            class="p-3 w-12 h-12 flex items-center justify-center hover:scale-110 transition duration-200">
