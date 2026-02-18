@@ -497,18 +497,38 @@ function minifyCss($css)
                 }
             });
 
-            editor.BlockManager.add('iframe-site', {
-                label: 'Site Externo',
-                content: {
-                    type: 'default',
-                    components: `
-                    <iframe 
-                        src="https://exemplo.com" 
-                        style="width:100%; height:600px; border:none;">
-                    </iframe>
-                    `
+            editor.DomComponents.addType('iframe-site', {
+            model: {
+                defaults: {
+                tagName: 'iframe',
+                attributes: {
+                    src: 'https://exemplo.com'
+                },
+                style: {
+                    width: '100%',
+                    height: '600px',
+                    border: 'none'
+                },
+                traits: [
+                    {
+                    type: 'text',
+                    label: 'URL do Site',
+                    name: 'src',
+                    changeProp: 1
+                    }
+                ]
                 }
-                });
+            }
+            });
+
+            editor.BlockManager.add('iframe-site', {
+            label: 'Site Externo',
+            category: 'Extras',
+            content: {
+                type: 'iframe-site'
+            }
+            });
+
 
             // Comandos para dispositivos
             editor.Commands.add('set-device-desktop', {
