@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Dynasty 8 - Imóveis</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<title>Dynasty 8 - Imóveis</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100 font-sans">
 
-<!-- HERO / HEADER -->
+<!-- HERO -->
 <header class="relative">
 
-  <!-- Fundo GTA -->
+  <!-- Imagem fundo -->
   <div class="absolute inset-0">
     <img src="https://www.gta5.com.br/wp-content/uploads/2013/09/Screenshot-GTA-V-188.jpg"
          class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-green-900/40"></div>
+    <div class="absolute inset-0 bg-black/30"></div>
   </div>
 
-  <!-- Conteúdo central -->
-  <div class="relative z-10 py-10">
+  <div class="relative z-10 pt-10">
 
     <!-- Logo centralizada -->
-    <div class="flex justify-center mb-6">
-      <img src="https://media.discordapp.net/attachments/1409263056197783623/1473803760575709277/latest.png?ex=69978a36&is=699638b6&hm=166b2f5a6f913eb2bd9b4503b7c831debb0bcea2317aa86e1fe376c3f0cbd4f2&=&format=webp&quality=lossless"
+    <div class="flex justify-center mb-4">
+      <img src="https://media.discordapp.net/attachments/1409263056197783623/1473803760575709277/latest.png"
            class="h-20">
     </div>
 
+    <!-- Faixa verde slogan -->
+    <div class="bg-green-700 text-white text-center text-lg font-medium py-2">
+      A melhor mudança da sua vida
+    </div>
+
     <!-- Categorias -->
-    <div class="flex justify-center mb-3">
-      <div class="flex bg-yellow-400 font-bold text-sm shadow-md">
+    <div class="bg-yellow-400 flex justify-center font-bold text-sm">
+      <div class="flex">
         <button class="bg-green-700 text-white px-6 py-2">TODAS</button>
         <button class="px-6 py-2 hover:bg-yellow-300">ALTO PADRÃO</button>
         <button class="px-6 py-2 hover:bg-yellow-300">MÉDIAS</button>
@@ -37,9 +42,9 @@
       </div>
     </div>
 
-    <!-- Faixa verde filtros -->
-    <div class="flex justify-center">
-      <div class="bg-green-700 text-white text-xs px-6 py-2 flex gap-6 font-semibold">
+    <!-- Filtros -->
+    <div class="bg-green-800 text-white text-xs font-semibold flex justify-center">
+      <div class="flex gap-6 px-6 py-2">
         <span class="opacity-80">PREÇO</span>
         <span>MAIOR PREÇO</span>
         <span class="opacity-80">LOCALIZAÇÃO</span>
@@ -53,59 +58,46 @@
     </div>
 
   </div>
-
 </header>
 
-<!-- CONTEÚDO -->
-<div class="max-w-7xl mx-auto mt-6 px-6 grid grid-cols-3 gap-6">
+<!-- ÁREA BRANCA 100% LARGURA -->
+<section class="bg-white w-full pt-6 pb-10">
 
-  <!-- LISTA DE PROPRIEDADES -->
-  <div class="col-span-1 space-y-4">
+  <div class="max-w-7xl mx-auto px-6 grid grid-cols-3 gap-6">
 
-    <div class="bg-white shadow-md border border-gray-200">
-      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
-           class="h-40 w-full object-cover">
-      <div class="bg-yellow-400 text-black font-bold text-center py-1 text-sm">
-        INTERIOR REMODELADO
+    <!-- LISTA -->
+    <div class="col-span-1 space-y-4">
+
+      <div class="border border-gray-200 shadow-sm">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+             class="h-40 w-full object-cover">
+        <div class="bg-yellow-400 text-black font-bold text-center py-1 text-sm">
+          INTERIOR REMODELADO
+        </div>
+        <div class="p-4">
+          <h3 class="font-bold text-lg">Eclipse Towers, Apto 3</h3>
+          <p class="text-2xl font-bold text-gray-800">$500,000</p>
+          <p class="text-sm text-gray-500 mb-3">Área norte de Los Santos</p>
+          <button class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
+            COMPRAR
+          </button>
+        </div>
       </div>
-      <div class="p-4">
-        <h3 class="font-bold text-lg">Eclipse Towers, Apto 3</h3>
-        <p class="text-2xl font-bold text-gray-800">$500,000</p>
-        <p class="text-sm text-gray-500 mb-3">Área norte de Los Santos</p>
-        <button class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
-          COMPRAR
-        </button>
-      </div>
+
     </div>
 
-    <div class="bg-white shadow-md border border-gray-200">
-      <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c"
-           class="h-40 w-full object-cover">
-      <div class="bg-yellow-400 text-black font-bold text-center py-1 text-sm">
-        INTERIOR REMODELADO
-      </div>
-      <div class="p-4">
-        <h3 class="font-bold text-lg">Tinsel Towers, Apto 42</h3>
-        <p class="text-2xl font-bold text-gray-800">$492,000</p>
-        <p class="text-sm text-gray-500 mb-3">Área norte de Los Santos</p>
-        <button class="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700 transition">
-          COMPRAR
-        </button>
+    <!-- IMAGEM PRINCIPAL -->
+    <div class="col-span-2 border border-gray-200 shadow-sm p-4">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">IMAGEM DO IMÓVEL</h2>
+      <div class="w-full h-[500px] overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1600607687644-c7171b42498a"
+             class="w-full h-full object-cover">
       </div>
     </div>
 
   </div>
 
-  <!-- IMAGEM PRINCIPAL -->
-  <div class="col-span-2 bg-white shadow-md border border-gray-200 p-4">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">IMAGEM DO IMÓVEL</h2>
-    <div class="w-full h-[500px] overflow-hidden">
-      <img src="https://images.unsplash.com/photo-1600607687644-c7171b42498a"
-           class="w-full h-full object-cover">
-    </div>
-  </div>
-
-</div>
+</section>
 
 </body>
 </html>
