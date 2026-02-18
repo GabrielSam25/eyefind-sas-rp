@@ -1044,20 +1044,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="w-64">
                         <img src="imagens/eyefind-logo.png" alt="Eyefind.info Logo" class="w-full">
                     </div>
-
-                    <div class="w-full md:w-96">
-                        <form action="busca.php" method="GET">
-                            <div class="relative">
-                                <input type="text" name="q"
-                                    class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
-                                    placeholder="Procurar no Eyefind">
-                                <button type="submit" class="absolute right-3 top-3 text-eyefind-blue">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
                 </div>
 
                 <div class="flex items-center gap-6 mt-4 md:mt-0">
