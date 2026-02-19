@@ -1,76 +1,124 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BurgerShot</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navbar + Carrossel</title>
 
-  <style>
-    /* Remove barra de scroll mas mantém funcional */
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
-    }
-    .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-  </style>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  margin: 0;
+}
+
+/* CARROSSEL */
+.carousel {
+  width: 100%;
+  /* SOLUÇÃO 1: Usar aspect-ratio. 
+     Isso cria uma proporção fixa (ex: 16/6 é ótimo para banners largos).
+     Assim o container cresce e diminui mantendo o formato, evitando cortes drásticos. */
+  aspect-ratio: 16 / 6; 
+  
+  /* Caso a imagem fique muito pequena no celular, você pode manter uma altura mínima */
+  min-height: 200px; 
+  max-height: 600px;
+  
+  background-color: #f3f4f6; /* Cor de fundo caso a imagem não preencha tudo */
+  overflow: hidden;
+  position: relative;
+}
+
+.slides {
+  display: flex;
+  width: 200%; /* 200% porque temos 2 imagens (100% para cada) */
+  height: 100%;
+  animation: slide 8s infinite;
+}
+
+.slides img {
+  width: 50%; /* Cada imagem ocupa exatos 50% do container .slides */
+  height: 100%;
+  
+  /* SOLUÇÃO 2: 'contain' x 'cover'
+     'contain': Garante que a imagem NUNCA seja cortada (pode deixar faixas vazias nas laterais).
+     'cover': Preenche tudo sem deixar faixas vazias (mas pode cortar as bordas se a proporção não bater).
+     Experimente trocar para 'cover' se o aspect-ratio acima já tiver resolvido seu problema de proporção! */
+  object-fit: contain; 
+  object-position: center;
+}
+
+/* Animação */
+@keyframes slide {
+  0%   { transform: translateX(0); }
+  45%  { transform: translateX(0); }
+  50%  { transform: translateX(-50%); }
+  95%  { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* Ajuste de proporção para telas menores (Celulares) */
+@media (max-width: 768px) {
+  .carousel {
+    aspect-ratio: 4 / 3; /* No celular, banners costumam ser mais "quadrados" */
+  }
+}
+</style>
 </head>
 
-<body class="bg-gray-50">
+<body class="bg-gray-100">
 
-  <div class="min-h-screen flex flex-col">
+<header class="bg-gradient-to-r from-[#4b250f] to-[#2a1408] py-4">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-6">
 
-    <!-- HEADER -->
-    <header class="bg-white shadow-md">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-
-        <!-- Logo -->
-        <img src="BurgerShot-HDLogo.png" class="h-12 w-auto" />
-
-        <!-- Menu Desktop -->
-        <nav class="hidden md:flex gap-8 font-semibold text-gray-700">
-          <a href="#" class="hover:text-red-600 transition">Início</a>
-          <a href="#" class="hover:text-red-600 transition">Cardápio</a>
-          <a href="#" class="hover:text-red-600 transition">Cupons</a>
-          <a href="#" class="hover:text-red-600 transition">Delivery</a>
-        </nav>
-
-        <!-- Botão -->
-        <a href="#" class="hidden md:inline-block bg-red-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-red-700 transition">
-          Contato
-        </a>
-
-        <!-- Botão Mobile -->
-        <button class="md:hidden text-2xl">☰</button>
-
-      </div>
-    </header>
-
-
-    <!-- CAROUSEL SEM JS -->
-    <div class="relative w-full bg-black">
-
-      <div class="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth">
-
-        <!-- Slide 1 -->
-        <div class="snap-start flex-shrink-0 w-full flex justify-center">
-          <img src="https://media.discordapp.net/attachments/1409263056197783623/1473816829347631266/a1.png?ex=69979662&is=699644e2&hm=b8afb0f3a9a9111af7586f079bbbfd674bf9dc889a79b111ca31f25ac083f389&=&format=webp&quality=lossless"
-               class="w-full h-auto max-h-[600px] object-contain">
-        </div>
-
-        <!-- Slide 2 -->
-        <div class="snap-start flex-shrink-0 w-full flex justify-center">
-          <img src="https://media.discordapp.net/attachments/1409263056197783623/1473822302033416192/ASDASD.png?ex=69979b7b&is=699649fb&hm=97c8cedfc17f472cba16e681af2740cd6a61c5f9ad7c8b26d5527b3f31414bf9&=&format=webp&quality=lossless"
-               class="w-full h-auto max-h-[600px] object-contain">
-        </div>
-
-      </div>
-
+    <div class="flex items-center">
+      <img src="SUA-LOGO-AQUI.png" alt="Logo" class="h-12 md:h-14">
     </div>
 
+    <nav class="hidden md:flex space-x-8 text-white text-lg font-semibold">
+      <a href="#" class="hover:text-yellow-400 transition">Início</a>
+      <a href="#" class="hover:text-yellow-400 transition">Cupons</a>
+      <a href="#" class="hover:text-yellow-400 transition">Cardápio</a>
+      <a href="#" class="hover:text-yellow-400 transition">App BK</a>
+      <a href="#" class="hover:text-yellow-400 transition">Clube BK</a>
+      <a href="#" class="hover:text-yellow-400 transition">Delivery</a>
+    </nav>
+
+    <div class="hidden md:block">
+      <a href="#" class="text-white font-semibold hover:text-yellow-400 transition">
+        Entrar
+      </a>
+    </div>
+
+    <button id="menuBtn" class="md:hidden text-white text-2xl">
+      ☰
+    </button>
+
   </div>
+
+  <div id="mobileMenu" class="hidden md:hidden bg-[#2a1408] text-white px-6 pb-4 space-y-3 font-semibold">
+    <a href="#" class="block hover:text-yellow-400">Início</a>
+    <a href="#" class="block hover:text-yellow-400">Cupons</a>
+    <a href="#" class="block hover:text-yellow-400">Cardápio</a>
+    <a href="#" class="block hover:text-yellow-400">App BK</a>
+    <a href="#" class="block hover:text-yellow-400">Clube BK</a>
+    <a href="#" class="block hover:text-yellow-400">Delivery</a>
+    <a href="#" class="block hover:text-yellow-400">Entrar</a>
+  </div>
+</header>
+
+<div class="carousel">
+  <div class="slides">
+    <img src="SUA-IMAGEM-1.jpg" alt="Banner 1">
+    <img src="SUA-IMAGEM-2.jpg" alt="Banner 2">
+  </div>
+</div>
+
+<script>
+document.getElementById('menuBtn').addEventListener('click', function() {
+  document.getElementById('mobileMenu').classList.toggle('hidden');
+});
+</script>
 
 </body>
 </html>
