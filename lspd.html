@@ -4,123 +4,272 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LSPD – Los Santos Police Department</title>
+  <!-- Tailwind + Font Awesome -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans">
 
-  <!-- HEADER -->
-  <header class="bg-blue-900 text-white shadow-lg">
-    <div class="max-w-7xl mx-auto flex justify-between items-center p-5">
+  <!-- TOP BAR (emergency + social) – inspirado LAPD -->
+  <div class="bg-gray-900 text-white text-sm py-2 px-4 flex flex-wrap justify-between items-center">
+    <div class="flex items-center space-x-4">
+      <span class="flex items-center"><i class="fas fa-phone-alt mr-2 text-yellow-400"></i> Emergência: 9-1-1</span>
+      <span class="flex items-center"><i class="fas fa-phone mr-2 text-yellow-400"></i> Não emergência: 3-1-1</span>
+    </div>
+    <div class="flex space-x-4">
+      <a href="#" class="hover:text-yellow-400"><i class="fab fa-facebook-f"></i></a>
+      <a href="#" class="hover:text-yellow-400"><i class="fab fa-twitter"></i></a>
+      <a href="#" class="hover:text-yellow-400"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="hover:text-yellow-400"><i class="fab fa-youtube"></i></a>
+    </div>
+  </div>
+
+  <!-- HEADER PRINCIPAL (logo + navegação) -->
+  <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center p-4">
       <div class="flex items-center gap-3">
-        <img src="https://i.imgur.com/n4MhqfG.png" alt="LSPD Logo" class="w-16 h-16 object-contain">
-        <h1 class="text-2xl font-bold">Los Santos Police Department</h1>
+        <img src="https://i.imgur.com/n4MhqfG.png" alt="LSPD Logo" class="w-14 h-14 object-contain">
+        <div>
+          <h1 class="text-xl font-bold leading-tight">Los Santos Police Department</h1>
+          <p class="text-xs text-blue-200">desde 1869 • proteger e servir</p>
+        </div>
       </div>
-      <nav class="space-x-6 text-lg">
-        <a href="#Historia" class="hover:text-gray-300">História</a>
-        <a href="#Missao" class="hover:text-gray-300">Missão</a>
-        <a href="#Noticias" class="hover:text-gray-300">Notícias</a>
-        <a href="#Blog" class="hover:text-gray-300">Blog</a>
-        <a href="#Contato" class="hover:text-gray-300">Contato</a>
+      <nav class="hidden md:flex space-x-5 text-md font-medium">
+        <a href="#Historia" class="hover:text-yellow-300 flex items-center"><i class="fas fa-landmark mr-1"></i>História</a>
+        <a href="#Missao" class="hover:text-yellow-300 flex items-center"><i class="fas fa-bullseye mr-1"></i>Missão</a>
+        <a href="#Divisoes" class="hover:text-yellow-300 flex items-center"><i class="fas fa-sitemap mr-1"></i>Divisões</a>
+        <a href="#Noticias" class="hover:text-yellow-300 flex items-center"><i class="fas fa-newspaper mr-1"></i>Notícias</a>
+        <a href="#Blog" class="hover:text-yellow-300 flex items-center"><i class="fas fa-pen-nib mr-1"></i>Blog</a>
+        <a href="#Contato" class="hover:text-yellow-300 flex items-center"><i class="fas fa-envelope mr-1"></i>Contato</a>
       </nav>
+      <!-- menu mobile simplificado -->
+      <button class="md:hidden text-2xl"><i class="fas fa-bars"></i></button>
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="relative bg-gradient-to-b from-blue-900 to-blue-700 h-[80vh] text-white">
-    <img src="https://images.unsplash.com/photo-1579118521438-90f62b6d5d2b"
-         alt="Policiais LSPD" class="absolute inset-0 w-full h-full object-cover opacity-40">
-    <div class="relative z-10 flex flex-col justify-center items-center h-full text-center px-6">
-      <h2 class="text-5xl font-bold mb-4">Compromisso com a Segurança e com a Cidade</h2>
-      <p class="text-xl max-w-3xl mb-6">Promovendo justiça, confiança e proteção à comunidade de Los Santos.</p>
-      <a href="#Historia" class="bg-yellow-400 text-blue-900 font-semibold px-6 py-3 rounded hover:bg-yellow-500 transition">Conheça Nossa História</a>
+  <!-- HERO com botão e chamada mais forte (inspirado LAPD.org) -->
+  <section class="relative bg-gradient-to-b from-blue-900 to-blue-800 text-white">
+    <div class="absolute inset-0 overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1579118521438-90f62b6d5d2b?q=80&w=2070&auto=format&fit=crop"
+           alt="Policiais LSPD" class="w-full h-full object-cover opacity-30">
+    </div>
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-24 md:py-32">
+      <div class="max-w-3xl">
+        <span class="bg-yellow-400 text-blue-900 text-sm font-bold px-4 py-1 rounded-full inline-block mb-4"><i class="fas fa-shield-alt mr-2"></i>SEGURANÇA PÚBLICA</span>
+        <h2 class="text-5xl md:text-6xl font-bold mb-4 leading-tight">Compromisso com a comunidade</h2>
+        <p class="text-xl mb-8 text-blue-100">Promovendo justiça, confiança e proteção em toda Los Santos. Conheça nossa história de serviço desde 1869.</p>
+        <div class="flex flex-wrap gap-4">
+          <a href="#Historia" class="bg-yellow-400 text-blue-900 font-bold px-8 py-4 rounded-lg hover:bg-yellow-300 transition flex items-center gap-2"><i class="fas fa-scroll"></i> Nossa história</a>
+          <a href="#Contato" class="bg-transparent border-2 border-white text-white font-bold px-8 py-4 rounded-lg hover:bg-white hover:text-blue-900 transition flex items-center gap-2"><i class="fas fa-video"></i> Últimos eventos</a>
+        </div>
+      </div>
+    </div>
+    <!-- onda decorativa -->
+    <div class="absolute bottom-0 w-full">
+      <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto text-gray-100">
+        <path d="M0 120L60 105C120 90 240 60 360 48C480 36 600 42 720 54C840 66 960 84 1080 90C1200 96 1320 90 1380 87L1440 84V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="currentColor"/>
+      </svg>
     </div>
   </section>
 
-  <!-- HISTÓRIA -->
-  <section id="Historia" class="max-w-7xl mx-auto p-8">
-    <h2 class="text-3xl font-bold text-blue-900 mb-4">📜 História do LSPD</h2>
-    <p class="text-lg text-gray-700 mb-4">
-      O Los Santos Police Department foi fundado para proteger e servir a cidade, mantendo a ordem e garantindo a segurança pública em uma metrópole complexa e em constante crescimento. Inspirado em tradições de departamentos policiais respeitados internacionalmente, a LSPD construiu sua reputação com base na disciplina, treinamento e compromisso com a lei.
-    </p>
-    <p class="text-gray-700">
-      A história institucional da LSPD reflete seu desenvolvimento desde uma pequena força operacional até uma organização moderna e estruturada, com divisões especializadas, operações táticas e foco em integração comunitária. Assim como muitas instituições policiais do mundo real, sua trajetória inclui períodos de adaptação, profissionalização e evolução frente aos desafios sociais.
-    </p>
-  </section>
-
-  <!-- MISSÃO & VALORES -->
-  <section id="Missao" class="bg-white py-12 shadow-inner">
-    <div class="max-w-7xl mx-auto px-8">
-      <h2 class="text-3xl font-bold text-blue-900 mb-6">🎖️ Missão e Valores</h2>
-      <div class="grid md:grid-cols-2 gap-8">
+  <!-- HISTÓRIA COMPLETA DA LAPD adaptada para LSPD -->
+  <section id="Historia" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-16">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold text-blue-900 flex items-center justify-center gap-3"><i class="fas fa-history text-yellow-500"></i> História do LSPD</h2>
+      <p class="text-gray-600 max-w-2xl mx-auto">Uma trajetória de evolução, desafios e compromisso com a lei – inspirada na rica história do Departamento de Polícia de Los Angeles.</p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-8 items-start">
+      <div class="space-y-6 text-gray-700">
         <div>
-          <h3 class="text-xl font-semibold text-gray-800 mb-2">Missão</h3>
-          <p class="text-gray-700">
-            Proteger vidas e propriedade, fortalecer a confiança pública por meio da justiça e agir com integridade em todas as operações.
-          </p>
+          <h3 class="text-xl font-bold text-blue-800 flex items-center gap-2"><i class="fas fa-tree text-green-700"></i> Fundação e primeiros anos (1869–1900)</h3>
+          <p>O LSPD foi criado em 1869, quando Los Santos era uma pequena cidade com cerca de 600 habitantes. Inicialmente, contava com apenas seis policiais contratados pelo xerife do condado. Em 1876, a cidade criou seu próprio conselho de polícia e nomeou o primeiro chefe da força. Durante o século XIX, o departamento cresceu junto com a cidade, enfrentando desde distúrbios rurais até crimes ligados à expansão ferroviária.</p>
         </div>
         <div>
-          <h3 class="text-xl font-semibold text-gray-800 mb-2">Valores</h3>
-          <ul class="list-disc list-inside text-gray-700">
-            <li>Integridade e transparência</li>
-            <li>Serviço comunitário</li>
-            <li>Profissionalismo e treinamento contínuo</li>
-            <li>Respeito aos direitos humanos</li>
+          <h3 class="text-xl font-bold text-blue-800 flex items-center gap-2"><i class="fas fa-car-side text-blue-600"></i> Século XX: modernização e expansão</h3>
+          <p>Na década de 1910, o LSPD introduziu as primeiras viaturas motorizadas e uma torre de rádio para comunicação. Em 1913, a primeira mulher oficial ingressou na força. Os anos 20 e 30 foram marcados pelo combate ao contrabando durante a Lei Seca. Em 1950, o departamento já contava com mais de 2.000 oficiais e criou a famosa divisão de gangues. Nos anos 60, implementou programas de policiamento comunitário e, em 1973, a primeira unidade SWAT da cidade.</p>
+        </div>
+      </div>
+      <div class="space-y-6 text-gray-700">
+        <div>
+          <h3 class="text-xl font-bold text-blue-800 flex items-center gap-2"><i class="fas fa-chart-line text-green-600"></i> Era contemporânea e profissionalização</h3>
+          <p>Nas décadas de 80 e 90, o LSPD passou por reformas estruturais, incluindo a adoção de políticas de uso de força e treinamento intensivo em direitos civis. Em 2001, inaugurou o atual quartel-general e expandiu as divisões especializadas: operações aéreas, K9, negociação de reféns e cibercrime. O departamento hoje conta com mais de 9.000 oficiais e 3.000 civis, servindo uma população de 4 milhões de pessoas.</p>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-blue-800 flex items-center gap-2"><i class="fas fa-hand-holding-heart text-red-500"></i> Legado e compromisso</h3>
+          <p>O LSPD mantém museu, programas de policiamento de vizinhança e academias comunitárias. Em 2020, implementou o uso de câmeras corporais em todas as patrulhas. A história do departamento reflete a própria evolução de Los Santos: de vila pacata a metrópole global, sempre com o lema "to protect and to serve" desde 1955.</p>
+        </div>
+        <p class="text-sm italic bg-blue-50 p-4 rounded-lg"><i class="fas fa-info-circle text-blue-800 mr-2"></i> Esta linha do tempo é uma adaptação livre da história da LAPD, preservando seus marcos reais em homenagem à tradição policial.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISSÃO E VALORES COM ÍCONES -->
+  <section id="Missao" class="bg-white py-16 shadow-inner scroll-mt-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold text-blue-900 flex items-center justify-center gap-3"><i class="fas fa-bullseye text-yellow-500"></i> Missão, Visão e Valores</h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-yellow-400 shadow">
+          <i class="fas fa-shield-halved text-4xl text-blue-800 mb-4"></i>
+          <h3 class="text-xl font-bold mb-2">Missão</h3>
+          <p class="text-gray-700">Proteger vidas e propriedades com justiça, integridade e respeito, fortalecendo a confiança pública por meio da transparência e da parceria com a comunidade.</p>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-yellow-400 shadow">
+          <i class="fas fa-eye text-4xl text-blue-800 mb-4"></i>
+          <h3 class="text-xl font-bold mb-2">Visão</h3>
+          <p class="text-gray-700">Ser referência em polícia comunitária, inovação tecnológica e respeito aos direitos humanos, garantindo a segurança de Los Santos no século XXI.</p>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-yellow-400 shadow">
+          <i class="fas fa-list-check text-4xl text-blue-800 mb-4"></i>
+          <h3 class="text-xl font-bold mb-2">Valores</h3>
+          <ul class="list-none space-y-2 text-gray-700">
+            <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Integridade e transparência</li>
+            <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Serviço comunitário</li>
+            <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Profissionalismo contínuo</li>
+            <li><i class="fas fa-check-circle text-green-600 mr-2"></i>Respeito à diversidade</li>
           </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- NEWS / NOTÍCIAS -->
-  <section id="Noticias" class="max-w-7xl mx-auto px-8 py-12">
-    <h2 class="text-3xl font-bold text-blue-900 mb-6">🗞️ Últimas Notícias</h2>
-    <div class="grid md:grid-cols-3 gap-8">
-
-      <!-- Exemplo Card -->
-      <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1598605699673-637e3a228a8d" 
-             alt="Notícia LSPD" class="w-full h-48 object-cover">
-        <div class="p-4">
-          <h3 class="font-bold text-xl text-blue-900 mb-2">LSPD intervenção em operação urbana</h3>
-          <p class="text-gray-700 text-sm mb-2">
-            Força tática conclui operação em região com alto índice de crimes.
-          </p>
-          <a href="#" class="text-blue-900 font-medium hover:underline">Leia mais →</a>
-        </div>
+  <!-- NOVA SEÇÃO: DIVISÕES (inspirada nas áreas da LAPD) -->
+  <section id="Divisoes" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-16">
+    <h2 class="text-4xl font-bold text-blue-900 mb-4 flex items-center gap-3"><i class="fas fa-sitemap text-yellow-500"></i> Divisões operacionais</h2>
+    <p class="text-gray-600 mb-8">Conheça as principais divisões que atuam 24h para manter a ordem em Los Santos.</p>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white p-5 rounded-xl shadow hover:shadow-md transition border-b-4 border-blue-700">
+        <i class="fas fa-car-side text-3xl text-blue-700 mb-3"></i>
+        <h3 class="font-bold text-lg">Patrulha Central</h3>
+        <p class="text-sm text-gray-600">Área metropolitana, distrito financeiro e resposta imediata.</p>
       </div>
-
-      <!-- Você pode duplicar e ajustar outros cards -->
+      <div class="bg-white p-5 rounded-xl shadow hover:shadow-md transition border-b-4 border-blue-700">
+        <i class="fas fa-helicopter text-3xl text-blue-700 mb-3"></i>
+        <h3 class="font-bold text-lg">Suporte Aéreo (Air-1)</h3>
+        <p class="text-sm text-gray-600">Helicópteros para perseguição, resgate e monitoramento.</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl shadow hover:shadow-md transition border-b-4 border-blue-700">
+        <i class="fas fa-dog text-3xl text-blue-700 mb-3"></i>
+        <h3 class="font-bold text-lg">K9 & Cavalaria</h3>
+        <p class="text-sm text-gray-600">Unidade canina e montada para controle de multidões e buscas.</p>
+      </div>
+      <div class="bg-white p-5 rounded-xl shadow hover:shadow-md transition border-b-4 border-blue-700">
+        <i class="fas fa-bolt text-3xl text-blue-700 mb-3"></i>
+        <h3 class="font-bold text-lg">SWAT / METRO</h3>
+        <p class="text-sm text-gray-600">Táticas especiais, resgate de reféns e alto risco.</p>
+      </div>
+    </div>
+    <!-- mensagem do chefe (estilo LAPD chief) -->
+    <div class="mt-12 bg-blue-50 p-6 rounded-lg flex flex-col md:flex-row gap-6 items-center">
+      <img src="https://images.unsplash.com/photo-1573167507387-6b4b98c7e13b?w=150&h=150&fit=crop&crop=faces" alt="Chefe LSPD" class="w-24 h-24 rounded-full border-4 border-white shadow-lg">
+      <div>
+        <span class="text-sm text-blue-800 font-bold"><i class="fas fa-star"></i> CHEFE DE POLÍCIA</span>
+        <h3 class="text-2xl font-bold">Dominic Reynolds</h3>
+        <p class="text-gray-700 italic">“Nossa prioridade é a parceria com a comunidade. Cada oficial é treinado para servir com respeito e excelência.”</p>
+      </div>
     </div>
   </section>
 
-  <!-- BLOG -->
-  <section id="Blog" class="bg-gray-200 py-12">
-    <div class="max-w-7xl mx-auto px-8">
-      <h2 class="text-3xl font-bold text-blue-900 mb-6">📰 Blog Institucional</h2>
+  <!-- NOTÍCIAS (cards mais dinâmicos) -->
+  <section id="Noticias" class="bg-gray-100 py-16 scroll-mt-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-4xl font-bold text-blue-900 mb-4 flex items-center gap-3"><i class="fas fa-newspaper text-yellow-500"></i> Últimas notícias</h2>
       <div class="grid md:grid-cols-3 gap-8">
-        <!-- Blog Post -->
-        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition overflow-hidden">
-          <img src="https://images.unsplash.com/photo-1590402495774-b3a7c7b93556" 
-               alt="Blog LSPD" class="w-full h-48 object-cover">
-          <div class="p-4">
-            <h3 class="font-bold text-xl text-blue-900 mb-2">Como a LSPD treina seus oficiais</h3>
-            <p class="text-gray-700 text-sm mb-2">Entenda o rigor e a disciplina por trás dos programas de treinamento profissional.</p>
-            <a href="#" class="text-blue-900 font-medium hover:underline">Leia mais →</a>
+        <div class="bg-white rounded-lg shadow-lg hover:shadow-2xl transition overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1598605699673-637e3a228a8d?w=600&auto=format" alt="Notícia" class="w-full h-48 object-cover">
+          <div class="p-5">
+            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">OPERAÇÃO URBANA</span>
+            <h3 class="font-bold text-xl text-blue-900 mb-2 mt-2">LSPD conclui operação em Vespucci</h3>
+            <p class="text-gray-600 text-sm mb-3">Força tática recupera veículos roubados e prende quatro suspeitos após perseguição.</p>
+            <a href="#" class="text-blue-900 font-medium hover:underline flex items-center gap-1">Leia mais <i class="fas fa-arrow-right text-xs"></i></a>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg hover:shadow-2xl transition overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1590402495774-b3a7c7b93556?w=600&auto=format" alt="Notícia" class="w-full h-48 object-cover">
+          <div class="p-5">
+            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">COMUNIDADE</span>
+            <h3 class="font-bold text-xl text-blue-900 mb-2 mt-2">Programa "Pizza com a Polícia"</h3>
+            <p class="text-gray-600 text-sm mb-3">Jovens do bairro de Davis participam de roda de conversa com oficiais do setor.</p>
+            <a href="#" class="text-blue-900 font-medium hover:underline flex items-center gap-1">Leia mais <i class="fas fa-arrow-right text-xs"></i></a>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg hover:shadow-2xl transition overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1589579235211-78a5cd1f35d9?w=600&auto=format" alt="Notícia" class="w-full h-48 object-cover">
+          <div class="p-5">
+            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-1 rounded">TECNOLOGIA</span>
+            <h3 class="font-bold text-xl text-blue-900 mb-2 mt-2">Câmeras corporais em toda frota</h3>
+            <p class="text-gray-600 text-sm mb-3">Departamento atinge 100% de cobertura com bodycams, reforçando transparência.</p>
+            <a href="#" class="text-blue-900 font-medium hover:underline flex items-center gap-1">Leia mais <i class="fas fa-arrow-right text-xs"></i></a>
           </div>
         </div>
       </div>
+      <div class="text-center mt-10">
+        <a href="#" class="bg-blue-900 text-white px-8 py-3 rounded-lg hover:bg-blue-800 inline-flex items-center gap-2"><i class="fas fa-newspaper"></i> Ver todas as notícias</a>
+      </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
-  <footer id="Contato" class="bg-blue-900 text-white py-6">
-    <div class="max-w-7xl mx-auto px-8">
-      <h3 class="text-xl font-bold mb-2">Contato</h3>
-      <p>Email: comunicacao@lspd.ls</p>
-      <p>Telefone institucional: +55 (21) 0000-0000</p>
-      <p class="mt-4">&copy; 2026 Los Santos Police Department</p>
+  <!-- BLOG (menor, mas com ícone) -->
+  <section id="Blog" class="max-w-7xl mx-auto px-6 py-16 scroll-mt-16">
+    <h2 class="text-4xl font-bold text-blue-900 mb-4 flex items-center gap-3"><i class="fas fa-pen-fancy text-yellow-500"></i> Blog institucional</h2>
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="flex bg-white shadow rounded-lg overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1625061085414-2d69e6f0a0d0?w=300&h=200&fit=crop" alt="blog" class="w-1/3 object-cover">
+        <div class="p-4 w-2/3">
+          <h3 class="font-bold text-lg text-blue-900">Como entrar para a academia</h3>
+          <p class="text-sm text-gray-600">Requisitos, teste físico e dicas para sua carreira no LSPD.</p>
+          <a href="#" class="text-blue-700 text-sm font-medium mt-2 inline-block">Ler mais →</a>
+        </div>
+      </div>
+      <div class="flex bg-white shadow rounded-lg overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1517048676730-d6b0e6a4c6b0?w=300&h=200&fit=crop" alt="blog" class="w-1/3 object-cover">
+        <div class="p-4 w-2/3">
+          <h3 class="font-bold text-lg text-blue-900">Policiamento comunitário</h3>
+          <p class="text-sm text-gray-600">Oficiais contam experiência em reuniões de bairro.</p>
+          <a href="#" class="text-blue-700 text-sm font-medium mt-2 inline-block">Ler mais →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER com informações de contato e ícones -->
+  <footer id="Contato" class="bg-blue-900 text-white pt-12 pb-6 scroll-mt-16">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div>
+        <h4 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-building"></i> LSPD</h4>
+        <p class="text-sm text-blue-200 mt-2">100 W. 1st St., Los Santos, CA 90012</p>
+        <p class="text-sm mt-2"><i class="fas fa-phone-alt mr-2"></i> Emergência: 9-1-1</p>
+        <p class="text-sm"><i class="fas fa-phone mr-2"></i> Não emergência: (213) 486-8000</p>
+      </div>
+      <div>
+        <h4 class="text-lg font-bold">Divisões</h4>
+        <ul class="text-sm space-y-1 mt-2 text-blue-200">
+          <li><a href="#" class="hover:text-white">Patrulha Central</a></li>
+          <li><a href="#" class="hover:text-white">Detetives</a></li>
+          <li><a href="#" class="hover:text-white">Trânsito</a></li>
+          <li><a href="#" class="hover:text-white">Relações Comunitárias</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-bold">Transparência</h4>
+        <ul class="text-sm space-y-1 mt-2 text-blue-200">
+          <li><a href="#" class="hover:text-white">Dados abertos</a></li>
+          <li><a href="#" class="hover:text-white">Ouvidoria</a></li>
+          <li><a href="#" class="hover:text-white">Relatórios anuais</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-bold">Redes</h4>
+        <div class="flex space-x-4 mt-2 text-2xl">
+          <a href="#" class="hover:text-yellow-400"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="hover:text-yellow-400"><i class="fab fa-x-twitter"></i></a>
+          <a href="#" class="hover:text-yellow-400"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="hover:text-yellow-400"><i class="fab fa-youtube"></i></a>
+        </div>
+        <p class="text-xs text-blue-300 mt-4">© 2026 Los Santos Police Department. Todos os direitos reservados.</p>
+      </div>
     </div>
   </footer>
-
 </body>
 </html>
