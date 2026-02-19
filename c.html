@@ -3,64 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Navbar + Carrossel</title>
+<title>Navbar + Carrossel Full Width</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 body {
   margin: 0;
+  padding: 0;
 }
 
 /* CARROSSEL */
 .carousel {
   width: 100%;
-  /* SOLUÇÃO 1: Usar aspect-ratio. 
-     Isso cria uma proporção fixa (ex: 16/6 é ótimo para banners largos).
-     Assim o container cresce e diminui mantendo o formato, evitando cortes drásticos. */
-  aspect-ratio: 16 / 6; 
-  
-  /* Caso a imagem fique muito pequena no celular, você pode manter uma altura mínima */
-  min-height: 200px; 
+  /* Define a proporção do banner (Largura / Altura) */
+  /* 16/5 é um formato comum de banner largo. Ajuste se sua imagem for mais alta ou mais baixa. */
+  aspect-ratio: 16 / 5; 
+  min-height: 250px;
   max-height: 600px;
-  
-  background-color: #f3f4f6; /* Cor de fundo caso a imagem não preencha tudo */
   overflow: hidden;
   position: relative;
+  background-color: #000;
 }
 
 .slides {
   display: flex;
-  width: 200%; /* 200% porque temos 2 imagens (100% para cada) */
+  width: 200%; /* 200% pois são 2 imagens de 100% cada */
   height: 100%;
-  animation: slide 8s infinite;
+  animation: slide 10s infinite;
 }
 
 .slides img {
-  width: 50%; /* Cada imagem ocupa exatos 50% do container .slides */
+  /* Cada imagem deve ocupar exatamente METADE do container de 200% */
+  width: 50%; 
   height: 100%;
-  
-  /* SOLUÇÃO 2: 'contain' x 'cover'
-     'contain': Garante que a imagem NUNCA seja cortada (pode deixar faixas vazias nas laterais).
-     'cover': Preenche tudo sem deixar faixas vazias (mas pode cortar as bordas se a proporção não bater).
-     Experimente trocar para 'cover' se o aspect-ratio acima já tiver resolvido seu problema de proporção! */
-  object-fit: contain; 
-  object-position: center;
+  /* 'cover' faz a imagem ocupar toda a largura e altura disponível sem deixar espaços brancos */
+  object-fit: cover;
+  /* Centraliza a imagem para que o corte (se houver) seja igual nas bordas */
+  object-position: center; 
 }
 
-/* Animação */
+/* Animação Suave */
 @keyframes slide {
   0%   { transform: translateX(0); }
-  45%  { transform: translateX(0); }
+  40%  { transform: translateX(0); }
   50%  { transform: translateX(-50%); }
-  95%  { transform: translateX(-50%); }
+  90%  { transform: translateX(-50%); }
   100% { transform: translateX(0); }
 }
 
-/* Ajuste de proporção para telas menores (Celulares) */
+/* Ajuste para Celulares: Deixa o banner um pouco mais alto para não esmagar o conteúdo */
 @media (max-width: 768px) {
   .carousel {
-    aspect-ratio: 4 / 3; /* No celular, banners costumam ser mais "quadrados" */
+    aspect-ratio: 4 / 3; 
   }
 }
 </style>
@@ -68,7 +63,7 @@ body {
 
 <body class="bg-gray-100">
 
-<header class="bg-gradient-to-r from-[#4b250f] to-[#2a1408] py-4">
+<header class="bg-gradient-to-r from-[#4b250f] to-[#2a1408] py-4 shadow-md">
   <div class="max-w-7xl mx-auto flex items-center justify-between px-6">
 
     <div class="flex items-center">
@@ -85,7 +80,7 @@ body {
     </nav>
 
     <div class="hidden md:block">
-      <a href="#" class="text-white font-semibold hover:text-yellow-400 transition">
+      <a href="#" class="text-white font-semibold border-2 border-white px-4 py-1 rounded-full hover:bg-white hover:text-[#4b250f] transition">
         Entrar
       </a>
     </div>
@@ -96,8 +91,8 @@ body {
 
   </div>
 
-  <div id="mobileMenu" class="hidden md:hidden bg-[#2a1408] text-white px-6 pb-4 space-y-3 font-semibold">
-    <a href="#" class="block hover:text-yellow-400">Início</a>
+  <div id="mobileMenu" class="hidden md:hidden bg-[#2a1408] text-white px-6 pb-4 space-y-3 font-semibold border-t border-gray-700">
+    <a href="#" class="block pt-3 hover:text-yellow-400">Início</a>
     <a href="#" class="block hover:text-yellow-400">Cupons</a>
     <a href="#" class="block hover:text-yellow-400">Cardápio</a>
     <a href="#" class="block hover:text-yellow-400">App BK</a>
@@ -109,8 +104,8 @@ body {
 
 <div class="carousel">
   <div class="slides">
-    <img src="https://media.discordapp.net/attachments/1409263056197783623/1473822302033416192/ASDASD.png?ex=69979b7b&is=699649fb&hm=97c8cedfc17f472cba16e681af2740cd6a61c5f9ad7c8b26d5527b3f31414bf9&=&format=webp&quality=lossless" alt="Banner 1">
-    <img src="SUA-IMAGEM-2.jpg" alt="Banner 2">
+    <img src="SUA-IMAGEM-1.jpg" alt="Banner Principal">
+    <img src="SUA-IMAGEM-2.jpg" alt="Promoção do Dia">
   </div>
 </div>
 
