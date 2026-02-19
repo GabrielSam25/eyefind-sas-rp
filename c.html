@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BurgerShot</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Remove barra de scroll mas mantém funcional */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
 </head>
 
 <body class="bg-gray-50">
@@ -38,58 +49,28 @@
     </header>
 
 
-    <!-- CAROUSEL -->
-    <div class="relative w-full overflow-hidden bg-black">
+    <!-- CAROUSEL SEM JS -->
+    <div class="relative w-full bg-black">
 
-      <!-- Slides -->
-      <div id="carousel" class="flex transition-transform duration-700">
+      <div class="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth">
 
-        <div class="min-w-full flex justify-center">
-          <img src="a1.png" class="w-full h-auto max-h-[600px] object-contain">
+        <!-- Slide 1 -->
+        <div class="snap-start flex-shrink-0 w-full flex justify-center">
+          <img src="https://media.discordapp.net/attachments/1409263056197783623/1473816829347631266/a1.png?ex=69979662&is=699644e2&hm=b8afb0f3a9a9111af7586f079bbbfd674bf9dc889a79b111ca31f25ac083f389&=&format=webp&quality=lossless"
+               class="w-full h-auto max-h-[600px] object-contain">
         </div>
 
-        <div class="min-w-full flex justify-center">
-          <img src="ASDASD.png" class="w-full h-auto max-h-[600px] object-contain">
+        <!-- Slide 2 -->
+        <div class="snap-start flex-shrink-0 w-full flex justify-center">
+          <img src="https://media.discordapp.net/attachments/1409263056197783623/1473822302033416192/ASDASD.png?ex=69979b7b&is=699649fb&hm=97c8cedfc17f472cba16e681af2740cd6a61c5f9ad7c8b26d5527b3f31414bf9&=&format=webp&quality=lossless"
+               class="w-full h-auto max-h-[600px] object-contain">
         </div>
 
       </div>
 
-      <!-- Botões -->
-      <button onclick="prevSlide()" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/70 px-3 py-2 rounded-full">
-        ❮
-      </button>
-
-      <button onclick="nextSlide()" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/70 px-3 py-2 rounded-full">
-        ❯
-      </button>
-
     </div>
 
   </div>
-
-
-<script>
-let index = 0;
-const carousel = document.getElementById("carousel");
-const totalSlides = carousel.children.length;
-
-function updateSlide() {
-  carousel.style.transform = `translateX(-${index * 100}%)`;
-}
-
-function nextSlide() {
-  index = (index + 1) % totalSlides;
-  updateSlide();
-}
-
-function prevSlide() {
-  index = (index - 1 + totalSlides) % totalSlides;
-  updateSlide();
-}
-
-// Auto play
-setInterval(nextSlide, 5000);
-</script>
 
 </body>
 </html>
