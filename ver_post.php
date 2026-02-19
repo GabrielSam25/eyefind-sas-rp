@@ -22,6 +22,26 @@ if (!$post) {
 // Incrementar views
 $stmt = $pdo->prepare("UPDATE blog_posts SET views = views + 1 WHERE id = ?");
 $stmt->execute([$post_id]);
+
+// Buscar template personalizado
+$stmt = $pdo->prepare("SELECT html, css FROM templates_visualizacao WHERE website_id = ? AND tipo = 'post'");
+$stmt->execute([$website_id]);
+$template = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Template padrão caso não exista personalizado
+if (!$template) {
+    $template['html'] = '<article class="max-w-3xl mx-auto p-6">
+    <h1 class="text-4xl font-bold mb-4 dynamic-titulo"></h1>
+    <div class="flex items-center text-gray-500 mb-6">
+        <span class="dynamic-autor-nome"></span> • 
+        <span class="dynamic-data ml-2"></span> • 
+        <span class="dynamic-views ml-2"></span> visualizações
+    </div>
+    <img class="w-full h-96 object-cover rounded-lg mb-8 dynamic-imagem" src="">
+    <div class="prose max-w-none dynamic-conteudo"></div>
+</article>';
+    $template['css'] = '.prose { font-size: 1.125rem; line-height: 1.8; }';
+}
 ?>
 
 <!DOCTYPE html>
@@ -31,17 +51,11 @@ $stmt->execute([$post_id]);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($post['titulo']); ?> - <?php echo htmlspecialchars($post['site_nome']); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <?php if (!empty($template['css'])): ?>
+        <style><?php echo $template['css']; ?></style>
+    <?php endif; ?>
     <style>
-        .post-content {
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        .post-content img {
-            max-width: 100%;
-            height: auto;
-            margin: 20px 0;
-        }
+        .dynamic-conteudo img { max-width: 100%; height: auto; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -50,28 +64,35 @@ $stmt->execute([$post_id]);
             <i class="fas fa-arrow-left mr-2"></i>Voltar para o site
         </a>
         
-        <article class="bg-white p-8 rounded-lg shadow-md">
-            <?php if ($post['imagem']): ?>
-                <img src="<?php echo htmlspecialchars($post['imagem']); ?>" alt="" class="w-full h-64 object-cover rounded-lg mb-6">
-            <?php endif; ?>
-            
-            <h1 class="text-3xl font-bold mb-4"><?php echo htmlspecialchars($post['titulo']); ?></h1>
-            
-            <div class="text-gray-600 mb-6">
-                Publicado em <?php echo date('d/m/Y H:i', strtotime($post['data_publicacao'])); ?> • 
-                <?php echo $post['views']; ?> visualizações
-            </div>
-            
-            <?php if ($post['resumo']): ?>
-                <div class="text-lg text-gray-700 italic mb-6 border-l-4 border-blue-500 pl-4">
-                    <?php echo nl2br(htmlspecialchars($post['resumo'])); ?>
-                </div>
-            <?php endif; ?>
-            
-            <div class="post-content">
-                <?php echo $post['conteudo']; ?>
-            </div>
-        </article>
+        <?php
+        // Usar DOMDocument para processar o template
+        $dom = new DOMDocument();
+        libxml_use_internal_errors(true);
+        @$dom->loadHTML('<?xml encoding="UTF-8">' . $template['html'], LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        
+        // Preparar dados para o template
+        $dados = [
+            'titulo' => $post['titulo'],
+            'conteudo' => $post['conteudo'],
+            'resumo' => $post['resumo'] ?? '',
+            'imagem' => $post['imagem'] ?? '',
+            'data_publicacao' => $post['data_publicacao'],
+            'autor_id' => $post['autor_id'] ?? null,
+            'views' => $post['views'],
+            'id' => $post['id']
+        ];
+        
+        // Preencher com os dados do post
+        $xpath = new DOMXPath($dom);
+        $elementos = $xpath->query("//*[contains(@class, 'dynamic-')]");
+        
+        foreach ($elementos as $el) {
+            preencherElementoComDados($el, $dados, $pdo, $website_id);
+        }
+        
+        echo $dom->saveHTML();
+        ?>
     </div>
 </body>
 </html>
