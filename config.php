@@ -278,7 +278,7 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
     
-    // Adiciona meta charset para evitar problemas com caracteres especiais
+    // Garantir codificação UTF-8
     $htmlWithMeta = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $html;
     @$dom->loadHTML($htmlWithMeta, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     libxml_clear_errors();
@@ -286,22 +286,19 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
     $xpath = new DOMXPath($dom);
     $nodes = $xpath->query("//*[@data-dynamic]");
     
-    // Converte para array para evitar problemas durante a remoção de nós
-    $nodesArray = [];
+    // Coletar apenas nós do tipo elemento
+    $elements = [];
     foreach ($nodes as $node) {
-        $nodesArray[] = $node;
+        if ($node->nodeType === XML_ELEMENT_NODE) {
+            $elements[] = $node;
+        }
     }
 
-    foreach ($nodesArray as $node) {
-        // Pula nós que não são elementos (ex: texto, comentário)
-        if (!($node instanceof DOMElement)) {
-            continue;
-        }
-        
+    foreach ($elements as $node) {
         $type = $node->getAttribute('data-dynamic');
         $limit = $node->getAttribute('data-limit') ?: 5;
 
-        // Obter dados conforme o tipo
+        // Buscar dados conforme o tipo
         $itens = [];
         switch ($type) {
             case 'blog_posts':
@@ -327,6 +324,7 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
                 continue 2;
         }
 
+        // Se não há itens, remove o bloco inteiro
         if (empty($itens)) {
             if ($node->parentNode) {
                 $node->parentNode->removeChild($node);
@@ -334,12 +332,12 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
             continue;
         }
 
-        // Verificar se é uma lista (termina com _lista)
+        // Processar listas ou itens únicos
         if (strpos($type, '_lista') !== false) {
-            // Procura o primeiro filho que seja elemento (template)
+            // Encontrar o primeiro elemento filho que servirá de template
             $template = null;
             foreach ($node->childNodes as $child) {
-                if ($child instanceof DOMElement) {
+                if ($child->nodeType === XML_ELEMENT_NODE) {
                     $template = $child;
                     break;
                 }
@@ -350,41 +348,40 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
                 $template->appendChild($dom->createElement('h3', 'Título'));
             }
 
-            // Remove todo o conteúdo original
+            // Limpar conteúdo original
             while ($node->firstChild) {
                 $node->removeChild($node->firstChild);
             }
 
-            // Clona e preenche para cada item
+            // Clonar e preencher para cada item
             foreach ($itens as $item) {
                 $clone = $template->cloneNode(true);
                 preencherElementoComDados($clone, $item, $pdo, $website_id);
                 $node->appendChild($clone);
             }
         } else {
-            // Item único: limpa e preenche o próprio nó
+            // Item único: limpar e preencher o próprio nó
             while ($node->firstChild) {
                 $node->removeChild($node->firstChild);
             }
             preencherElementoComDados($node, $itens[0], $pdo, $website_id);
         }
 
-        // Remove os atributos dinâmicos
+        // Remover atributos dinâmicos para não processar novamente
         $node->removeAttribute('data-dynamic');
         $node->removeAttribute('data-limit');
     }
 
     $result = $dom->saveHTML();
-    // Remove o meta tag adicionado temporariamente
+    // Remover o meta temporário
     $result = preg_replace('/<meta http-equiv="Content-Type" content="text\/html; charset=utf-8">/', '', $result, 1);
     return $result;
 }
 
-
-// ===== FUNÇÃO PARA PREENCHER ELEMENTO COM DADOS (RECURSIVA) =====
+// ===== FUNÇÃO AUXILIAR CORRIGIDA (COM VERIFICAÇÃO DE NODE TYPE) =====
 
 function preencherElementoComDados($elemento, $dados, $pdo, $website_id) {
-    if (!($elemento instanceof DOMElement)) {
+    if ($elemento->nodeType !== XML_ELEMENT_NODE) {
         return;
     }
     
@@ -472,7 +469,8 @@ function preencherElementoComDados($elemento, $dados, $pdo, $website_id) {
             case 'dynamic-contato':
             case 'dynamic-telefone':
                 while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
-                $valor = $dados[str_replace('dynamic-', '', $classe)] ?? '';
+                $campo = str_replace('dynamic-', '', $classe);
+                $valor = $dados[$campo] ?? '';
                 $elemento->appendChild($elemento->ownerDocument->createTextNode(htmlspecialchars($valor)));
                 break;
             case 'dynamic-email':
@@ -486,9 +484,9 @@ function preencherElementoComDados($elemento, $dados, $pdo, $website_id) {
         }
     }
 
-    // Processa filhos recursivamente
+    // Processar filhos recursivamente
     foreach ($elemento->childNodes as $filho) {
-        if ($filho instanceof DOMElement) {
+        if ($filho->nodeType === XML_ELEMENT_NODE) {
             preencherElementoComDados($filho, $dados, $pdo, $website_id);
         }
     }
