@@ -28,7 +28,7 @@ $ultimaNoticia = $stmt->fetch(PDO::FETCH_ASSOC);
 function getWeatherData()
 {
     $apiKey = '4137179bbfe371cdf0cf5abda9888dda';
-    $city = 'Los+Angeles';
+    $city = 'São+Paulo';
     $url = "http://api.openweathermap.org/data/2.5/weather?q={$city}&appid={$apiKey}&units=metric";
 
     $ch = curl_init();
