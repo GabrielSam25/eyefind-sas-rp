@@ -271,18 +271,35 @@ function criarSlug($texto) {
 // ===== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO (VERSÃO FINAL COM TEMPLATES) =====
 
 function renderDynamicBlocks($html, $website_id, $pdo) {
+    if (empty($html)) {
+        return '';
+    }
+    
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
-    @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    
+    // Adiciona meta charset para evitar problemas com caracteres especiais
+    $htmlWithMeta = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $html;
+    @$dom->loadHTML($htmlWithMeta, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     libxml_clear_errors();
 
     $xpath = new DOMXPath($dom);
     $nodes = $xpath->query("//*[@data-dynamic]");
-
+    
+    // Converte para array para evitar problemas durante a remoção de nós
+    $nodesArray = [];
     foreach ($nodes as $node) {
+        $nodesArray[] = $node;
+    }
+
+    foreach ($nodesArray as $node) {
+        // Pula nós que não são elementos (ex: texto, comentário)
+        if (!($node instanceof DOMElement)) {
+            continue;
+        }
+        
         $type = $node->getAttribute('data-dynamic');
         $limit = $node->getAttribute('data-limit') ?: 5;
-        $class = $node->getAttribute('class');
 
         // Obter dados conforme o tipo
         $itens = [];
@@ -293,7 +310,7 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
             case 'blog_destaque':
                 $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE website_id = ? AND status = 'publicado' ORDER BY views DESC LIMIT 1");
                 $stmt->execute([$website_id]);
-                $item = $stmt->fetch();
+                $item = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($item) $itens = [$item];
                 break;
             case 'noticias_lista':
@@ -307,31 +324,27 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
                 $itens = getClassificadosAnuncios($pdo, $website_id, null, $limit);
                 break;
             default:
-                // Se não reconhecer, pula
                 continue 2;
         }
 
         if (empty($itens)) {
-            // Se não houver itens, remove o nó
-            $node->parentNode->removeChild($node);
+            if ($node->parentNode) {
+                $node->parentNode->removeChild($node);
+            }
             continue;
         }
 
-        // Verificar se é uma lista (termina com _lista) ou item único
+        // Verificar se é uma lista (termina com _lista)
         if (strpos($type, '_lista') !== false) {
-            // É uma lista: o primeiro filho é o template
+            // Procura o primeiro filho que seja elemento (template)
             $template = null;
-            
-            // Procura o primeiro elemento filho que não seja texto vazio
             foreach ($node->childNodes as $child) {
                 if ($child instanceof DOMElement) {
                     $template = $child;
                     break;
                 }
             }
-            
             if (!$template) {
-                // Se não encontrar template, cria um padrão
                 $template = $dom->createElement('div');
                 $template->setAttribute('class', 'item');
                 $template->appendChild($dom->createElement('h3', 'Título'));
@@ -342,28 +355,31 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
                 $node->removeChild($node->firstChild);
             }
 
-            // Para cada item, clonar o template e preencher
+            // Clona e preenche para cada item
             foreach ($itens as $item) {
                 $clone = $template->cloneNode(true);
                 preencherElementoComDados($clone, $item, $pdo, $website_id);
                 $node->appendChild($clone);
             }
         } else {
-            // É um item único: preencher o próprio nó com os dados do primeiro item
-            // Mas antes, precisamos limpar o conteúdo para não duplicar
+            // Item único: limpa e preenche o próprio nó
             while ($node->firstChild) {
                 $node->removeChild($node->firstChild);
             }
             preencherElementoComDados($node, $itens[0], $pdo, $website_id);
         }
 
-        // Remover o atributo data-dynamic para não ser processado novamente
+        // Remove os atributos dinâmicos
         $node->removeAttribute('data-dynamic');
         $node->removeAttribute('data-limit');
     }
 
-    return $dom->saveHTML();
+    $result = $dom->saveHTML();
+    // Remove o meta tag adicionado temporariamente
+    $result = preg_replace('/<meta http-equiv="Content-Type" content="text\/html; charset=utf-8">/', '', $result, 1);
+    return $result;
 }
+
 
 // ===== FUNÇÃO PARA PREENCHER ELEMENTO COM DADOS (RECURSIVA) =====
 
