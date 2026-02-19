@@ -1,121 +1,113 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Dynasty 8 - Imóveis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navbar + Carrossel</title>
+
+<!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  margin: 0;
+}
+
+/* CARROSSEL */
+.carousel {
+  width: 100%;
+  height: 60vh; /* altura responsiva */
+  min-height: 300px;
+  max-height: 600px;
+  overflow: hidden;
+  position: relative;
+}
+
+.slides {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  animation: slide 8s infinite;
+}
+
+.slides img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Animação */
+@keyframes slide {
+  0%   { transform: translateX(0); }
+  45%  { transform: translateX(0); }
+  50%  { transform: translateX(-50%); }
+  95%  { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+</style>
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100">
 
-<!-- HERO -->
-<header class="relative">
+<!-- NAVBAR -->
+<header class="bg-gradient-to-r from-[#4b250f] to-[#2a1408] py-4">
+  <div class="max-w-7xl mx-auto flex items-center justify-between px-6">
 
-  <!-- Fundo -->
-  <div class="absolute inset-0">
-    <img src="https://www.gta5.com.br/wp-content/uploads/2013/09/Screenshot-GTA-V-188.jpg"
-         class="w-full h-full object-cover">
-    <div class="absolute inset-0 bg-black/30"></div>
-  </div>
-
-  <div class="relative z-10 pt-10">
-
-    <!-- Logo -->
-    <div class="flex justify-center mb-4">
-      <img src="https://media.discordapp.net/attachments/1409263056197783623/1473803760575709277/latest.png?ex=69978a36&is=699638b6&hm=166b2f5a6f913eb2bd9b4503b7c831debb0bcea2317aa86e1fe376c3f0cbd4f2&=&format=webp&quality=lossless"
-           class="h-24">
+    <!-- LOGO -->
+    <div class="flex items-center">
+      <img src="SUA-LOGO-AQUI.png" alt="Logo" class="h-12 md:h-14">
     </div>
 
-    <!-- Categorias (centralizada e mais próxima dos filtros) -->
-    <div class="flex justify-center mt-1">
-      <div class="bg-yellow-400 shadow-md font-bold text-sm flex">
-        <button class="bg-green-700 text-white px-8 py-3">TODAS</button>
-        <button class="px-8 py-3 hover:bg-yellow-300">ALTO PADRÃO</button>
-        <button class="px-8 py-3 hover:bg-yellow-300">MÉDIAS</button>
-        <button class="px-8 py-3 hover:bg-yellow-300">POPULARES</button>
-        <button class="px-8 py-3 hover:bg-yellow-300">NOVAS</button>
-      </div>
+    <!-- MENU DESKTOP -->
+    <nav class="hidden md:flex space-x-8 text-white text-lg font-semibold">
+      <a href="#" class="hover:text-yellow-400 transition">Início</a>
+      <a href="#" class="hover:text-yellow-400 transition">Cupons</a>
+      <a href="#" class="hover:text-yellow-400 transition">Cardápio</a>
+      <a href="#" class="hover:text-yellow-400 transition">App BK</a>
+      <a href="#" class="hover:text-yellow-400 transition">Clube BK</a>
+      <a href="#" class="hover:text-yellow-400 transition">Delivery</a>
+    </nav>
+
+    <!-- ENTRAR DESKTOP -->
+    <div class="hidden md:block">
+      <a href="#" class="text-white font-semibold hover:text-yellow-400 transition">
+        Entrar
+      </a>
     </div>
 
-<!-- Faixa Verde + Filtros + Serrilhado -->
-<div class="bg-green-800 text-white text-xs font-semibold mt-0">
+    <!-- BOTÃO MOBILE -->
+    <button id="menuBtn" class="md:hidden text-white text-2xl">
+      ☰
+    </button>
 
-  <!-- Filtros -->
-  <div class="max-w-7xl mx-auto flex justify-center gap-6 py-2">
-    <span class="opacity-80">PREÇO</span>
-    <span>MAIOR PREÇO</span>
-    <span class="opacity-80">LOCALIZAÇÃO</span>
-    <span>CENTRO</span>
-    <span>EAST LS</span>
-    <span>WEST LS</span>
-    <span>NORTH LS</span>
-    <span>SOUTH LS</span>
-    <span>BLAINE COUNTY</span>
   </div>
 
-  <!-- Serrilhado corrigido (100% largura e menor) -->
-  <div class="h-1 w-full"
-       style="
-         background:
-         repeating-linear-gradient(
-           -45deg,
-           white 0px,
-           white 6px,
-           transparent 6px,
-           transparent 12px
-         );
-       ">
+  <!-- MENU MOBILE -->
+  <div id="mobileMenu" class="hidden md:hidden bg-[#2a1408] text-white px-6 pb-4 space-y-3 font-semibold">
+    <a href="#" class="block hover:text-yellow-400">Início</a>
+    <a href="#" class="block hover:text-yellow-400">Cupons</a>
+    <a href="#" class="block hover:text-yellow-400">Cardápio</a>
+    <a href="#" class="block hover:text-yellow-400">App BK</a>
+    <a href="#" class="block hover:text-yellow-400">Clube BK</a>
+    <a href="#" class="block hover:text-yellow-400">Delivery</a>
+    <a href="#" class="block hover:text-yellow-400">Entrar</a>
   </div>
+</header>
 
+<!-- CARROSSEL -->
+<div class="carousel">
+  <div class="slides">
+    <img src="SUA-IMAGEM-1.jpg" alt="Banner 1">
+    <img src="SUA-IMAGEM-2.jpg" alt="Banner 2">
+  </div>
 </div>
 
-
-
-<!-- ÁREA BRANCA -->
-<section class="bg-white w-full pt-6 pb-10">
-
-  <div class="max-w-7xl mx-auto px-6 grid grid-cols-3 gap-6">
-
-    <!-- LISTA -->
-    <div class="col-span-1 space-y-6">
-
-      <!-- Card -->
-      <div class="border border-gray-200 shadow-sm">
-
-        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
-             class="h-44 w-full object-cover">
-
-        <!-- Faixa melhorada -->
-        <div class="bg-yellow-400 text-black font-extrabold text-center py-3 text-base tracking-wide">
-          INTERIOR REMODELADO
-        </div>
-
-        <div class="p-4">
-          <h3 class="font-bold text-lg">Eclipse Towers, Apto 3</h3>
-          <p class="text-3xl font-extrabold text-gray-800">$500,000</p>
-          <p class="text-sm text-gray-500 mb-4">Área norte de Los Santos</p>
-
-          <button class="bg-green-600 text-white px-6 py-2 rounded font-bold hover:bg-green-700 transition">
-            COMPRAR
-          </button>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- IMAGEM PRINCIPAL -->
-    <div class="col-span-2 border border-gray-200 shadow-sm p-4">
-      <h2 class="text-xl font-bold text-gray-800 mb-4">IMAGEM DO IMÓVEL</h2>
-      <div class="w-full h-[500px] overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1600607687644-c7171b42498a"
-             class="w-full h-full object-cover">
-      </div>
-    </div>
-
-  </div>
-
-</section>
+<!-- SCRIPT MENU MOBILE -->
+<script>
+document.getElementById('menuBtn').addEventListener('click', function() {
+  document.getElementById('mobileMenu').classList.toggle('hidden');
+});
+</script>
 
 </body>
 </html>
