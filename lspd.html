@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Los Santos Police Department</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-900">
+
+  <!-- HEADER -->
+  <header class="bg-blue-900 text-white shadow-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between p-4">
+      <div class="flex items-center gap-3">
+        <img src="https://i.imgur.com/n4MhqfG.png" alt="LSPD Logo" class="w-16 h-16 object-contain">
+        <h1 class="text-2xl font-bold">Los Santos Police Department</h1>
+      </div>
+      <nav class="space-x-6">
+        <a href="#home" class="hover:text-gray-300 transition">Início</a>
+        <a href="#noticias" class="hover:text-gray-300 transition">Notícias</a>
+        <a href="#blog" class="hover:text-gray-300 transition">Blog</a>
+        <a href="#contato" class="hover:text-gray-300 transition">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="home" class="relative h-[80vh] bg-blue-800">
+    <img src="https://images.unsplash.com/photo-1579118521438-90f62b6d5d2b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5Njc4NHwwfDF8c2VhcmNofDJ8fHBvbGljZXMlMjBsYXIlMjBzYW50b3N8ZW58MHx8fHwxNjk3Nzg3ODg1&ixlib=rb-4.0.3&q=80&w=1080" 
+         alt="Policiais LSPD" 
+         class="absolute inset-0 w-full h-full object-cover opacity-60">
+    <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
+      <h2 class="text-4xl md:text-5xl font-bold mb-4">Protegendo Los Santos</h2>
+      <p class="text-lg md:text-xl max-w-2xl">Notícias, blogs e informações da força policial da cidade de Los Santos.</p>
+      <a href="#noticias" class="mt-6 inline-block bg-yellow-400 text-blue-900 font-bold px-6 py-3 rounded hover:bg-yellow-500 transition">Confira as notícias</a>
+    </div>
+  </section>
+
+  <!-- NOTÍCIAS / BLOGS -->
+  <section id="noticias" class="max-w-7xl mx-auto px-6 py-16">
+    <h2 class="text-3xl font-bold mb-8 text-blue-900">Últimas Notícias</h2>
+    <div class="grid md:grid-cols-3 gap-8">
+      
+      <!-- Card 1 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+        <img src="https://images.unsplash.com/photo-1598605699673-637e3a228a8d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Notícia 1" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <h3 class="font-bold text-xl mb-2">Operação de Segurança Concluída</h3>
+          <p class="text-gray-700 text-sm mb-2">A LSPD finalizou com sucesso a operação de segurança no centro de Los Santos, garantindo a proteção dos cidadãos.</p>
+          <a href="#" class="text-blue-900 font-bold hover:underline">Leia mais →</a>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+        <img src="https://images.unsplash.com/photo-1590402495804-0ee11f170c57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Notícia 2" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <h3 class="font-bold text-xl mb-2">Treinamento da Força Tática</h3>
+          <p class="text-gray-700 text-sm mb-2">Os policiais passaram por treinamento intensivo para aprimorar suas técnicas de intervenção e segurança pública.</p>
+          <a href="#" class="text-blue-900 font-bold hover:underline">Leia mais →</a>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+        <img src="https://images.unsplash.com/photo-1590402495788-f60e9adf5f18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Notícia 3" class="w-full h-48 object-cover">
+        <div class="p-4">
+          <h3 class="font-bold text-xl mb-2">Campanha de Conscientização</h3>
+          <p class="text-gray-700 text-sm mb-2">A LSPD iniciou uma campanha de conscientização sobre segurança no trânsito para reduzir acidentes na cidade.</p>
+          <a href="#" class="text-blue-900 font-bold hover:underline">Leia mais →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BLOGS -->
+  <section id="blog" class="bg-gray-200 py-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-3xl font-bold mb-8 text-blue-900">Blog da LSPD</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Blog Post 1 -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1590402495774-b3a7c7b93556?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Blog 1" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold text-xl mb-2">Dicas de Segurança para Cidadãos</h3>
+            <p class="text-gray-700 text-sm mb-2">Como se proteger e agir corretamente em situações de risco em Los Santos.</p>
+            <a href="#" class="text-blue-900 font-bold hover:underline">Leia mais →</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 2 -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1590402495797-16b73a4f911c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Blog 2" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold text-xl mb-2">Histórias de Policiais da Cidade</h3>
+            <p class="text-gray-700 text-sm mb-2">Depoimentos de oficiais sobre seu trabalho diário e desafios enfrentados na cidade.</p>
+            <a href="#" class="text-blue-900 font-bold hover:underline">Leia mais →</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 3 -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1590402495783-0b8d9d1a43e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Blog 3" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold text-xl mb-2">Eventos Comunitários com a LSPD</h3>
+            <p class="text-gray-700 text-sm mb-2">A LSPD organiza eventos para engajar a comunidade e fortalecer a confiança entre polícia e cidadãos.</p>
+            <a href="#" class="text-blue-900 font-bold hover:underline">Leia mais →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RODAPÉ -->
+  <footer class="bg-blue-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between">
+      <p>&copy; 2026 Los Santos Police Department. Todos os direitos reservados.</p>
+      <div class="space-x-4 mt-4 md:mt-0">
+        <a href="#" class="hover:underline">Política de Privacidade</a>
+        <a href="#" class="hover:underline">Contato</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
