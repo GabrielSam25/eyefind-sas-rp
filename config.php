@@ -271,34 +271,20 @@ function criarSlug($texto) {
 // ===== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO (VERSÃO FINAL COM TEMPLATES) =====
 
 function renderDynamicBlocks($html, $website_id, $pdo) {
-    if (empty($html)) {
-        return '';
-    }
-    
     $dom = new DOMDocument();
     libxml_use_internal_errors(true);
-    
-    // Garantir codificação UTF-8
-    $htmlWithMeta = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $html;
-    @$dom->loadHTML($htmlWithMeta, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    @$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     libxml_clear_errors();
 
     $xpath = new DOMXPath($dom);
     $nodes = $xpath->query("//*[@data-dynamic]");
-    
-    // Coletar apenas nós do tipo elemento
-    $elements = [];
-    foreach ($nodes as $node) {
-        if ($node->nodeType === XML_ELEMENT_NODE) {
-            $elements[] = $node;
-        }
-    }
 
-    foreach ($elements as $node) {
+    foreach ($nodes as $node) {
         $type = $node->getAttribute('data-dynamic');
         $limit = $node->getAttribute('data-limit') ?: 5;
+        $class = $node->getAttribute('class');
 
-        // Buscar dados conforme o tipo
+        // Obter dados conforme o tipo
         $itens = [];
         switch ($type) {
             case 'blog_posts':
@@ -307,7 +293,7 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
             case 'blog_destaque':
                 $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE website_id = ? AND status = 'publicado' ORDER BY views DESC LIMIT 1");
                 $stmt->execute([$website_id]);
-                $item = $stmt->fetch(PDO::FETCH_ASSOC);
+                $item = $stmt->fetch();
                 if ($item) $itens = [$item];
                 break;
             case 'noticias_lista':
@@ -321,95 +307,94 @@ function renderDynamicBlocks($html, $website_id, $pdo) {
                 $itens = getClassificadosAnuncios($pdo, $website_id, null, $limit);
                 break;
             default:
+                // Se não reconhecer, pula
                 continue 2;
         }
 
-        // Se não há itens, remove o bloco inteiro
         if (empty($itens)) {
-            if ($node->parentNode) {
-                $node->parentNode->removeChild($node);
-            }
+            // Se não houver itens, remove o nó
+            $node->parentNode->removeChild($node);
             continue;
         }
 
-        // Processar listas ou itens únicos
+        // Verificar se é uma lista (termina com _lista) ou item único
         if (strpos($type, '_lista') !== false) {
-            // Encontrar o primeiro elemento filho que servirá de template
+            // É uma lista: o primeiro filho é o template
             $template = null;
+            
+            // Procura o primeiro elemento filho que não seja texto vazio
             foreach ($node->childNodes as $child) {
-                if ($child->nodeType === XML_ELEMENT_NODE) {
+                if ($child instanceof DOMElement) {
                     $template = $child;
                     break;
                 }
             }
+            
             if (!$template) {
+                // Se não encontrar template, cria um padrão
                 $template = $dom->createElement('div');
                 $template->setAttribute('class', 'item');
                 $template->appendChild($dom->createElement('h3', 'Título'));
             }
 
-            // Limpar conteúdo original
+            // Remove todo o conteúdo original
             while ($node->firstChild) {
                 $node->removeChild($node->firstChild);
             }
 
-            // Clonar e preencher para cada item
+            // Para cada item, clonar o template e preencher
             foreach ($itens as $item) {
                 $clone = $template->cloneNode(true);
                 preencherElementoComDados($clone, $item, $pdo, $website_id);
                 $node->appendChild($clone);
             }
         } else {
-            // Item único: limpar e preencher o próprio nó
+            // É um item único: preencher o próprio nó com os dados do primeiro item
+            // Mas antes, precisamos limpar o conteúdo para não duplicar
             while ($node->firstChild) {
                 $node->removeChild($node->firstChild);
             }
             preencherElementoComDados($node, $itens[0], $pdo, $website_id);
         }
 
-        // Remover atributos dinâmicos para não processar novamente
+        // Remover o atributo data-dynamic para não ser processado novamente
         $node->removeAttribute('data-dynamic');
         $node->removeAttribute('data-limit');
     }
 
-    $result = $dom->saveHTML();
-    // Remover o meta temporário
-    $result = preg_replace('/<meta http-equiv="Content-Type" content="text\/html; charset=utf-8">/', '', $result, 1);
-    return $result;
+    return $dom->saveHTML();
 }
 
-// ===== FUNÇÃO AUXILIAR CORRIGIDA (COM VERIFICAÇÃO DE NODE TYPE) =====
+// ===== FUNÇÃO PARA PREENCHER ELEMENTO COM DADOS (RECURSIVA) =====
 
 function preencherElementoComDados($elemento, $dados, $pdo, $website_id) {
-    if ($elemento->nodeType !== XML_ELEMENT_NODE) {
-        return;
-    }
-    
+    // Processa o próprio elemento
     $classAttr = $elemento->getAttribute('class');
     $classes = explode(' ', $classAttr);
     
     foreach ($classes as $classe) {
         $classe = trim($classe);
+        
         switch ($classe) {
             case 'dynamic-titulo':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
-                $elemento->appendChild($elemento->ownerDocument->createTextNode(htmlspecialchars($dados['titulo'] ?? '')));
+                $elemento->nodeValue = htmlspecialchars($dados['titulo'] ?? '');
                 break;
+                
             case 'dynamic-conteudo':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
-                if (!empty($dados['conteudo'])) {
-                    $fragment = $elemento->ownerDocument->createDocumentFragment();
-                    @$fragment->appendXML('<![CDATA[' . $dados['conteudo'] . ']]>');
-                    if ($fragment->hasChildNodes()) {
-                        $elemento->appendChild($fragment);
-                    }
+                $conteudo = $dados['conteudo'] ?? '';
+                while ($elemento->firstChild) {
+                    $elemento->removeChild($elemento->firstChild);
                 }
+                $fragment = $elemento->ownerDocument->createDocumentFragment();
+                @$fragment->appendXML($conteudo);
+                $elemento->appendChild($fragment);
                 break;
+                
             case 'dynamic-resumo':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
                 $resumo = $dados['resumo'] ?? substr(strip_tags($dados['conteudo'] ?? ''), 0, 150) . '...';
-                $elemento->appendChild($elemento->ownerDocument->createTextNode(htmlspecialchars($resumo)));
+                $elemento->nodeValue = htmlspecialchars($resumo);
                 break;
+                
             case 'dynamic-imagem':
                 if ($elemento->nodeName === 'img') {
                     $imagem = $dados['imagem'] ?? 'https://via.placeholder.com/800x400';
@@ -417,76 +402,87 @@ function preencherElementoComDados($elemento, $dados, $pdo, $website_id) {
                     $elemento->setAttribute('alt', htmlspecialchars($dados['titulo'] ?? 'Imagem'));
                 }
                 break;
+                
             case 'dynamic-data':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
                 $data = !empty($dados['data_publicacao']) ? date('d/m/Y', strtotime($dados['data_publicacao'])) : date('d/m/Y');
-                $elemento->appendChild($elemento->ownerDocument->createTextNode($data));
+                $elemento->nodeValue = $data;
                 break;
+                
             case 'dynamic-data-completa':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
                 $data = !empty($dados['data_publicacao']) ? date('l, F j, Y', strtotime($dados['data_publicacao'])) : date('l, F j, Y');
-                $elemento->appendChild($elemento->ownerDocument->createTextNode($data));
+                $elemento->nodeValue = $data;
                 break;
+                
             case 'dynamic-autor':
             case 'dynamic-autor-nome':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
                 $autor = getNoticiaAutor($pdo, $dados['autor_id'] ?? null);
-                $elemento->appendChild($elemento->ownerDocument->createTextNode(htmlspecialchars($autor['nome'])));
+                $elemento->nodeValue = htmlspecialchars($autor['nome']);
                 break;
+                
             case 'dynamic-categoria':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
                 $categoria = $dados['categoria'] ?? 'Geral';
-                $elemento->appendChild($elemento->ownerDocument->createTextNode(htmlspecialchars($categoria)));
+                $elemento->nodeValue = htmlspecialchars($categoria);
                 break;
+                
             case 'dynamic-views':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
                 $views = isset($dados['views']) ? number_format($dados['views']) : '0';
-                $elemento->appendChild($elemento->ownerDocument->createTextNode($views));
+                $elemento->nodeValue = $views;
                 break;
+                
             case 'dynamic-ano':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
-                $elemento->appendChild($elemento->ownerDocument->createTextNode(date('Y')));
+                $elemento->nodeValue = date('Y');
                 break;
+                
             case 'dynamic-link':
                 if ($elemento->nodeName === 'a' && isset($dados['id'])) {
                     $tipo = getTipoSite($pdo, $website_id);
                     switch ($tipo) {
-                        case 'blog': $link = "ver_post.php?website_id=$website_id&post_id=" . $dados['id']; break;
-                        case 'noticias': $link = "ver_noticia.php?website_id=$website_id&noticia_id=" . $dados['id']; break;
-                        case 'classificados': $link = "ver_anuncio.php?website_id=$website_id&anuncio_id=" . $dados['id']; break;
-                        default: $link = "#";
+                        case 'blog':
+                            $link = "ver_post.php?website_id=$website_id&post_id=" . $dados['id'];
+                            break;
+                        case 'noticias':
+                            $link = "ver_noticia.php?website_id=$website_id&noticia_id=" . $dados['id'];
+                            break;
+                        case 'classificados':
+                            $link = "ver_anuncio.php?website_id=$website_id&anuncio_id=" . $dados['id'];
+                            break;
+                        default:
+                            $link = "#";
                     }
                     $elemento->setAttribute('href', $link);
                 }
                 break;
+                
             case 'dynamic-preco':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
                 if (isset($dados['preco'])) {
-                    $preco = 'R$ ' . number_format($dados['preco'], 2, ',', '.');
-                    $elemento->appendChild($elemento->ownerDocument->createTextNode($preco));
+                    $preco = 'US ' . number_format($dados['preco'], 2, ',', '.');
+                    $elemento->nodeValue = $preco;
                 }
                 break;
+                
             case 'dynamic-contato':
-            case 'dynamic-telefone':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
-                $campo = str_replace('dynamic-', '', $classe);
-                $valor = $dados[$campo] ?? '';
-                $elemento->appendChild($elemento->ownerDocument->createTextNode(htmlspecialchars($valor)));
+                $elemento->nodeValue = htmlspecialchars($dados['contato'] ?? '');
                 break;
+                
+            case 'dynamic-telefone':
+                $elemento->nodeValue = htmlspecialchars($dados['telefone'] ?? '');
+                break;
+                
             case 'dynamic-email':
-                while ($elemento->firstChild) $elemento->removeChild($elemento->firstChild);
-                $email = $dados['email'] ?? '';
                 if ($elemento->nodeName === 'a') {
+                    $email = $dados['email'] ?? '';
                     $elemento->setAttribute('href', 'mailto:' . $email);
+                    $elemento->nodeValue = $email;
+                } else {
+                    $elemento->nodeValue = htmlspecialchars($dados['email'] ?? '');
                 }
-                $elemento->appendChild($elemento->ownerDocument->createTextNode(htmlspecialchars($email)));
                 break;
         }
     }
 
-    // Processar filhos recursivamente
+    // Processa os filhos recursivamente
     foreach ($elemento->childNodes as $filho) {
-        if ($filho->nodeType === XML_ELEMENT_NODE) {
+        if ($filho instanceof DOMElement) {
             preencherElementoComDados($filho, $dados, $pdo, $website_id);
         }
     }
