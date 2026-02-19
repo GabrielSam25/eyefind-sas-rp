@@ -1,119 +1,94 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Navbar + Carrossel</title>
-
-<!-- Tailwind CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-body {
-  margin: 0;
-}
-
-/* CARROSSEL */
-.carousel {
-  width: 100%;
-  height: 60vh; /* altura responsiva */
-  min-height: 300px;
-  max-height: 600px;
-  overflow: hidden;
-  position: relative;
-}
-
-.slides {
-  display: flex;
-  width: 200%;
-  height: 100%;
-  animation: slide 8s infinite;
-}
-
-.slides img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Animação */
-@keyframes slide {
-  0%   { transform: translateX(0); }
-  45%  { transform: translateX(0); }
-  50%  { transform: translateX(-50%); }
-  95%  { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BurgerShot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-50">
 
-<!-- NAVBAR -->
-<header class="bg-gradient-to-r from-[#4b250f] to-[#2a1408] py-4">
-  <div class="max-w-7xl mx-auto flex items-center justify-between px-6">
+  <div class="min-h-screen flex flex-col">
 
-    <!-- LOGO -->
-    <div class="flex items-center">
-      <img src="SUA-LOGO-AQUI.png" alt="Logo" class="h-12 md:h-14">
-    </div>
+    <!-- HEADER -->
+    <header class="bg-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
 
-    <!-- MENU DESKTOP -->
-    <nav class="hidden md:flex space-x-8 text-white text-lg font-semibold">
-      <a href="#" class="hover:text-yellow-400 transition">Início</a>
-      <a href="#" class="hover:text-yellow-400 transition">Cupons</a>
-      <a href="#" class="hover:text-yellow-400 transition">Cardápio</a>
-      <a href="#" class="hover:text-yellow-400 transition">App BK</a>
-      <a href="#" class="hover:text-yellow-400 transition">Clube BK</a>
-      <a href="#" class="hover:text-yellow-400 transition">Delivery</a>
-    </nav>
+        <!-- Logo -->
+        <img src="BurgerShot-HDLogo.png" class="h-12 w-auto" />
 
-    <!-- ENTRAR DESKTOP -->
-    <div class="hidden md:block">
-      <a href="#" class="text-white font-semibold hover:text-yellow-400 transition">
-        Entrar
-      </a>
-    </div>
+        <!-- Menu Desktop -->
+        <nav class="hidden md:flex gap-8 font-semibold text-gray-700">
+          <a href="#" class="hover:text-red-600 transition">Início</a>
+          <a href="#" class="hover:text-red-600 transition">Cardápio</a>
+          <a href="#" class="hover:text-red-600 transition">Cupons</a>
+          <a href="#" class="hover:text-red-600 transition">Delivery</a>
+        </nav>
 
-    <!-- BOTÃO MOBILE -->
-    <button id="menuBtn" class="md:hidden text-white text-2xl">
-      ☰
-    </button>
+        <!-- Botão -->
+        <a href="#" class="hidden md:inline-block bg-red-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-red-700 transition">
+          Contato
+        </a>
 
-  </div>
+        <!-- Botão Mobile -->
+        <button class="md:hidden text-2xl">☰</button>
 
-  <!-- MENU MOBILE -->
-  <div id="mobileMenu" class="hidden md:hidden bg-[#2a1408] text-white px-6 pb-4 space-y-3 font-semibold">
-    <a href="#" class="block hover:text-yellow-400">Início</a>
-    <a href="#" class="block hover:text-yellow-400">Cupons</a>
-    <a href="#" class="block hover:text-yellow-400">Cardápio</a>
-    <a href="#" class="block hover:text-yellow-400">App BK</a>
-    <a href="#" class="block hover:text-yellow-400">Clube BK</a>
-    <a href="#" class="block hover:text-yellow-400">Delivery</a>
-    <a href="#" class="block hover:text-yellow-400">Entrar</a>
-  </div>
-</header>
+      </div>
+    </header>
 
-<!-- CARROSSEL -->
-<div class="carousel">
-  <div class="slides">
-    <div class="w-full">
-    <div class="flex flex-col md:flex-row">
 
-        <img src="https://media.discordapp.net/attachments/1409263056197783623/1473822302033416192/ASDASD.png?ex=69979b7b&is=699649fb&hm=97c8cedfc17f472cba16e681af2740cd6a61c5f9ad7c8b26d5527b3f31414bf9&=&format=webp&quality=lossless"
-            class="w-full md:w-1/2 h-auto" />
+    <!-- CAROUSEL -->
+    <div class="relative w-full overflow-hidden bg-black">
 
-        <img src="ASDASD.png"
-            class="w-full md:w-1/2 h-auto" />
+      <!-- Slides -->
+      <div id="carousel" class="flex transition-transform duration-700">
 
+        <div class="min-w-full flex justify-center">
+          <img src="a1.png" class="w-full h-auto max-h-[600px] object-contain">
         </div>
+
+        <div class="min-w-full flex justify-center">
+          <img src="ASDASD.png" class="w-full h-auto max-h-[600px] object-contain">
+        </div>
+
+      </div>
+
+      <!-- Botões -->
+      <button onclick="prevSlide()" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/70 px-3 py-2 rounded-full">
+        ❮
+      </button>
+
+      <button onclick="nextSlide()" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/70 px-3 py-2 rounded-full">
+        ❯
+      </button>
+
     </div>
 
-<!-- SCRIPT MENU MOBILE -->
+  </div>
+
+
 <script>
-document.getElementById('menuBtn').addEventListener('click', function() {
-  document.getElementById('mobileMenu').classList.toggle('hidden');
-});
+let index = 0;
+const carousel = document.getElementById("carousel");
+const totalSlides = carousel.children.length;
+
+function updateSlide() {
+  carousel.style.transform = `translateX(-${index * 100}%)`;
+}
+
+function nextSlide() {
+  index = (index + 1) % totalSlides;
+  updateSlide();
+}
+
+function prevSlide() {
+  index = (index - 1 + totalSlides) % totalSlides;
+  updateSlide();
+}
+
+// Auto play
+setInterval(nextSlide, 5000);
 </script>
 
 </body>
