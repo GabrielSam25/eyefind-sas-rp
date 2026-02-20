@@ -11,7 +11,7 @@ $pagina = $_GET['pagina'] ?? 'inbox';
 $busca = $_GET['busca'] ?? '';
 $email_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// Buscar pastas do usuário (para o sidebar)
+// Buscar pastas do usuário
 $stmt = $pdo->prepare("SELECT * FROM email_pastas WHERE usuario_id = ? ORDER BY ordem");
 $stmt->execute([$usuario['id']]);
 $pastas = $stmt->fetchAll();
@@ -63,10 +63,10 @@ if ($email_id) {
         FROM emails e
         JOIN usuarios r ON e.remetente_id = r.id
         JOIN usuarios d ON e.destinatario_id = d.id
-        LEFT JOIN email_estrelas es ON e.id = es.email_id AND es.usuario_id = d.id
+        LEFT JOIN email_estrelas es ON e.id = es.email_id AND es.usuario_id = ?
         WHERE e.id = ? AND (e.destinatario_id = ? OR e.remetente_id = ?)
     ");
-    $stmt->execute([$email_id, $usuario['id'], $usuario['id']]);
+    $stmt->execute([$usuario['id'], $email_id, $usuario['id'], $usuario['id']]);
     $emailVisualizado = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($emailVisualizado) {
@@ -102,13 +102,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
         
         if (!isset($resultado['erro'])) {
             // Recarregar a página para mostrar a nova resposta
-            header('Location: email.php?pagina=' . $pagina . '&id=' . $email_id);
+            header('Location: email.php?pagina=' . $pagina . '&id=' . $email_id . '&msg=resposta_enviada');
             exit;
         } else {
             $erro_resposta = $resultado['erro'];
         }
     } else {
         $erro_resposta = 'Preencha todos os campos';
+    }
+}
+
+// Mensagem de sucesso
+$mensagem_sucesso = '';
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] == 'resposta_enviada') {
+        $mensagem_sucesso = 'Resposta enviada com sucesso!';
     }
 }
 ?>
@@ -121,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
-    <!-- CKEditor - Carregar apenas se estiver visualizando um email -->
+    <!-- CKEditor - apenas se estiver visualizando um email -->
     <?php if ($emailVisualizado): ?>
     <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
     <?php endif; ?>
@@ -158,19 +166,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
         .email-content p {
             margin-bottom: 1rem;
         }
-        .thread-item {
-            border-left: 2px solid #e5e7eb;
-            margin-left: 20px;
-            padding-left: 20px;
+        .thread-message {
+            transition: all 0.2s;
         }
-        .thread-item:last-child {
-            border-left-color: #067191;
+        .thread-message:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .resposta-rapida {
             background-color: #f9fafb;
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
     </style>
 </head>
@@ -248,7 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                     <i class="far fa-trash-alt"></i> Lixeira
                 </a>
                 
-                <!-- Pastas (categorias) -->
+                <!-- Pastas -->
                 <div class="border-t border-gray-200 my-4 pt-4">
                     <h3 class="text-xs uppercase text-gray-400 font-bold mb-2 px-3">Pastas</h3>
                     <?php if (empty($pastas)): ?>
@@ -279,19 +292,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                         </a>
                         <div class="flex gap-2">
                             <button onclick="toggleStar(<?php echo $emailVisualizado['id']; ?>)" 
-                                    class="text-gray-400 hover:text-yellow-400 transition p-2" 
+                                    class="text-gray-400 hover:text-yellow-400 transition p-2 <?php echo $emailVisualizado['tem_estrela'] ? 'star-active' : ''; ?>" 
                                     id="starBtn">
-                                <i class="fa<?php echo $emailVisualizado['tem_estrela'] ? 's' : 'r'; ?> fa-star <?php echo $emailVisualizado['tem_estrela'] ? 'text-yellow-400' : ''; ?> text-xl"></i>
+                                <i class="fa<?php echo $emailVisualizado['tem_estrela'] ? 's' : 'r'; ?> fa-star text-xl"></i>
                             </button>
                             
-                            <?php if ($emailVisualizado['destinatario_id'] == $usuario['id']): ?>
-                                <button onclick="moverLixeira(<?php echo $emailVisualizado['id']; ?>)" 
-                                        class="text-red-600 hover:text-red-800 transition p-2">
-                                    <i class="fas fa-trash-alt text-xl"></i>
-                                </button>
-                            <?php endif; ?>
+                            <button onclick="moverLixeira(<?php echo $emailVisualizado['id']; ?>)" 
+                                    class="text-red-600 hover:text-red-800 transition p-2">
+                                <i class="fas fa-trash-alt text-xl"></i>
+                            </button>
                         </div>
                     </div>
+                    
+                    <!-- Mensagem de sucesso -->
+                    <?php if ($mensagem_sucesso): ?>
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 animate-pulse">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <?php echo $mensagem_sucesso; ?>
+                        </div>
+                    <?php endif; ?>
                     
                     <!-- Assunto da conversa -->
                     <h1 class="text-2xl font-bold mb-6 text-eyefind-dark">
@@ -307,8 +326,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                     <div class="space-y-6 mb-8">
                         <?php foreach ($threadEmails as $index => $msg): 
                             $isRemetente = $msg['remetente_id'] == $usuario['id'];
+                            $isDestinatario = $msg['destinatario_id'] == $usuario['id'];
                         ?>
-                            <div class="border rounded-lg p-4 <?php echo $isRemetente ? 'bg-blue-50 border-blue-200' : 'bg-white'; ?>">
+                            <div class="thread-message border rounded-lg p-4 <?php echo $isRemetente ? 'bg-blue-50 border-blue-200' : 'bg-white'; ?>" 
+                                 id="msg-<?php echo $msg['id']; ?>">
                                 <div class="flex items-start gap-3">
                                     <div class="w-10 h-10 <?php echo $isRemetente ? 'bg-green-600' : 'bg-eyefind-blue'; ?> rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                                         <?php echo strtoupper(substr($msg['remetente_nome'], 0, 1)); ?>
@@ -322,6 +343,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                                                 </span>
                                                 <?php if ($isRemetente): ?>
                                                     <span class="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Você</span>
+                                                <?php endif; ?>
+                                                <?php if ($msg['id'] == $email_id): ?>
+                                                    <span class="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Atual</span>
                                                 <?php endif; ?>
                                             </div>
                                             <span class="text-xs text-gray-400">
@@ -341,10 +365,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                                                 <div class="flex flex-wrap gap-2">
                                                     <?php foreach ($anexos as $anexo): ?>
                                                         <a href="<?php echo htmlspecialchars($anexo['caminho_arquivo']); ?>" 
-                                                           class="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200"
+                                                           class="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200 flex items-center gap-1"
                                                            download>
-                                                            <i class="fas fa-file mr-1"></i>
+                                                            <i class="fas fa-file"></i>
                                                             <?php echo htmlspecialchars($anexo['nome_arquivo']); ?>
+                                                            <span class="text-gray-400">(<?php echo round($anexo['tamanho'] / 1024, 1); ?> KB)</span>
                                                         </a>
                                                     <?php endforeach; ?>
                                                 </div>
@@ -364,6 +389,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                         
                         <?php if (isset($erro_resposta)): ?>
                             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
                                 <?php echo $erro_resposta; ?>
                             </div>
                         <?php endif; ?>
@@ -377,13 +403,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                             
                             <div class="mb-4">
                                 <label class="block text-sm font-bold mb-2">Sua resposta:</label>
-                                <textarea name="corpo" id="resposta_editor" rows="8" class="w-full border rounded"></textarea>
+                                <textarea name="corpo" id="resposta_editor" rows="8" class="w-full border rounded"><?php echo isset($_POST['corpo']) ? htmlspecialchars($_POST['corpo']) : ''; ?></textarea>
                             </div>
                             
                             <div class="flex justify-between items-center">
                                 <div class="text-sm text-gray-500">
-                                    <i class="far fa-clock mr-1"></i>
-                                    Respondendo a: <?php echo htmlspecialchars($emailVisualizado['remetente_nome']); ?>
+                                    <i class="far fa-user mr-1"></i>
+                                    Respondendo a: <span class="font-bold"><?php echo htmlspecialchars($emailVisualizado['remetente_nome']); ?></span>
                                 </div>
                                 <div class="flex gap-2">
                                     <button type="button" onclick="cancelarResposta()" 
@@ -401,16 +427,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                     </div>
                 </div>
                 
-                <!-- Inicialização do CKEditor (agora dentro do bloco condicional) -->
+                <!-- Inicialização do CKEditor (com as mesmas opções do compor_email) -->
                 <script>
                     CKEDITOR.replace('resposta_editor', {
-                        height: 200,
+                        height: 250,
                         toolbar: [
-                            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
-                            { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
+                            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
                             { name: 'links', items: ['Link', 'Unlink'] },
-                            { name: 'styles', items: ['Format'] },
-                            { name: 'colors', items: ['TextColor'] }
+                            { name: 'styles', items: ['Format', 'Font', 'FontSize'] },
+                            { name: 'colors', items: ['TextColor', 'BGColor'] },
+                            { name: 'tools', items: ['Maximize'] }
                         ]
                     });
                 </script>
@@ -494,14 +521,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                     const icon = document.querySelector('#starBtn i');
                     if (icon) {
                         if (data.estrela) {
-                            icon.classList.remove('far', 'text-gray-400');
-                            icon.classList.add('fas', 'text-yellow-400');
+                            icon.classList.remove('far');
+                            icon.classList.add('fas', 'star-active');
                         } else {
-                            icon.classList.remove('fas', 'text-yellow-400');
-                            icon.classList.add('far', 'text-gray-400');
+                            icon.classList.remove('fas', 'star-active');
+                            icon.classList.add('far');
                         }
                     }
-                });
+                    
+                    // Atualizar também na lista se existir
+                    const listIcon = document.querySelector(`a[href*="id=${emailId}"] i.fa-star`);
+                    if (listIcon) {
+                        if (data.estrela) {
+                            listIcon.classList.remove('far', 'text-gray-400');
+                            listIcon.classList.add('fas', 'star-active');
+                        } else {
+                            listIcon.classList.remove('fas', 'star-active');
+                            listIcon.classList.add('far', 'text-gray-400');
+                        }
+                    }
+                })
+                .catch(error => console.error('Erro:', error));
         }
 
         function toggleStarList(emailId, element) {
@@ -518,7 +558,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                         icon.classList.remove('fas', 'star-active');
                         icon.classList.add('far', 'text-gray-400');
                     }
-                });
+                })
+                .catch(error => console.error('Erro:', error));
         }
 
         function moverLixeira(emailId) {
@@ -529,12 +570,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                         if (data.sucesso) {
                             window.location.href = 'email.php?pagina=<?php echo $pagina; ?>';
                         }
-                    });
+                    })
+                    .catch(error => console.error('Erro:', error));
             }
         }
 
         function cancelarResposta() {
-            if (confirm('Descartar resposta?')) {
+            if (confirm('Descartar esta resposta?')) {
                 <?php if ($emailVisualizado): ?>
                 CKEDITOR.instances.resposta_editor.setData('');
                 <?php endif; ?>
