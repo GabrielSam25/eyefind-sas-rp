@@ -2,7 +2,7 @@
 require_once 'email_config.php';
 
 if (!isLogado()) {
-    header('Location: login.php?redirect=email.php');
+    header('Location: login.php?redirect=eyefind_mail4234');
     exit;
 }
 
@@ -73,7 +73,7 @@ $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex flex-col md:flex-row items-center gap-6 w-full">
                     <div class="w-64">
-                        <a href="email.php">
+                        <a href="eyefind_mail4234">
                             <img src="imagens/eyefindmail.png" alt="Eyefind.mail" class="w-full">
                         </a>
                     </div>
@@ -111,13 +111,13 @@ $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
         <aside class="w-64 bg-white border-r border-gray-300 p-6 flex flex-col">
             
             <!-- Escrever -->
-            <a href="compor_email.php" class="w-full bg-eyefind-blue text-white py-3 rounded-lg font-bold mb-6 flex items-center justify-center gap-2 hover:bg-eyefind-dark transition">
+            <a href="compor_eyefind_mail4234" class="w-full bg-eyefind-blue text-white py-3 rounded-lg font-bold mb-6 flex items-center justify-center gap-2 hover:bg-eyefind-dark transition">
                 <i class="fas fa-pen"></i> Escrever
             </a>
 
             <!-- Menu -->
             <nav class="space-y-3 text-gray-700 font-medium flex-1">
-                <a href="email.php?pagina=inbox" class="flex items-center justify-between gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'inbox' ? 'bg-gray-100 text-eyefind-blue' : ''; ?>">
+                <a href="eyefind_mail4234?pagina=inbox" class="flex items-center justify-between gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'inbox' ? 'bg-gray-100 text-eyefind-blue' : ''; ?>">
                     <span class="flex items-center gap-3">
                         <i class="far fa-envelope"></i> Caixa de entrada
                     </span>
@@ -126,15 +126,15 @@ $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
                     <?php endif; ?>
                 </a>
                 
-                <a href="email.php?pagina=estrelas" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'estrelas' ? 'bg-gray-100 text-eyefind-blue' : ''; ?>">
+                <a href="eyefind_mail4234?pagina=estrelas" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'estrelas' ? 'bg-gray-100 text-eyefind-blue' : ''; ?>">
                     <i class="far fa-star"></i> Com estrela
                 </a>
                 
-                <a href="email.php?pagina=enviados" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'enviados' ? 'bg-gray-100 text-eyefind-blue' : ''; ?>">
+                <a href="eyefind_mail4234?pagina=enviados" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'enviados' ? 'bg-gray-100 text-eyefind-blue' : ''; ?>">
                     <i class="far fa-paper-plane"></i> Enviados
                 </a>
                 
-                <a href="email.php?pagina=lixeira" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'lixeira' ? 'bg-gray-100 text-eyefind-blue' : ''; ?>">
+                <a href="eyefind_mail4234?pagina=lixeira" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'lixeira' ? 'bg-gray-100 text-eyefind-blue' : ''; ?>">
                     <i class="far fa-trash-alt"></i> Lixeira
                 </a>
                 
@@ -147,7 +147,7 @@ $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
                     
                     foreach ($pastas as $pasta):
                     ?>
-                    <a href="email.php?pasta=<?php echo $pasta['id']; ?>" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-sm">
+                    <a href="eyefind_mail4234.php?pasta=<?php echo $pasta['id']; ?>" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-sm">
                         <i class="fas fa-folder" style="color: <?php echo $pasta['cor']; ?>"></i>
                         <?php echo htmlspecialchars($pasta['nome']); ?>
                     </a>
@@ -172,7 +172,7 @@ $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
                 <?php else: ?>
                     <?php foreach ($emails as $email): ?>
                         <div class="email-item px-6 py-4 hover:bg-gray-50 cursor-pointer flex items-center gap-4 <?php echo empty($email['data_leitura']) && $pagina == 'inbox' ? 'unread' : ''; ?>" 
-                             onclick="window.location='ver_email.php?id=<?php echo $email['id']; ?>'">
+                             onclick="window.location='ver_eyefind_mail4234?id=<?php echo $email['id']; ?>'">
                             
                             <!-- Estrela -->
                             <button onclick="event.stopPropagation(); toggleStar(<?php echo $email['id']; ?>, this)">
