@@ -80,7 +80,7 @@
         <aside class="w-64 bg-white border-r border-gray-300 p-6">
 
             <!-- Escrever -->
-            <button class="w-full bg-eyefind-blue text-white py-3 rounded font-bold hover:bg-eyefind-dark transition mb-6 flex items-center justify-center gap-2">
+            <button class="w-full bg-eyefind-blue text-white py-3 rounded font-bold mb-6 flex items-center justify-center gap-2">
                 <i class="fas fa-pen"></i> Escrever
             </button>
 
