@@ -164,30 +164,48 @@ if (isset($_GET['excluir'])) {
                                 </div>
 
                                 <div class="flex flex-wrap gap-2">
-                                    <?php if ($site['tipo'] == 'blog'): ?>
-                                        <a href="gerenciar_posts.php?website_id=<?php echo $site['id']; ?>" 
-                                           class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200 transition">
-                                            <i class="fas fa-pen mr-1"></i>Posts
-                                        </a>
-                                    <?php elseif ($site['tipo'] == 'noticias'): ?>
+
+                                    <?php if ($site['tipo'] == 'noticias'): ?>
                                         <a href="gerenciar_noticias.php?website_id=<?php echo $site['id']; ?>" 
-                                           class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200 transition">
+                                        class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200 transition">
                                             <i class="fas fa-newspaper mr-1"></i>Notícias
                                         </a>
-                                    <?php elseif ($site['tipo'] == 'classificados'): ?>
+                                        <a href="editar_template.php?website_id=<?php echo $site['id']; ?>&tipo=noticia" 
+                                        class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200 transition">
+                                            <i class="fas fa-paint-brush mr-1"></i>Template Notícia
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if ($site['tipo'] == 'blog'): ?>
+                                        <a href="gerenciar_posts.php?website_id=<?php echo $site['id']; ?>" 
+                                        class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200 transition">
+                                            <i class="fas fa-pen mr-1"></i>Posts
+                                        </a>
+                                        <a href="editar_template.php?website_id=<?php echo $site['id']; ?>&tipo=post" 
+                                        class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200 transition">
+                                            <i class="fas fa-paint-brush mr-1"></i>Template Post
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if ($site['tipo'] == 'classificados'): ?>
                                         <a href="gerenciar_anuncios.php?website_id=<?php echo $site['id']; ?>" 
-                                           class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200 transition">
+                                        class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200 transition">
                                             <i class="fas fa-tag mr-1"></i>Anúncios
+                                        </a>
+                                        <a href="editar_template.php?website_id=<?php echo $site['id']; ?>&tipo=anuncio" 
+                                        class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200 transition">
+                                            <i class="fas fa-paint-brush mr-1"></i>Template Anúncio
                                         </a>
                                     <?php endif; ?>
 
                                     <a href="edit_blog.php?id=<?php echo $site['id']; ?>" 
-                                       class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200 transition">
+                                    class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200 transition">
                                         <i class="fas fa-edit mr-1"></i>Editar
                                     </a>
+
                                     <a href="manage_blogs.php?excluir=<?php echo $site['id']; ?>" 
-                                       class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200 transition"
-                                       onclick="return confirm('Tem certeza que deseja excluir este site? Esta ação não pode ser desfeita.');">
+                                    class="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200 transition"
+                                    onclick="return confirm('Tem certeza que deseja excluir este site? Esta ação não pode ser desfeita.');">
                                         <i class="fas fa-trash mr-1"></i>Excluir
                                     </a>
                                 </div>
