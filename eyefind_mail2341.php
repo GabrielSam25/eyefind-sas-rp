@@ -48,20 +48,6 @@
                     <div class="w-64">
                         <img src="" alt="Eyefind Logo" class="w-full">
                     </div>
-
-                    <div class="w-full md:w-96">
-                        <form action="search.php" method="GET">
-                            <div class="relative">
-                                <input type="text" name="q"
-                                    class="w-full px-4 py-2 bg-white border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
-                                    placeholder="Procurar no Eyefind">
-                                <button type="submit"
-                                    class="absolute right-3 top-3 text-eyefind-blue">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
                 </div>
             </div>
         </div>
