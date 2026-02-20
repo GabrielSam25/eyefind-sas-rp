@@ -430,15 +430,6 @@ if (isset($_GET['msg'])) {
                 <!-- Inicialização do CKEditor (com as mesmas opções do compor_email) -->
                 <script>
                     CKEDITOR.replace('resposta_editor', {
-                        height: 250,
-                        toolbar: [
-                            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
-                            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
-                            { name: 'links', items: ['Link', 'Unlink'] },
-                            { name: 'styles', items: ['Format', 'Font', 'FontSize'] },
-                            { name: 'colors', items: ['TextColor', 'BGColor'] },
-                            { name: 'tools', items: ['Maximize'] }
-                        ]
                     });
                 </script>
                 
