@@ -119,8 +119,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="mb-4">
-                    <label for="email" class="block text-eyefind-dark font-bold mb-2">Email</label>
-                    <input type="email" id="email" name="email" class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue">
+                    <label for="email" class="block text-eyefind-dark font-bold mb-2">
+                        Email
+                    </label>
+                    
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        required
+                        pattern="^[a-zA-Z0-9._%+-]+@eyefind\.mail$"
+                        title="Use um email válido do domínio @eyefind.mail"
+                        class="w-full px-4 py-2 bg-eyefind-light border-2 border-eyefind-blue rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
+                    >
                 </div>
 
                 <div class="mb-4">
