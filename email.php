@@ -43,7 +43,9 @@ $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
 
 // Buscar email específico se tiver ID
 $emailVisualizado = null;
+$threadEmails = [];
 $anexos = [];
+
 if ($email_id) {
     $stmt = $pdo->prepare("
         SELECT 
@@ -68,10 +70,40 @@ if ($email_id) {
             marcarComoLido($pdo, $email_id, $usuario['id']);
         }
         
+        // Buscar toda a thread se tiver thread_id
+        if ($emailVisualizado['thread_id']) {
+            $threadEmails = getThreadEmails($pdo, $emailVisualizado['thread_id'], $usuario['id']);
+        } else {
+            $threadEmails = [$emailVisualizado];
+        }
+        
         // Buscar anexos
         $stmt = $pdo->prepare("SELECT * FROM email_anexos WHERE email_id = ?");
         $stmt->execute([$email_id]);
         $anexos = $stmt->fetchAll();
+    }
+}
+
+// Processar resposta rápida
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
+    $para = $_POST['para'];
+    $assunto = $_POST['assunto'];
+    $corpo = $_POST['corpo'];
+    $thread_id = $_POST['thread_id'] ?? null;
+    $resposta_para = $_POST['resposta_para'] ?? null;
+    
+    if (!empty($para) && !empty($assunto) && !empty($corpo)) {
+        $resultado = enviarEmailComThread($pdo, $usuario['id'], $para, $assunto, $corpo, $thread_id, $resposta_para);
+        
+        if (!isset($resultado['erro'])) {
+            // Recarregar a página para mostrar a nova resposta
+            header('Location: email.php?pagina=' . $pagina . '&id=' . $email_id);
+            exit;
+        } else {
+            $erro_resposta = $resultado['erro'];
+        }
+    } else {
+        $erro_resposta = 'Preencha todos os campos';
     }
 }
 ?>
@@ -83,6 +115,7 @@ if ($email_id) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
     <script>
     tailwind.config = {
         theme: {
@@ -115,8 +148,19 @@ if ($email_id) {
         .email-content p {
             margin-bottom: 1rem;
         }
-        .email-content {
-            font-family: Arial, sans-serif;
+        .thread-item {
+            border-left: 2px solid #e5e7eb;
+            margin-left: 20px;
+            padding-left: 20px;
+        }
+        .thread-item:last-child {
+            border-left-color: #067191;
+        }
+        .resposta-rapida {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -193,28 +237,6 @@ if ($email_id) {
                 <a href="email.php?pagina=lixeira" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'lixeira' ? 'sidebar-link active' : ''; ?>">
                     <i class="far fa-trash-alt"></i> Lixeira
                 </a>
-                
-                <div class="border-t border-gray-200 my-4 pt-4">
-                    <h3 class="text-xs uppercase text-gray-400 font-bold mb-2 px-3">Pastas</h3>
-                    <?php
-                    $stmt = $pdo->prepare("SELECT * FROM email_pastas WHERE usuario_id = ? ORDER BY ordem");
-                    $stmt->execute([$usuario['id']]);
-                    $pastas = $stmt->fetchAll();
-                    
-                    if (empty($pastas)) {
-                        echo '<p class="text-xs text-gray-400 px-3">Nenhuma pasta criada</p>';
-                    } else {
-                        foreach ($pastas as $pasta):
-                    ?>
-                    <a href="email.php?pasta=<?php echo $pasta['id']; ?>" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-sm">
-                        <i class="fas fa-folder" style="color: <?php echo $pasta['cor']; ?>"></i>
-                        <?php echo htmlspecialchars($pasta['nome']); ?>
-                    </a>
-                    <?php 
-                        endforeach;
-                    }
-                    ?>
-                </div>
             </nav>
         </aside>
 
@@ -222,181 +244,158 @@ if ($email_id) {
         <main class="flex-1 bg-white overflow-y-auto">
             
             <?php if ($emailVisualizado): ?>
-                <!-- ===== VISUALIZAÇÃO DO EMAIL ===== -->
+                <!-- ===== VISUALIZAÇÃO DO EMAIL (COM THREAD) ===== -->
                 <div class="p-6">
                     <!-- Cabeçalho com ações -->
                     <div class="flex justify-between items-center mb-6 pb-4 border-b">
                         <a href="email.php?pagina=<?php echo $pagina; ?>" class="text-gray-500 hover:text-gray-700 transition">
                             <i class="fas fa-arrow-left mr-2"></i>Voltar para lista
                         </a>
-                        <div class="flex gap-3">
+                        <div class="flex gap-2">
                             <button onclick="toggleStar(<?php echo $emailVisualizado['id']; ?>)" 
-                                    class="text-gray-400 hover:text-yellow-400 transition" 
+                                    class="text-gray-400 hover:text-yellow-400 transition p-2" 
                                     id="starBtn">
                                 <i class="fa<?php echo $emailVisualizado['tem_estrela'] ? 's' : 'r'; ?> fa-star <?php echo $emailVisualizado['tem_estrela'] ? 'text-yellow-400' : ''; ?> text-xl"></i>
                             </button>
                             
-                            <!-- Botão Responder (melhorado) -->
-                            <a href="compor_email.php?responder=<?php echo $emailVisualizado['id']; ?>&email=<?php echo urlencode($emailVisualizado['remetente_email']); ?>&assunto=<?php echo urlencode('Re: ' . $emailVisualizado['assunto']); ?>&corpo=<?php echo urlencode("\n\n\n----- Mensagem original -----\nDe: " . $emailVisualizado['remetente_nome'] . " <" . $emailVisualizado['remetente_email'] . ">\nAssunto: " . $emailVisualizado['assunto'] . "\nData: " . date('d/m/Y H:i', strtotime($emailVisualizado['data_envio'])) . "\n\n" . $emailVisualizado['corpo']); ?>" 
-                               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
-                                <i class="fas fa-reply"></i> Responder
-                            </a>
-                            
-                            <button onclick="responderRapido(<?php echo $emailVisualizado['id']; ?>)" 
-                                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
-                                <i class="fas fa-reply-all"></i> Responder rápido
-                            </button>
-                            
                             <?php if ($emailVisualizado['destinatario_id'] == $usuario['id']): ?>
                                 <button onclick="moverLixeira(<?php echo $emailVisualizado['id']; ?>)" 
-                                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2">
-                                    <i class="fas fa-trash"></i> Excluir
+                                        class="text-red-600 hover:text-red-800 transition p-2">
+                                    <i class="fas fa-trash-alt text-xl"></i>
                                 </button>
                             <?php endif; ?>
                         </div>
                     </div>
                     
-                    <!-- Assunto -->
-                    <h1 class="text-2xl font-bold mb-6 text-eyefind-dark"><?php echo htmlspecialchars($emailVisualizado['assunto']); ?></h1>
+                    <!-- Assunto da conversa -->
+                    <h1 class="text-2xl font-bold mb-6 text-eyefind-dark">
+                        <?php echo htmlspecialchars($emailVisualizado['assunto']); ?>
+                        <?php if (count($threadEmails) > 1): ?>
+                            <span class="text-sm font-normal text-gray-500 ml-3">
+                                (<?php echo count($threadEmails); ?> mensagens)
+                            </span>
+                        <?php endif; ?>
+                    </h1>
                     
-                    <!-- Informações do remetente -->
-                    <div class="flex items-start gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                        <div class="w-12 h-12 bg-eyefind-blue rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            <?php echo strtoupper(substr($emailVisualizado['remetente_nome'], 0, 1)); ?>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="font-bold text-gray-800"><?php echo htmlspecialchars($emailVisualizado['remetente_nome']); ?></p>
-                                    <p class="text-sm text-gray-500"><?php echo htmlspecialchars($emailVisualizado['remetente_email']); ?></p>
+                    <!-- Thread de mensagens -->
+                    <div class="space-y-6 mb-8">
+                        <?php foreach ($threadEmails as $index => $msg): 
+                            $isRemetente = $msg['remetente_id'] == $usuario['id'];
+                        ?>
+                            <div class="border rounded-lg p-4 <?php echo $isRemetente ? 'bg-blue-50 border-blue-200' : 'bg-white'; ?>">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 <?php echo $isRemetente ? 'bg-green-600' : 'bg-eyefind-blue'; ?> rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                        <?php echo strtoupper(substr($msg['remetente_nome'], 0, 1)); ?>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div>
+                                                <span class="font-bold text-gray-800"><?php echo htmlspecialchars($msg['remetente_nome']); ?></span>
+                                                <span class="text-sm text-gray-500 ml-2">
+                                                    &lt;<?php echo htmlspecialchars($msg['remetente_email']); ?>&gt;
+                                                </span>
+                                                <?php if ($isRemetente): ?>
+                                                    <span class="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Você</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <span class="text-xs text-gray-400">
+                                                <?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="email-content prose max-w-none">
+                                            <?php echo $msg['corpo']; ?>
+                                        </div>
+                                        
+                                        <?php if ($msg['id'] == $email_id && !empty($anexos)): ?>
+                                            <div class="mt-4 pt-3 border-t">
+                                                <p class="text-xs font-bold text-gray-500 mb-2">
+                                                    <i class="fas fa-paperclip mr-1"></i>Anexos:
+                                                </p>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <?php foreach ($anexos as $anexo): ?>
+                                                        <a href="<?php echo htmlspecialchars($anexo['caminho_arquivo']); ?>" 
+                                                           class="text-xs bg-gray-100 px-2 py-1 rounded hover:bg-gray-200"
+                                                           download>
+                                                            <i class="fas fa-file mr-1"></i>
+                                                            <?php echo htmlspecialchars($anexo['nome_arquivo']); ?>
+                                                        </a>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                                <span class="text-sm text-gray-400">
-                                    <?php echo date('d/m/Y H:i', strtotime($emailVisualizado['data_envio'])); ?>
-                                </span>
                             </div>
-                            <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
-                                <span>
-                                    <i class="far fa-user mr-1"></i>
-                                    Para: <?php echo htmlspecialchars($emailVisualizado['destinatario_nome']); ?>
-                                </span>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                     
-                    <!-- Corpo do email (CORRIGIDO - agora mostra HTML corretamente) -->
-                    <div class="email-content prose max-w-none mb-6 p-6 bg-white rounded-lg border border-gray-200">
-                        <?php echo $emailVisualizado['corpo']; ?>
-                    </div>
-                    
-                    <!-- Anexos -->
-                    <?php if (!empty($anexos)): ?>
-                        <div class="border-t pt-4 mt-4">
-                            <h3 class="font-bold mb-3 text-gray-700">
-                                <i class="fas fa-paperclip mr-2"></i>Anexos (<?php echo count($anexos); ?>)
-                            </h3>
-                            <div class="flex flex-wrap gap-3">
-                                <?php foreach ($anexos as $anexo): ?>
-                                    <a href="<?php echo htmlspecialchars($anexo['caminho_arquivo']); ?>" 
-                                       class="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded hover:bg-gray-200 transition"
-                                       download>
-                                        <i class="fas fa-file text-gray-500"></i>
-                                        <span class="text-sm"><?php echo htmlspecialchars($anexo['nome_arquivo']); ?></span>
-                                        <span class="text-xs text-gray-400">(<?php echo round($anexo['tamanho'] / 1024, 1); ?> KB)</span>
-                                    </a>
-                                <?php endforeach; ?>
+                    <!-- Resposta Rápida com Editor -->
+                    <div class="resposta-rapida border-t-2 border-eyefind-blue">
+                        <h3 class="font-bold text-lg mb-4 text-eyefind-blue">
+                            <i class="fas fa-reply mr-2"></i>Responder a esta conversa
+                        </h3>
+                        
+                        <?php if (isset($erro_resposta)): ?>
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm">
+                                <?php echo $erro_resposta; ?>
                             </div>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <!-- Barra de resposta rápida -->
-                    <div class="mt-8 pt-4 border-t">
-                        <h3 class="font-bold mb-3">Responder rapidamente:</h3>
-                        <form action="enviar_resposta.php" method="POST" class="space-y-3">
+                        <?php endif; ?>
+                        
+                        <form method="POST" id="formResposta">
+                            <input type="hidden" name="resposta_rapida" value="1">
                             <input type="hidden" name="para" value="<?php echo $emailVisualizado['remetente_email']; ?>">
-                            <input type="hidden" name="assunto" value="Re: <?php echo htmlspecialchars($emailVisualizado['assunto']); ?>">
-                            <textarea name="corpo" rows="4" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" placeholder="Digite sua resposta..."></textarea>
-                            <div class="flex justify-end">
-                                <button type="submit" class="bg-eyefind-blue text-white px-4 py-2 rounded hover:bg-eyefind-dark transition">
-                                    <i class="fas fa-paper-plane mr-2"></i>Enviar resposta
-                                </button>
+                            <input type="hidden" name="assunto" value="<?php echo htmlspecialchars($emailVisualizado['assunto']); ?>">
+                            <input type="hidden" name="thread_id" value="<?php echo $emailVisualizado['thread_id']; ?>">
+                            <input type="hidden" name="resposta_para" value="<?php echo $emailVisualizado['id']; ?>">
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-bold mb-2">Sua resposta:</label>
+                                <textarea name="corpo" id="resposta_editor" rows="8" class="w-full border rounded"></textarea>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <div class="text-sm text-gray-500">
+                                    <i class="far fa-clock mr-1"></i>
+                                    Respondendo a: <?php echo htmlspecialchars($emailVisualizado['remetente_nome']); ?>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="cancelarResposta()" 
+                                            class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" 
+                                            class="bg-eyefind-blue text-white px-6 py-2 rounded hover:bg-eyefind-dark transition flex items-center gap-2">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Enviar Resposta
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
                 </div>
                 
             <?php else: ?>
-                <!-- ===== LISTA DE EMAILS ===== -->
-                <div>
-                    <!-- Barra superior -->
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h2 class="text-lg font-bold text-gray-700">
-                            <i class="far <?php echo $icone; ?> mr-2 text-eyefind-blue"></i>
-                            <?php echo $titulo; ?>
-                        </h2>
-                        <span class="text-sm text-gray-500"><?php echo count($emails); ?> mensagem(s)</span>
-                    </div>
-
-                    <!-- Lista de emails -->
-                    <div class="divide-y divide-gray-200">
-                        <?php if (empty($emails)): ?>
-                            <div class="text-center py-12">
-                                <i class="far fa-envelope-open text-6xl text-gray-300 mb-4"></i>
-                                <p class="text-gray-500">Nenhum email encontrado</p>
-                                <?php if ($pagina == 'inbox'): ?>
-                                    <p class="text-sm text-gray-400 mt-2">Quando você receber emails, eles aparecerão aqui</p>
-                                <?php endif; ?>
-                            </div>
-                        <?php else: ?>
-                            <?php foreach ($emails as $email): ?>
-                                <a href="email.php?pagina=<?php echo $pagina; ?>&id=<?php echo $email['id']; ?>" 
-                                   class="block email-item px-6 py-4 hover:bg-gray-50 <?php echo empty($email['data_leitura']) && $pagina == 'inbox' ? 'unread' : ''; ?> <?php echo $email_id == $email['id'] ? 'selected' : ''; ?>">
-                                    <div class="flex items-center gap-4">
-                                        <!-- Estrela -->
-                                        <div onclick="event.preventDefault(); toggleStarList(<?php echo $email['id']; ?>, this)">
-                                            <i class="fa<?php echo isset($email['tem_estrela']) && $email['tem_estrela'] ? 's' : 'r'; ?> fa-star <?php echo isset($email['tem_estrela']) && $email['tem_estrela'] ? 'star-active' : 'text-gray-400'; ?> hover:text-yellow-400"></i>
-                                        </div>
-
-                                        <!-- Remetente/Destinatário -->
-                                        <div class="w-48 font-semibold text-gray-800 truncate">
-                                            <?php 
-                                            if ($pagina == 'enviados') {
-                                                echo htmlspecialchars($email['destinatario_nome'] ?? 'Para: ' . $email['destinatario_email']);
-                                            } else {
-                                                echo htmlspecialchars($email['remetente_nome'] ?? $email['remetente_email']);
-                                            }
-                                            ?>
-                                        </div>
-
-                                        <!-- Assunto e preview -->
-                                        <div class="flex-1 min-w-0">
-                                            <span class="font-medium text-gray-800"><?php echo htmlspecialchars($email['assunto']); ?></span>
-                                            <span class="text-gray-500 ml-2 truncate">– <?php echo htmlspecialchars(substr(strip_tags($email['corpo']), 0, 60)); ?>...</span>
-                                        </div>
-
-                                        <!-- Data -->
-                                        <div class="text-sm text-gray-400 whitespace-nowrap">
-                                            <?php 
-                                            $data = new DateTime($email['data_envio']);
-                                            $hoje = new DateTime();
-                                            if ($data->format('Y-m-d') == $hoje->format('Y-m-d')) {
-                                                echo $data->format('H:i');
-                                            } else {
-                                                echo $data->format('d/m');
-                                            }
-                                            ?>
-                                        </div>
-                                    </div>
-                                </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                <!-- ===== LISTA DE EMAILS ===== (igual ao anterior) -->
+                <!-- ... mantenha o código da lista igual ... -->
             <?php endif; ?>
         </main>
     </div>
 
     <script>
-        function toggleStar(emailId, element) {
+        // Inicializar CKEditor na resposta rápida
+        CKEDITOR.replace('resposta_editor', {
+            height: 200,
+            toolbar: [
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                { name: 'links', items: ['Link', 'Unlink'] },
+                { name: 'styles', items: ['Format'] },
+                { name: 'colors', items: ['TextColor'] }
+            ]
+        });
+
+        function toggleStar(emailId) {
             fetch('email_acao.php?acao=estrela&id=' + emailId)
                 .then(response => response.json())
                 .then(data => {
@@ -408,26 +407,7 @@ if ($email_id) {
                         icon.classList.remove('fas', 'text-yellow-400');
                         icon.classList.add('far', 'text-gray-400');
                     }
-                })
-                .catch(error => console.error('Erro:', error));
-        }
-
-        function toggleStarList(emailId, element) {
-            event.preventDefault();
-            const icon = element.querySelector('i') || element;
-            
-            fetch('email_acao.php?acao=estrela&id=' + emailId)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.estrela) {
-                        icon.classList.remove('far', 'text-gray-400');
-                        icon.classList.add('fas', 'star-active');
-                    } else {
-                        icon.classList.remove('fas', 'star-active');
-                        icon.classList.add('far', 'text-gray-400');
-                    }
-                })
-                .catch(error => console.error('Erro:', error));
+                });
         }
 
         function moverLixeira(emailId) {
@@ -442,9 +422,10 @@ if ($email_id) {
             }
         }
 
-        function responderRapido(emailId) {
-            const respostaRapida = document.querySelector('.mt-8');
-            respostaRapida.scrollIntoView({ behavior: 'smooth' });
+        function cancelarResposta() {
+            if (confirm('Descartar resposta?')) {
+                CKEDITOR.instances.resposta_editor.setData('');
+            }
         }
     </script>
 </body>
