@@ -46,7 +46,7 @@
                 <div class="flex flex-col md:flex-row items-center gap-6 w-full">
                     
                     <div class="w-64">
-                        <img src="" alt="Eyefind Logo" class="w-full">
+                        <img src="eyefindmail.png" alt="Eyefind Logo" class="w-full">
                     </div>
                 </div>
             </div>
