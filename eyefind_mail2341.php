@@ -63,12 +63,6 @@
                         </form>
                     </div>
                 </div>
-
-                <!-- Usuário -->
-                <div class="mt-4 md:mt-0 text-white font-semibold">
-                    Bem-vindo, Usuário
-                </div>
-
             </div>
         </div>
     </section>
