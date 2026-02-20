@@ -1,6 +1,12 @@
 <?php
 require_once "config.php";
+require_once 'email_config.php'; 
 
+$naoLidos = 0;
+if (isLogado()) {
+    $usuario = getUsuarioAtual($pdo);
+    $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
+}
 
 $categorias = getCategorias($pdo);
 $websiteDoMinuto = getWebsiteDoMinuto($pdo);
