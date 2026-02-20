@@ -20,7 +20,11 @@ function getEmailsRecebidos($pdo, $usuario_id, $limite = 50) {
         ORDER BY e.data_envio DESC
         LIMIT ?
     ");
-    $stmt->execute([$usuario_id, $usuario_id, $usuario_id, $limite]);
+    $stmt->bindValue(1, $usuario_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, $usuario_id, PDO::PARAM_INT);
+    $stmt->bindValue(3, $usuario_id, PDO::PARAM_INT);
+    $stmt->bindValue(4, (int)$limite, PDO::PARAM_INT);
+    $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -36,7 +40,9 @@ function getEmailsEnviados($pdo, $usuario_id, $limite = 50) {
         ORDER BY e.data_envio DESC
         LIMIT ?
     ");
-    $stmt->execute([$usuario_id, $limite]);
+    $stmt->bindValue(1, $usuario_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, (int)$limite, PDO::PARAM_INT);
+    $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -53,7 +59,10 @@ function getEmailsComEstrela($pdo, $usuario_id, $limite = 50) {
         ORDER BY es.data_estrela DESC
         LIMIT ?
     ");
-    $stmt->execute([$usuario_id, $usuario_id, $limite]);
+    $stmt->bindValue(1, $usuario_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, $usuario_id, PDO::PARAM_INT);
+    $stmt->bindValue(3, (int)$limite, PDO::PARAM_INT);
+    $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -71,7 +80,9 @@ function getEmailsLixeira($pdo, $usuario_id, $limite = 50) {
         ORDER BY el.data_exclusao DESC
         LIMIT ?
     ");
-    $stmt->execute([$usuario_id, $limite]);
+    $stmt->bindValue(1, $usuario_id, PDO::PARAM_INT);
+    $stmt->bindValue(2, (int)$limite, PDO::PARAM_INT);
+    $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -190,3 +201,4 @@ function salvarRascunho($pdo, $usuario_id, $para, $assunto, $corpo, $email_origi
         return $stmt->execute([$usuario_id, $para, $assunto, $corpo]);
     }
 }
+?>
