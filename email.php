@@ -115,6 +115,9 @@ if ($email_id) {
         .email-content p {
             margin-bottom: 1rem;
         }
+        .email-content {
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body class="bg-eyefind-light h-screen flex flex-col">
@@ -233,15 +236,21 @@ if ($email_id) {
                                 <i class="fa<?php echo $emailVisualizado['tem_estrela'] ? 's' : 'r'; ?> fa-star <?php echo $emailVisualizado['tem_estrela'] ? 'text-yellow-400' : ''; ?> text-xl"></i>
                             </button>
                             
-                            <a href="compor_email.php?responder=<?php echo $emailVisualizado['id']; ?>" 
-                               class="text-blue-600 hover:text-blue-800 transition">
-                                <i class="fas fa-reply mr-1"></i> Responder
+                            <!-- Botão Responder (melhorado) -->
+                            <a href="compor_email.php?responder=<?php echo $emailVisualizado['id']; ?>&email=<?php echo urlencode($emailVisualizado['remetente_email']); ?>&assunto=<?php echo urlencode('Re: ' . $emailVisualizado['assunto']); ?>&corpo=<?php echo urlencode("\n\n\n----- Mensagem original -----\nDe: " . $emailVisualizado['remetente_nome'] . " <" . $emailVisualizado['remetente_email'] . ">\nAssunto: " . $emailVisualizado['assunto'] . "\nData: " . date('d/m/Y H:i', strtotime($emailVisualizado['data_envio'])) . "\n\n" . $emailVisualizado['corpo']); ?>" 
+                               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="fas fa-reply"></i> Responder
                             </a>
+                            
+                            <button onclick="responderRapido(<?php echo $emailVisualizado['id']; ?>)" 
+                                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+                                <i class="fas fa-reply-all"></i> Responder rápido
+                            </button>
                             
                             <?php if ($emailVisualizado['destinatario_id'] == $usuario['id']): ?>
                                 <button onclick="moverLixeira(<?php echo $emailVisualizado['id']; ?>)" 
-                                        class="text-red-600 hover:text-red-800 transition">
-                                    <i class="fas fa-trash mr-1"></i> Excluir
+                                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2">
+                                    <i class="fas fa-trash"></i> Excluir
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -256,24 +265,27 @@ if ($email_id) {
                             <?php echo strtoupper(substr($emailVisualizado['remetente_nome'], 0, 1)); ?>
                         </div>
                         <div class="flex-1">
-                            <p class="font-bold text-gray-800"><?php echo htmlspecialchars($emailVisualizado['remetente_nome']); ?></p>
-                            <p class="text-sm text-gray-500"><?php echo htmlspecialchars($emailVisualizado['remetente_email']); ?></p>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-bold text-gray-800"><?php echo htmlspecialchars($emailVisualizado['remetente_nome']); ?></p>
+                                    <p class="text-sm text-gray-500"><?php echo htmlspecialchars($emailVisualizado['remetente_email']); ?></p>
+                                </div>
+                                <span class="text-sm text-gray-400">
+                                    <?php echo date('d/m/Y H:i', strtotime($emailVisualizado['data_envio'])); ?>
+                                </span>
+                            </div>
                             <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
                                 <span>
-                                    <i class="far fa-clock mr-1"></i>
+                                    <i class="far fa-user mr-1"></i>
                                     Para: <?php echo htmlspecialchars($emailVisualizado['destinatario_nome']); ?>
-                                </span>
-                                <span>
-                                    <i class="far fa-calendar mr-1"></i>
-                                    <?php echo date('d/m/Y H:i', strtotime($emailVisualizado['data_envio'])); ?>
                                 </span>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Corpo do email -->
-                    <div class="email-content prose max-w-none mb-6 p-4 bg-white rounded-lg border border-gray-100">
-                        <?php echo nl2br(htmlspecialchars($emailVisualizado['corpo'])); ?>
+                    <!-- Corpo do email (CORRIGIDO - agora mostra HTML corretamente) -->
+                    <div class="email-content prose max-w-none mb-6 p-6 bg-white rounded-lg border border-gray-200">
+                        <?php echo $emailVisualizado['corpo']; ?>
                     </div>
                     
                     <!-- Anexos -->
@@ -295,6 +307,21 @@ if ($email_id) {
                             </div>
                         </div>
                     <?php endif; ?>
+                    
+                    <!-- Barra de resposta rápida -->
+                    <div class="mt-8 pt-4 border-t">
+                        <h3 class="font-bold mb-3">Responder rapidamente:</h3>
+                        <form action="enviar_resposta.php" method="POST" class="space-y-3">
+                            <input type="hidden" name="para" value="<?php echo $emailVisualizado['remetente_email']; ?>">
+                            <input type="hidden" name="assunto" value="Re: <?php echo htmlspecialchars($emailVisualizado['assunto']); ?>">
+                            <textarea name="corpo" rows="4" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue" placeholder="Digite sua resposta..."></textarea>
+                            <div class="flex justify-end">
+                                <button type="submit" class="bg-eyefind-blue text-white px-4 py-2 rounded hover:bg-eyefind-dark transition">
+                                    <i class="fas fa-paper-plane mr-2"></i>Enviar resposta
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 
             <?php else: ?>
@@ -413,6 +440,11 @@ if ($email_id) {
                         }
                     });
             }
+        }
+
+        function responderRapido(emailId) {
+            const respostaRapida = document.querySelector('.mt-8');
+            respostaRapida.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
