@@ -156,16 +156,13 @@ $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
             </nav>
         </aside>
 
-        <!-- ===== LISTA DE EMAILS ===== -->
         <main class="flex-1 bg-white overflow-y-auto">
             
-            <!-- Barra superior -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
                 <h2 class="text-lg font-bold text-gray-700"><?php echo $titulo; ?></h2>
                 <span class="text-sm text-gray-500"><?php echo count($emails); ?> mensagens</span>
             </div>
 
-            <!-- Lista de emails -->
             <div class="divide-y divide-gray-200">
                 <?php if (empty($emails)): ?>
                     <div class="text-center py-12">
