@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="block font-bold mb-2">Para:</label>
                     <input type="email" name="para" value="<?php echo htmlspecialchars($para); ?>" 
                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-eyefind-blue"
-                           placeholder="email@exemplo.com" required>
+                           placeholder="email@eyefind.mail" required>
                 </div>
                 
                 <div class="mb-4">
