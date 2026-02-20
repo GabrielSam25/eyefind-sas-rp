@@ -229,6 +229,16 @@ if ($weatherId == 800 && $isDayTime) {
                     $is_admin = isset($usuario['is_admin']) && $usuario['is_admin'] == 1;
                     ?>
 
+                    <!-- Eyefind.Mail -->
+                    <div class="relative group">
+                        <a href="eyefind_mail.php" class="p-3 hover:scale-110 transition duration-200 flex items-center">
+                            <img src="imagens/eyefindmail-logo.png" class="h-8 w-auto" alt="Eyefind.Mail">
+                        </a>
+                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
+                            Eyefind.Mail
+                        </div>
+                    </div>
+
                     <!-- Criar Blog -->
                     <div class="relative group">
                         <a href="new_blog.php" class="p-3 hover:scale-110 transition duration-200">
