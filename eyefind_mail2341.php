@@ -73,6 +73,9 @@
         </div>
     </section>
 
+    <div class="w-full h-2 bg-yellow-400"></div>
+
+
     <!-- ================= CONTEÚDO ================= -->
     <div class="flex flex-1 overflow-hidden">
 
