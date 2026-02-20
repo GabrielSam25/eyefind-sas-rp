@@ -1,11 +1,6 @@
 <?php
 require_once "config.php";
 
-$naoLidos = 0;
-if (isLogado()) {
-    $usuario = getUsuarioAtual($pdo);
-    $naoLidos = getTotalNaoLidos($pdo, $usuario['id']);
-}
 
 $categorias = getCategorias($pdo);
 $websiteDoMinuto = getWebsiteDoMinuto($pdo);
