@@ -131,7 +131,7 @@ if (isset($_GET['msg'])) {
     
     <!-- CKEditor - apenas se estiver visualizando um email -->
     <?php if ($emailVisualizado): ?>
-    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <?php endif; ?>
     
     <script>
