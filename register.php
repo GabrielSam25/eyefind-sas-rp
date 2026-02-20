@@ -20,6 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $erro = "As senhas não coincidem.";
     } elseif (strlen($senha) < 6) {
         $erro = "A senha deve ter pelo menos 6 caracteres.";
+    } elseif (!preg_match('/^[a-zA-Z0-9._%+-]+@eyefind\.mail$/', $email)) {
+        $erro = "Apenas emails do domínio @eyefind.mail são permitidos.";
     } else {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM usuarios WHERE email = ?");
         $stmt->execute([$email]);
