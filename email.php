@@ -11,6 +11,11 @@ $pagina = $_GET['pagina'] ?? 'inbox';
 $busca = $_GET['busca'] ?? '';
 $email_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
+// Buscar pastas do usuário (para o sidebar)
+$stmt = $pdo->prepare("SELECT * FROM email_pastas WHERE usuario_id = ? ORDER BY ordem");
+$stmt->execute([$usuario['id']]);
+$pastas = $stmt->fetchAll();
+
 // Determinar qual lista de emails carregar
 switch ($pagina) {
     case 'inbox':
@@ -115,7 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- CKEditor - Carregar apenas se estiver visualizando um email -->
+    <?php if ($emailVisualizado): ?>
     <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+    <?php endif; ?>
+    
     <script>
     tailwind.config = {
         theme: {
@@ -237,6 +247,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                 <a href="email.php?pagina=lixeira" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 <?php echo $pagina == 'lixeira' ? 'sidebar-link active' : ''; ?>">
                     <i class="far fa-trash-alt"></i> Lixeira
                 </a>
+                
+                <!-- Pastas (categorias) -->
+                <div class="border-t border-gray-200 my-4 pt-4">
+                    <h3 class="text-xs uppercase text-gray-400 font-bold mb-2 px-3">Pastas</h3>
+                    <?php if (empty($pastas)): ?>
+                        <p class="text-xs text-gray-400 px-3">Nenhuma pasta criada</p>
+                    <?php else: ?>
+                        <?php foreach ($pastas as $pasta): ?>
+                            <a href="email.php?pasta=<?php echo $pasta['id']; ?>" 
+                               class="flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-sm">
+                                <i class="fas fa-folder" style="color: <?php echo $pasta['cor']; ?>"></i>
+                                <?php echo htmlspecialchars($pasta['nome']); ?>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </nav>
         </aside>
 
@@ -375,36 +401,121 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
                     </div>
                 </div>
                 
+                <!-- Inicialização do CKEditor (agora dentro do bloco condicional) -->
+                <script>
+                    CKEDITOR.replace('resposta_editor', {
+                        height: 200,
+                        toolbar: [
+                            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+                            { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                            { name: 'links', items: ['Link', 'Unlink'] },
+                            { name: 'styles', items: ['Format'] },
+                            { name: 'colors', items: ['TextColor'] }
+                        ]
+                    });
+                </script>
+                
             <?php else: ?>
-                <!-- ===== LISTA DE EMAILS ===== (igual ao anterior) -->
-                <!-- ... mantenha o código da lista igual ... -->
+                <!-- ===== LISTA DE EMAILS ===== -->
+                <div>
+                    <!-- Barra superior -->
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="text-lg font-bold text-gray-700">
+                            <i class="far <?php echo $icone; ?> mr-2 text-eyefind-blue"></i>
+                            <?php echo $titulo; ?>
+                        </h2>
+                        <span class="text-sm text-gray-500"><?php echo count($emails); ?> mensagem(s)</span>
+                    </div>
+
+                    <!-- Lista de emails -->
+                    <div class="divide-y divide-gray-200">
+                        <?php if (empty($emails)): ?>
+                            <div class="text-center py-12">
+                                <i class="far fa-envelope-open text-6xl text-gray-300 mb-4"></i>
+                                <p class="text-gray-500">Nenhum email encontrado</p>
+                                <?php if ($pagina == 'inbox'): ?>
+                                    <p class="text-sm text-gray-400 mt-2">Quando você receber emails, eles aparecerão aqui</p>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($emails as $email): ?>
+                                <a href="email.php?pagina=<?php echo $pagina; ?>&id=<?php echo $email['id']; ?>" 
+                                   class="block email-item px-6 py-4 hover:bg-gray-50 <?php echo empty($email['data_leitura']) && $pagina == 'inbox' ? 'unread' : ''; ?> <?php echo $email_id == $email['id'] ? 'selected' : ''; ?>">
+                                    <div class="flex items-center gap-4">
+                                        <!-- Estrela -->
+                                        <div onclick="event.preventDefault(); toggleStarList(<?php echo $email['id']; ?>, this)">
+                                            <i class="fa<?php echo isset($email['tem_estrela']) && $email['tem_estrela'] ? 's' : 'r'; ?> fa-star <?php echo isset($email['tem_estrela']) && $email['tem_estrela'] ? 'star-active' : 'text-gray-400'; ?> hover:text-yellow-400"></i>
+                                        </div>
+
+                                        <!-- Remetente/Destinatário -->
+                                        <div class="w-48 font-semibold text-gray-800 truncate">
+                                            <?php 
+                                            if ($pagina == 'enviados') {
+                                                echo htmlspecialchars($email['destinatario_nome'] ?? 'Para: ' . $email['destinatario_email']);
+                                            } else {
+                                                echo htmlspecialchars($email['remetente_nome'] ?? $email['remetente_email']);
+                                            }
+                                            ?>
+                                        </div>
+
+                                        <!-- Assunto e preview -->
+                                        <div class="flex-1 min-w-0">
+                                            <span class="font-medium text-gray-800"><?php echo htmlspecialchars($email['assunto']); ?></span>
+                                            <span class="text-gray-500 ml-2 truncate">– <?php echo htmlspecialchars(substr(strip_tags($email['corpo']), 0, 60)); ?>...</span>
+                                        </div>
+
+                                        <!-- Data -->
+                                        <div class="text-sm text-gray-400 whitespace-nowrap">
+                                            <?php 
+                                            $data = new DateTime($email['data_envio']);
+                                            $hoje = new DateTime();
+                                            if ($data->format('Y-m-d') == $hoje->format('Y-m-d')) {
+                                                echo $data->format('H:i');
+                                            } else {
+                                                echo $data->format('d/m');
+                                            }
+                                            ?>
+                                        </div>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
             <?php endif; ?>
         </main>
     </div>
 
     <script>
-        // Inicializar CKEditor na resposta rápida
-        CKEDITOR.replace('resposta_editor', {
-            height: 200,
-            toolbar: [
-                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
-                { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
-                { name: 'links', items: ['Link', 'Unlink'] },
-                { name: 'styles', items: ['Format'] },
-                { name: 'colors', items: ['TextColor'] }
-            ]
-        });
-
         function toggleStar(emailId) {
             fetch('email_acao.php?acao=estrela&id=' + emailId)
                 .then(response => response.json())
                 .then(data => {
                     const icon = document.querySelector('#starBtn i');
+                    if (icon) {
+                        if (data.estrela) {
+                            icon.classList.remove('far', 'text-gray-400');
+                            icon.classList.add('fas', 'text-yellow-400');
+                        } else {
+                            icon.classList.remove('fas', 'text-yellow-400');
+                            icon.classList.add('far', 'text-gray-400');
+                        }
+                    }
+                });
+        }
+
+        function toggleStarList(emailId, element) {
+            event.preventDefault();
+            const icon = element.querySelector('i') || element;
+            
+            fetch('email_acao.php?acao=estrela&id=' + emailId)
+                .then(response => response.json())
+                .then(data => {
                     if (data.estrela) {
                         icon.classList.remove('far', 'text-gray-400');
-                        icon.classList.add('fas', 'text-yellow-400');
+                        icon.classList.add('fas', 'star-active');
                     } else {
-                        icon.classList.remove('fas', 'text-yellow-400');
+                        icon.classList.remove('fas', 'star-active');
                         icon.classList.add('far', 'text-gray-400');
                     }
                 });
@@ -424,7 +535,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resposta_rapida'])) {
 
         function cancelarResposta() {
             if (confirm('Descartar resposta?')) {
+                <?php if ($emailVisualizado): ?>
                 CKEDITOR.instances.resposta_editor.setData('');
+                <?php endif; ?>
             }
         }
     </script>
