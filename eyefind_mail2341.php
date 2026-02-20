@@ -12,20 +12,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        eyefind: {
-                            light: "#f2f5f9",
-                            blue: "#2c6fb7",
-                            dark: "#1e4f85"
-                        }
-                    }
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'eyefind-blue': '#067191',
+                    'eyefind-light': '#F8FAFC',
+                    'eyefind-dark': '#02343F',
+                    'eyefind-container': '#DCE7EB'
                 }
             }
         }
+    }
+
     </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+    </style>
 </head>
 
 <body class="bg-eyefind-light h-screen flex flex-col">
