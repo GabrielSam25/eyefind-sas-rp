@@ -201,4 +201,50 @@ function salvarRascunho($pdo, $usuario_id, $para, $assunto, $corpo, $email_origi
         return $stmt->execute([$usuario_id, $para, $assunto, $corpo]);
     }
 }
+
+// Função para enviar email com suporte a thread
+function enviarEmailComThread($pdo, $remetente_id, $destinatario_email, $assunto, $corpo, $thread_id = null, $resposta_para = null) {
+    // Buscar ID do destinatário pelo email
+    $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE email = ?");
+    $stmt->execute([$destinatario_email]);
+    $destinatario = $stmt->fetch();
+    
+    if (!$destinatario) {
+        return ['erro' => 'Destinatário não encontrado'];
+    }
+    
+    // Se não tiver thread_id, criar uma nova
+    if (!$thread_id) {
+        $thread_id = time() . '_' . $remetente_id . '_' . $destinatario['id'];
+    }
+    
+    $stmt = $pdo->prepare("
+        INSERT INTO emails (remetente_id, destinatario_id, assunto, corpo, thread_id, resposta_para) 
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->execute([$remetente_id, $destinatario['id'], $assunto, $corpo, $thread_id, $resposta_para]);
+    
+    return ['sucesso' => true, 'email_id' => $pdo->lastInsertId(), 'thread_id' => $thread_id];
+}
+
+// Buscar thread de conversa
+function getThreadEmails($pdo, $thread_id, $usuario_id) {
+    $stmt = $pdo->prepare("
+        SELECT 
+            e.*,
+            r.nome as remetente_nome,
+            r.email as remetente_email,
+            d.nome as destinatario_nome,
+            d.email as destinatario_email,
+            CASE WHEN es.id IS NOT NULL THEN 1 ELSE 0 END as tem_estrela
+        FROM emails e
+        JOIN usuarios r ON e.remetente_id = r.id
+        JOIN usuarios d ON e.destinatario_id = d.id
+        LEFT JOIN email_estrelas es ON e.id = es.email_id AND es.usuario_id = ?
+        WHERE e.thread_id = ? AND (e.destinatario_id = ? OR e.remetente_id = ?)
+        ORDER BY e.data_envio ASC
+    ");
+    $stmt->execute([$usuario_id, $thread_id, $usuario_id, $usuario_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
