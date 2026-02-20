@@ -237,27 +237,27 @@ if ($weatherId == 800 && $isDayTime) {
                     ?>
 
                     <!-- Eyefind.Mail -->
-                <div class="relative group">
-                    <a href="eyefind_mail.php" class="p-3 hover:scale-110 transition duration-200 flex items-center relative">
-                        <img src="imagens/eyefindmail-logo.png" class="h-8 w-auto" alt="Eyefind.Mail">
+                    <div class="relative group">
+                        <a href="email.php" class="p-3 hover:scale-110 transition duration-200 flex items-center relative">
+                            <img src="imagens/eyefindmail-logo.png" class="h-8 w-auto" alt="Eyefind.Mail">
+                            
+                            <!-- Indicador vermelho de emails não lidos -->
+                            <?php if ($naoLidos > 0): ?>
+                                <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 animate-pulse shadow-lg" 
+                                    style="box-shadow: 0 0 0 2px white;">
+                                    <?php echo $naoLidos > 99 ? '99+' : $naoLidos; ?>
+                                </span>
+                            <?php endif; ?>
+                        </a>
                         
-                        <!-- Indicador vermelho de emails não lidos -->
-                        <?php if ($naoLidos > 0): ?>
-                            <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 animate-pulse shadow-lg" 
-                                style="box-shadow: 0 0 0 2px white;">
-                                <?php echo $naoLidos > 99 ? '99+' : $naoLidos; ?>
-                            </span>
-                        <?php endif; ?>
-                    </a>
-                    
-                    <!-- Tooltip -->
-                    <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-50">
-                        Eyefind.Mail
-                        <?php if ($naoLidos > 0): ?>
-                            (<?php echo $naoLidos; ?> novo<?php echo $naoLidos > 1 ? 's' : ''; ?>)
-                        <?php endif; ?>
+                        <!-- Tooltip -->
+                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap z-50">
+                            Eyefind.Mail
+                            <?php if ($naoLidos > 0): ?>
+                                (<?php echo $naoLidos; ?> novo<?php echo $naoLidos > 1 ? 's' : ''; ?>)
+                            <?php endif; ?>
+                        </div>
                     </div>
-                </div>
 
                     <!-- Criar Blog -->
                     <div class="relative group">
