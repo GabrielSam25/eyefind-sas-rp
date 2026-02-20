@@ -487,3 +487,12 @@ function preencherElementoComDados($elemento, $dados, $pdo, $website_id) {
         }
     }
 }
+
+function getTotalNaoLidos($pdo, $usuario_id) {
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) FROM emails 
+        WHERE destinatario_id = ? AND data_leitura IS NULL
+    ");
+    $stmt->execute([$usuario_id]);
+    return $stmt->fetchColumn();
+}
