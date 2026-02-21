@@ -132,7 +132,7 @@ $categorias = $stmt->fetchAll(PDO::FETCH_COLUMN);
                             <td class="py-2 px-4 border"><?php echo htmlspecialchars($anuncio['titulo']); ?></td>
                             <td class="py-2 px-4 border">
                                 <?php if ($anuncio['preco']): ?>
-                                    R$ <?php echo number_format($anuncio['preco'], 2, ',', '.'); ?>
+                                    US <?php echo number_format($anuncio['preco'], 2, ',', '.'); ?>
                                 <?php endif; ?>
                             </td>
                             <td class="py-2 px-4 border"><?php echo $anuncio['categoria'] ?? '-'; ?></td>
